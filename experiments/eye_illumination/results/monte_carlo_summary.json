@@ -1,0 +1,14 @@
+{
+  "sample_count_per_case": 600000,
+  "seed": 20260814,
+  "focused_adult_10D": {
+    "captured_ray_fraction": 1.0,
+    "p10_to_mean_uniformity": 0.8455859344278206,
+    "pixels_at_least_half_mean": 0.9985039271911234
+  },
+  "adult_infinity_plus10D_defocus": {
+    "captured_ray_fraction": 0.7713016666666667,
+    "p10_to_mean_uniformity": 0.8310499720470818,
+    "pixels_at_least_half_mean": 1.0
+  }
+}

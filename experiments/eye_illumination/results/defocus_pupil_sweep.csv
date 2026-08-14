@@ -1,0 +1,97 @@
+eye_id,eye_label,pupil_diameter_mm,defocus_D,blur_diameter_mm,geometric_min_angular_diameter_deg,uniform_conservative_angular_diameter_deg
+chick_30_45d,30–45 day chick,2,-10,0.168,19.316863,21.608694
+chick_30_45d,30–45 day chick,2,-5,0.084,19.889821,21.035736
+chick_30_45d,30–45 day chick,2,0,0,20.462778,20.462778
+chick_30_45d,30–45 day chick,2,2,0.0336,20.233595,20.691962
+chick_30_45d,30–45 day chick,2,5,0.084,19.889821,21.035736
+chick_30_45d,30–45 day chick,2,10,0.168,19.316863,21.608694
+chick_30_45d,30–45 day chick,2,15,0.252,18.743905,22.181652
+chick_30_45d,30–45 day chick,2,20,0.336,18.170947,22.75461
+chick_30_45d,30–45 day chick,2.5,-10,0.21,19.030384,21.895173
+chick_30_45d,30–45 day chick,2.5,-5,0.105,19.746581,21.178976
+chick_30_45d,30–45 day chick,2.5,0,0,20.462778,20.462778
+chick_30_45d,30–45 day chick,2.5,2,0.042,20.176299,20.749257
+chick_30_45d,30–45 day chick,2.5,5,0.105,19.746581,21.178976
+chick_30_45d,30–45 day chick,2.5,10,0.21,19.030384,21.895173
+chick_30_45d,30–45 day chick,2.5,15,0.315,18.314187,22.61137
+chick_30_45d,30–45 day chick,2.5,20,0.42,17.597989,23.327567
+chick_30_45d,30–45 day chick,3,-10,0.252,18.743905,22.181652
+chick_30_45d,30–45 day chick,3,-5,0.126,19.603342,21.322215
+chick_30_45d,30–45 day chick,3,0,0,20.462778,20.462778
+chick_30_45d,30–45 day chick,3,2,0.0504,20.119004,20.806553
+chick_30_45d,30–45 day chick,3,5,0.126,19.603342,21.322215
+chick_30_45d,30–45 day chick,3,10,0.252,18.743905,22.181652
+chick_30_45d,30–45 day chick,3,15,0.378,17.884468,23.041088
+chick_30_45d,30–45 day chick,3,20,0.504,17.025032,23.900525
+chick_30_45d,30–45 day chick,3.5,-10,0.294,18.457426,22.468131
+chick_30_45d,30–45 day chick,3.5,-5,0.147,19.460102,21.465455
+chick_30_45d,30–45 day chick,3.5,0,0,20.462778,20.462778
+chick_30_45d,30–45 day chick,3.5,2,0.0588,20.061708,20.863849
+chick_30_45d,30–45 day chick,3.5,5,0.147,19.460102,21.465455
+chick_30_45d,30–45 day chick,3.5,10,0.294,18.457426,22.468131
+chick_30_45d,30–45 day chick,3.5,15,0.441,17.45475,23.470807
+chick_30_45d,30–45 day chick,3.5,20,0.588,16.452074,24.473483
+child_6y,6-year-old child,2,-10,0.334,19.439394,21.731226
+child_6y,6-year-old child,2,-5,0.167,20.012352,21.158268
+child_6y,6-year-old child,2,0,0,20.58531,20.58531
+child_6y,6-year-old child,2,2,0.0668,20.356127,20.814493
+child_6y,6-year-old child,2,5,0.167,20.012352,21.158268
+child_6y,6-year-old child,2,10,0.334,19.439394,21.731226
+child_6y,6-year-old child,2,15,0.501,18.866437,22.304183
+child_6y,6-year-old child,2,20,0.668,18.293479,22.877141
+child_6y,6-year-old child,3,-10,0.501,18.866437,22.304183
+child_6y,6-year-old child,3,-5,0.2505,19.725873,21.444747
+child_6y,6-year-old child,3,0,0,20.58531,20.58531
+child_6y,6-year-old child,3,2,0.1002,20.241535,20.929085
+child_6y,6-year-old child,3,5,0.2505,19.725873,21.444747
+child_6y,6-year-old child,3,10,0.501,18.866437,22.304183
+child_6y,6-year-old child,3,15,0.7515,18.007,23.16362
+child_6y,6-year-old child,3,20,1.002,17.147563,24.023057
+child_6y,6-year-old child,4,-10,0.668,18.293479,22.877141
+child_6y,6-year-old child,4,-5,0.334,19.439394,21.731226
+child_6y,6-year-old child,4,0,0,20.58531,20.58531
+child_6y,6-year-old child,4,2,0.1336,20.126944,21.043676
+child_6y,6-year-old child,4,5,0.334,19.439394,21.731226
+child_6y,6-year-old child,4,10,0.668,18.293479,22.877141
+child_6y,6-year-old child,4,15,1.002,17.147563,24.023057
+child_6y,6-year-old child,4,20,1.336,16.001648,25.168972
+child_6y,6-year-old child,5,-10,0.835,17.720521,23.450099
+child_6y,6-year-old child,5,-5,0.4175,19.152916,22.017704
+child_6y,6-year-old child,5,0,0,20.58531,20.58531
+child_6y,6-year-old child,5,2,0.167,20.012352,21.158268
+child_6y,6-year-old child,5,5,0.4175,19.152916,22.017704
+child_6y,6-year-old child,5,10,0.835,17.720521,23.450099
+child_6y,6-year-old child,5,15,1.2525,16.288127,24.882493
+child_6y,6-year-old child,5,20,1.67,14.855732,26.314888
+adult_18y,18-year-old adult,2,-10,0.334,19.439394,21.731226
+adult_18y,18-year-old adult,2,-5,0.167,20.012352,21.158268
+adult_18y,18-year-old adult,2,0,0,20.58531,20.58531
+adult_18y,18-year-old adult,2,2,0.0668,20.356127,20.814493
+adult_18y,18-year-old adult,2,5,0.167,20.012352,21.158268
+adult_18y,18-year-old adult,2,10,0.334,19.439394,21.731226
+adult_18y,18-year-old adult,2,15,0.501,18.866437,22.304183
+adult_18y,18-year-old adult,2,20,0.668,18.293479,22.877141
+adult_18y,18-year-old adult,3,-10,0.501,18.866437,22.304183
+adult_18y,18-year-old adult,3,-5,0.2505,19.725873,21.444747
+adult_18y,18-year-old adult,3,0,0,20.58531,20.58531
+adult_18y,18-year-old adult,3,2,0.1002,20.241535,20.929085
+adult_18y,18-year-old adult,3,5,0.2505,19.725873,21.444747
+adult_18y,18-year-old adult,3,10,0.501,18.866437,22.304183
+adult_18y,18-year-old adult,3,15,0.7515,18.007,23.16362
+adult_18y,18-year-old adult,3,20,1.002,17.147563,24.023057
+adult_18y,18-year-old adult,4,-10,0.668,18.293479,22.877141
+adult_18y,18-year-old adult,4,-5,0.334,19.439394,21.731226
+adult_18y,18-year-old adult,4,0,0,20.58531,20.58531
+adult_18y,18-year-old adult,4,2,0.1336,20.126944,21.043676
+adult_18y,18-year-old adult,4,5,0.334,19.439394,21.731226
+adult_18y,18-year-old adult,4,10,0.668,18.293479,22.877141
+adult_18y,18-year-old adult,4,15,1.002,17.147563,24.023057
+adult_18y,18-year-old adult,4,20,1.336,16.001648,25.168972
+adult_18y,18-year-old adult,5,-10,0.835,17.720521,23.450099
+adult_18y,18-year-old adult,5,-5,0.4175,19.152916,22.017704
+adult_18y,18-year-old adult,5,0,0,20.58531,20.58531
+adult_18y,18-year-old adult,5,2,0.167,20.012352,21.158268
+adult_18y,18-year-old adult,5,5,0.4175,19.152916,22.017704
+adult_18y,18-year-old adult,5,10,0.835,17.720521,23.450099
+adult_18y,18-year-old adult,5,15,1.2525,16.288127,24.882493
+adult_18y,18-year-old adult,5,20,1.67,14.855732,26.314888

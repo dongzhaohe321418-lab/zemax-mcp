@@ -1,0 +1,13 @@
+{
+  "focused_zos_edge_max_error_um": 4.440892098500626e-13,
+  "focused_zos_rms_max_um": 5.659306737752698e-12,
+  "unaccommodated_expected_spread_mm": 0.82665,
+  "unaccommodated_observed_spread_mm": 0.8266499999999999,
+  "unaccommodated_spread_error_um": 1.1102230246251565e-13,
+  "headline_rows": 15,
+  "full_focused_sweep_rows": 105,
+  "all_imaging_residuals_below_1e_12_m": true,
+  "opticstudio_version": "24.1.0",
+  "api_license_valid": true,
+  "overall_status": "passed"
+}

@@ -1,0 +1,60 @@
+{
+  "application": {
+    "name": "Ansys Zemax OpticStudio",
+    "version": "24.1.0",
+    "zosapi_license_valid": true
+  },
+  "artifacts": [
+    "experiments/eye_illumination/results/headline_results.csv",
+    "experiments/eye_illumination/results/focused_source_sweep.csv",
+    "experiments/eye_illumination/results/defocus_pupil_sweep.csv",
+    "experiments/eye_illumination/results/axial_length_sensitivity.csv",
+    "experiments/eye_illumination/results/infinity_angular_sweep.csv",
+    "experiments/eye_illumination/results/monte_carlo_summary.json",
+    "experiments/eye_illumination/results/validation_report.json",
+    "experiments/eye_illumination/results/zemax/zosapi_validation.csv",
+    "experiments/eye_illumination/results/zemax/*.zos",
+    "experiments/eye_illumination/notebooks/eye_illumination_analysis.ipynb",
+    "experiments/eye_illumination/report/eye_illumination_report.html"
+  ],
+  "experiment_id": "eye-illumination-650nm-v1",
+  "hypothesis": "A calibrated paraxial ABCD model will reproduce OpticStudio paraxial ray-trace retinal edges to numerical precision, while source angular extent controls focused coverage and pupil diameter controls defocus blur.",
+  "inputs": {
+    "configuration": "experiments/eye_illumination/config/experiment.json",
+    "monte_carlo_rays_per_case": 600000,
+    "random_seed": 20260814,
+    "source_document": "experiments/eye_illumination/source/\u5c0f\u9e21\u548c\u4eba\u773c\u5149\u5b66\u4eff\u771f\u53c2\u6570.pptx",
+    "source_document_sha256": "b8bcfe66c559081daecc29fa6426de1c297667848a2c1f7e60a5a3f198640e39",
+    "wavelength_nm": 650.0
+  },
+  "limitations": [
+    "No absolute radiometry or retinal safety conclusion is possible without source flux, exposure, spectrum, and tissue transmission data.",
+    "The current eyes are effective paraxial thin-lens models and do not include anatomical surfaces, aberrations, scattering, or eye rotation.",
+    "The slide-5 15 D lens was interpreted as -15 D, and external-lens vertex distances are provisional assumptions."
+  ],
+  "next_step": "Replace each effective eye with a multi-surface anatomical model, add measured radiometry and vertex distances, then perform non-sequential stray-light and tolerance Monte Carlo validation.",
+  "objective": "Determine the circular 650 nm source geometry required to illuminate specified posterior-pole regions in chick, child, and adult effective-eye models, quantify defocus and external-lens sensitivity, and cross-validate with licensed OpticStudio ray tracing.",
+  "observations": [
+    "Focused physical source diameter scales inversely with object vergence magnitude while the required angular diameter stays close to 20 degrees.",
+    "The chick 20 D and adult 20 D conditions exceed the accommodation limits supplied in the source presentation.",
+    "At 100 mm object distance, the adult model remains feasible through a -10 D external lens but exceeds its 18 D accommodation limit at -15 D and -20 D.",
+    "Pupil diameter does not change the ideal focused source image size in the paraxial model, but it linearly increases geometric defocus blur.",
+    "Five focused OpticStudio systems and one intentionally unaccommodated system agree with the independent model to double-precision numerical tolerance."
+  ],
+  "outputs": {
+    "adult_10D_max_pupil_blur_diameter_mm": 0.835,
+    "adult_10D_source_diameter_mm": 35.92814371257485,
+    "adult_infinity_full_angular_diameter_deg": 20.585309957318586,
+    "chick_10D_source_diameter_mm": 35.714285714285715,
+    "defocused_adult_plus10D_captured_ray_fraction": 0.7713016666666667,
+    "focused_adult_10D_captured_ray_fraction": 1.0,
+    "focused_zos_edge_max_error_um": 4.440892098500626e-13,
+    "tests_passed": 21,
+    "unaccommodated_expected_spread_mm": 0.82665,
+    "unaccommodated_observed_spread_mm": 0.8266499999999999,
+    "validation_status": "passed"
+  },
+  "payload_sha256": "c046545cdf7007ba1be63a92ef484e788d822cec7b9bf0a36c2e3a53db156ac9",
+  "recorded_at_utc": "2026-08-14T07:50:24.384810+00:00",
+  "schema_version": 1
+}

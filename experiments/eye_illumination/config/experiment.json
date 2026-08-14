@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "experiment_id": "eye-illumination-650nm-v1",
+  "wavelength_nm": 650.0,
+  "source_model": "uniform circular Lambertian emitter; paraxial geometric propagation",
+  "retinal_coverage_definition": "source image disk covers the specified posterior-pole disk",
+  "random_seed": 20260814,
+  "source_demands_D": [0, 2, 5, 10, 15, 20],
+  "defocus_sweep_D": [-10, -5, 0, 2, 5, 10, 15, 20],
+  "external_lens_powers_D": [0, -1, -3, -5, -10, -15, -20],
+  "eyes": [
+    {
+      "id": "chick_30_45d",
+      "label": "30–45 day chick",
+      "effective_focal_length_mm": 8.4,
+      "reported_axial_length_mm": 11.7,
+      "axial_sensitivity_mm": [10.5, 11.7, 12.5],
+      "pupil_diameters_mm": [2.0, 2.5, 3.0, 3.5],
+      "posterior_pole_diameter_mm": 3.0,
+      "accommodation_limit_D": 15.69,
+      "external_lens_vertex_distance_mm": 5.0
+    },
+    {
+      "id": "child_6y",
+      "label": "6-year-old child",
+      "effective_focal_length_mm": 16.7,
+      "reported_axial_length_mm": 23.0,
+      "axial_sensitivity_mm": [22.5, 23.0, 23.5],
+      "pupil_diameters_mm": [2.0, 3.0, 4.0, 5.0],
+      "posterior_pole_diameter_mm": 6.0,
+      "accommodation_limit_D": 22.5,
+      "external_lens_vertex_distance_mm": 12.0
+    },
+    {
+      "id": "adult_18y",
+      "label": "18-year-old adult",
+      "effective_focal_length_mm": 16.7,
+      "reported_axial_length_mm": 23.6,
+      "axial_sensitivity_mm": [23.1, 23.6, 24.1],
+      "pupil_diameters_mm": [2.0, 3.0, 4.0, 5.0],
+      "posterior_pole_diameter_mm": 6.0,
+      "accommodation_limit_D": 18.0,
+      "external_lens_vertex_distance_mm": 12.0
+    }
+  ],
+  "assumptions": [
+    "The effective eye is represented by a rotationally symmetric paraxial thin lens.",
+    "The reported effective focal length is the air-equivalent focal length; baseline power is 1000/f_mm diopters.",
+    "The reduced retina distance is calibrated to the baseline effective focal length, separating principal-plane offset from reported full axial length.",
+    "Accommodation changes effective eye power while retinal position remains fixed.",
+    "The source is spatially uniform and circular; absolute radiometric power and tissue safety are out of scope because the PPT supplies no source flux or exposure time.",
+    "The -15 D external lens value resolves the likely missing minus sign in slide 5.",
+    "External-lens vertex distances are provisional: 5 mm for chick and 12 mm for human eyes."
+  ]
+}

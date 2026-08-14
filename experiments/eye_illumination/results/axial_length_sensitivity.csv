@@ -1,0 +1,37 @@
+eye_id,eye_label,pupil_diameter_mm,axial_length_mm,axial_delta_mm,equivalent_defocus_D,blur_diameter_mm
+chick_30_45d,30–45 day chick,2,10.5,-1.2,12.729643,0.213858
+chick_30_45d,30–45 day chick,2,11.7,0,-0,0
+chick_30_45d,30–45 day chick,2,12.5,0.8,-8.4864285,0.142572
+chick_30_45d,30–45 day chick,2.5,10.5,-1.2,12.729643,0.2673225
+chick_30_45d,30–45 day chick,2.5,11.7,0,-0,0
+chick_30_45d,30–45 day chick,2.5,12.5,0.8,-8.4864285,0.178215
+chick_30_45d,30–45 day chick,3,10.5,-1.2,12.729643,0.320787
+chick_30_45d,30–45 day chick,3,11.7,0,-0,0
+chick_30_45d,30–45 day chick,3,12.5,0.8,-8.4864285,0.213858
+chick_30_45d,30–45 day chick,3.5,10.5,-1.2,12.729643,0.3742515
+chick_30_45d,30–45 day chick,3.5,11.7,0,-0,0
+chick_30_45d,30–45 day chick,3.5,12.5,0.8,-8.4864285,0.249501
+child_6y,6-year-old child,2,22.5,-0.5,1.3419323,0.044820539
+child_6y,6-year-old child,2,23,0,-0,0
+child_6y,6-year-old child,2,23.5,0.5,-1.3419323,0.044820539
+child_6y,6-year-old child,3,22.5,-0.5,1.3419323,0.067230808
+child_6y,6-year-old child,3,23,0,-0,0
+child_6y,6-year-old child,3,23.5,0.5,-1.3419323,0.067230808
+child_6y,6-year-old child,4,22.5,-0.5,1.3419323,0.089641077
+child_6y,6-year-old child,4,23,0,-0,0
+child_6y,6-year-old child,4,23.5,0.5,-1.3419323,0.089641077
+child_6y,6-year-old child,5,22.5,-0.5,1.3419323,0.11205135
+child_6y,6-year-old child,5,23,0,-0,0
+child_6y,6-year-old child,5,23.5,0.5,-1.3419323,0.11205135
+adult_18y,18-year-old adult,2,23.1,-0.5,1.3419323,0.044820539
+adult_18y,18-year-old adult,2,23.6,0,-0,0
+adult_18y,18-year-old adult,2,24.1,0.5,-1.3419323,0.044820539
+adult_18y,18-year-old adult,3,23.1,-0.5,1.3419323,0.067230808
+adult_18y,18-year-old adult,3,23.6,0,-0,0
+adult_18y,18-year-old adult,3,24.1,0.5,-1.3419323,0.067230808
+adult_18y,18-year-old adult,4,23.1,-0.5,1.3419323,0.089641077
+adult_18y,18-year-old adult,4,23.6,0,-0,0
+adult_18y,18-year-old adult,4,24.1,0.5,-1.3419323,0.089641077
+adult_18y,18-year-old adult,5,23.1,-0.5,1.3419323,0.11205135
+adult_18y,18-year-old adult,5,23.6,0,-0,0
+adult_18y,18-year-old adult,5,24.1,0.5,-1.3419323,0.11205135

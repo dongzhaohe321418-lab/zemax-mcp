@@ -1,0 +1,26 @@
+{
+  "experiment_id": "eye-illumination-650nm-v1",
+  "config_sha256": "a02ea2c61568df9e0b342d9e9d28806c422f126d96994a1a7156f996bd45288d",
+  "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 12:24:25) [MSC v.1938 64 bit (ARM64)]",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "numpy": "2.4.6",
+  "pandas": "3.0.5",
+  "matplotlib": "3.11.1",
+  "outputs": [
+    "axial_length_sensitivity.csv",
+    "defocus_pupil_sweep.csv",
+    "focused_source_sweep.csv",
+    "headline_results.csv",
+    "infinity_angular_sweep.csv",
+    "monte_carlo_summary.json",
+    "run_manifest.json",
+    "validation_report.json",
+    "zemax",
+    "adult_accommodation_heatmap.png",
+    "defocus_blur_by_pupil.png",
+    "retinal_irradiance_monte_carlo.png",
+    "source_diameter_vs_demand.png",
+    "zosapi_cross_validation.png"
+  ],
+  "model_status": "executed reduced-order paraxial model; selected cases cross-validated by the ZOS-API workflow"
+}

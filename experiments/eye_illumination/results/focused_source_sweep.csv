@@ -1,0 +1,106 @@
+eye_id,eye_label,source_demand_D,source_distance_mm,external_lens_D,vertex_distance_mm,pupil_independence_note,accommodation_D,eye_power_D,magnification,source_diameter_mm,source_area_mm2,feasible_accommodation,imaging_B_residual_m
+chick_30_45d,30–45 day chick,2,500,0,5,Paraxial in-focus image size is independent of pupil diameter,2,121.04762,-0.0168,178.57143,25044.584,True,-2.6020852e-17
+chick_30_45d,30–45 day chick,5,200,0,5,Paraxial in-focus image size is independent of pupil diameter,5,124.04762,-0.042,71.428571,4007.1335,True,-1.0408341e-17
+chick_30_45d,30–45 day chick,10,100,0,5,Paraxial in-focus image size is independent of pupil diameter,10,129.04762,-0.084,35.714286,1001.7834,True,-5.2041704e-18
+chick_30_45d,30–45 day chick,15,66.666667,0,5,Paraxial in-focus image size is independent of pupil diameter,15,134.04762,-0.126,23.809524,445.23705,True,-3.469447e-18
+chick_30_45d,30–45 day chick,20,50,0,5,Paraxial in-focus image size is independent of pupil diameter,20,139.04762,-0.168,17.857143,250.44584,False,-1.7347235e-18
+chick_30_45d,30–45 day chick,2,500,-1,5,Paraxial in-focus image size is independent of pupil diameter,2.9752724,122.02289,-0.01671725,179.45536,25293.139,True,-7.4140416e-18
+chick_30_45d,30–45 day chick,5,200,-1,5,Paraxial in-focus image size is independent of pupil diameter,5.9460132,124.99363,-0.041796243,71.776786,4046.2983,True,-1.7154583e-17
+chick_30_45d,30–45 day chick,10,100,-1,5,Paraxial in-focus image size is independent of pupil diameter,10.898233,129.94585,-0.083602886,35.883929,1011.3229,True,-1.4084262e-17
+chick_30_45d,30–45 day chick,15,66.666667,-1,5,Paraxial in-focus image size is independent of pupil diameter,15.851686,134.89931,-0.12541993,23.919643,449.36502,False,-7.1914419e-18
+chick_30_45d,30–45 day chick,20,50,-1,5,Paraxial in-focus image size is independent of pupil diameter,20.806371,139.85399,-0.16724739,17.9375,252.70493,False,-3.8754833e-18
+chick_30_45d,30–45 day chick,2,500,-3,5,Paraxial in-focus image size is independent of pupil diameter,4.8972755,123.94489,-0.016554171,181.22321,25793.931,True,-3.6380815e-17
+chick_30_45d,30–45 day chick,5,200,-3,5,Paraxial in-focus image size is independent of pupil diameter,7.8107675,126.85839,-0.041394604,72.473214,4125.1992,True,-3.0219438e-18
+chick_30_45d,30–45 day chick,10,100,-3,5,Paraxial in-focus image size is independent of pupil diameter,12.66946,131.71708,-0.082819818,36.223214,1030.5376,True,-2.2236935e-18
+chick_30_45d,30–45 day chick,15,66.666667,-3,5,Paraxial in-focus image size is independent of pupil diameter,17.531747,136.57937,-0.12427568,24.139881,457.6781,False,4.3160753e-18
+chick_30_45d,30–45 day chick,20,50,-3,5,Paraxial in-focus image size is independent of pupil diameter,22.397632,141.44525,-0.16576221,18.098214,257.25352,False,-6.2918282e-18
+chick_30_45d,30–45 day chick,2,500,-5,5,Paraxial in-focus image size is independent of pupil diameter,6.782142,125.82976,-0.016394242,182.99107,26299.633,True,-2.6366409e-18
+chick_30_45d,30–45 day chick,5,200,-5,5,Paraxial in-focus image size is independent of pupil diameter,9.6400244,128.68764,-0.04100061,73.169643,4204.862,True,-7.8408113e-18
+chick_30_45d,30–45 day chick,10,100,-5,5,Paraxial in-focus image size is independent of pupil diameter,14.407814,133.45543,-0.082051282,36.5625,1049.9332,True,-9.5755348e-18
+chick_30_45d,30–45 day chick,15,66.666667,-5,5,Paraxial in-focus image size is independent of pupil diameter,19.181429,138.22905,-0.12315211,24.360119,466.06737,False,-8.4625362e-18
+chick_30_45d,30–45 day chick,20,50,-5,5,Paraxial in-focus image size is independent of pupil diameter,23.96088,143.0085,-0.16430318,18.258929,261.84269,False,-5.2387261e-18
+chick_30_45d,30–45 day chick,2,500,-10,5,Paraxial in-focus image size is independent of pupil diameter,11.338733,130.38635,-0.016007623,187.41071,27585.364,True,-2.955941e-17
+chick_30_45d,30–45 day chick,5,200,-10,5,Paraxial in-focus image size is independent of pupil diameter,14.064362,133.11198,-0.040047676,74.910714,4407.3522,True,1.6656121e-18
+chick_30_45d,30–45 day chick,10,100,-10,5,Paraxial in-focus image size is independent of pupil diameter,18.615752,137.66337,-0.080190931,37.410714,1099.2131,False,6.7393313e-18
+chick_30_45d,30–45 day chick,15,66.666667,-10,5,Paraxial in-focus image size is independent of pupil diameter,23.178017,142.22564,-0.12043011,24.910714,487.37387,False,-6.5167316e-18
+chick_30_45d,30–45 day chick,20,50,-10,5,Paraxial in-focus image size is independent of pupil diameter,27.751196,146.79882,-0.16076555,18.660714,273.49312,False,-6.9111383e-20
+chick_30_45d,30–45 day chick,2,500,-15,5,Paraxial in-focus image size is independent of pupil diameter,15.685362,134.73298,-0.015638818,191.83036,28901.777,True,-2.4996255e-17
+chick_30_45d,30–45 day chick,5,200,-15,5,Paraxial in-focus image size is independent of pupil diameter,18.287711,137.33533,-0.039138031,76.651786,4614.604,False,7.7025886e-18
+chick_30_45d,30–45 day chick,10,100,-15,5,Paraxial in-focus image size is independent of pupil diameter,22.637106,141.68473,-0.078413069,38.258929,1149.6231,False,-4.7013782e-18
+chick_30_45d,30–45 day chick,15,66.666667,-15,5,Paraxial in-focus image size is independent of pupil diameter,27.001753,146.04937,-0.11782583,25.46131,509.15657,False,-8.0403739e-18
+chick_30_45d,30–45 day chick,20,50,-15,5,Paraxial in-focus image size is independent of pupil diameter,31.381733,150.42935,-0.15737705,19.0625,285.39713,False,-2.3411828e-19
+chick_30_45d,30–45 day chick,2,500,-20,5,Paraxial in-focus image size is independent of pupil diameter,19.836215,138.88383,-0.015286624,196.25,30248.874,False,-4.1771586e-17
+chick_30_45d,30–45 day chick,5,200,-20,5,Paraxial in-focus image size is independent of pupil diameter,22.323462,141.37108,-0.038268793,78.392857,4826.6173,False,-7.0771167e-18
+chick_30_45d,30–45 day chick,10,100,-20,5,Paraxial in-focus image size is independent of pupil diameter,26.484018,145.53164,-0.076712329,39.107143,1201.1633,False,-1.4276913e-17
+chick_30_45d,30–45 day chick,15,66.666667,-20,5,Paraxial in-focus image size is independent of pupil diameter,30.663616,149.71123,-0.11533181,26.011905,531.41547,False,-2.6251223e-18
+chick_30_45d,30–45 day chick,20,50,-20,5,Paraxial in-focus image size is independent of pupil diameter,34.862385,153.91,-0.15412844,19.464286,297.55471,False,-8.9422914e-18
+child_6y,6-year-old child,2,500,0,12,Paraxial in-focus image size is independent of pupil diameter,2,61.88024,-0.0334,179.64072,25345.417,True,3.469447e-18
+child_6y,6-year-old child,5,200,0,12,Paraxial in-focus image size is independent of pupil diameter,5,64.88024,-0.0835,71.856287,4055.2668,True,0
+child_6y,6-year-old child,10,100,0,12,Paraxial in-focus image size is independent of pupil diameter,10,69.88024,-0.167,35.928144,1013.8167,True,0
+child_6y,6-year-old child,15,66.666667,0,12,Paraxial in-focus image size is independent of pupil diameter,15,74.88024,-0.2505,23.952096,450.5852,True,0
+child_6y,6-year-old child,20,50,0,12,Paraxial in-focus image size is independent of pupil diameter,20,79.88024,-0.334,17.964072,253.45417,True,0
+child_6y,6-year-old child,2,500,-1,12,Paraxial in-focus image size is independent of pupil diameter,2.9415486,62.821788,-0.033013348,181.74467,25942.585,True,2.3997115e-17
+child_6y,6-year-old child,5,200,-1,12,Paraxial in-focus image size is independent of pupil diameter,5.8737442,65.753984,-0.082568626,72.666826,4147.2696,True,-7.2756468e-18
+child_6y,6-year-old child,10,100,-1,12,Paraxial in-focus image size is independent of pupil diameter,10.766308,70.646547,-0.16525491,36.307545,1035.3416,True,6.7453598e-18
+child_6y,6-year-old child,15,66.666667,-1,12,Paraxial in-focus image size is independent of pupil diameter,15.665848,75.546088,-0.2480591,24.187784,459.49634,True,2.0080382e-18
+child_6y,6-year-old child,20,50,-1,12,Paraxial in-focus image size is independent of pupil diameter,20.57238,80.452619,-0.33098145,18.127904,258.09826,True,-1.9759971e-18
+child_6y,6-year-old child,2,500,-3,12,Paraxial in-focus image size is independent of pupil diameter,4.7607271,64.640967,-0.032266292,185.95257,27157.781,True,-3.5561509e-17
+child_6y,6-year-old child,5,200,-3,12,Paraxial in-focus image size is independent of pupil diameter,7.5640331,67.444273,-0.08076685,74.287904,4334.3711,True,9.6367803e-18
+child_6y,6-year-old child,10,100,-3,12,Paraxial in-focus image size is independent of pupil diameter,12.251861,72.132101,-0.1618719,37.066347,1079.0696,True,2.6501468e-18
+child_6y,6-year-old child,15,66.666667,-3,12,Paraxial in-focus image size is independent of pupil diameter,16.95936,76.839599,-0.24331727,24.659162,477.5804,True,6.0241145e-18
+child_6y,6-year-old child,20,50,-3,12,Paraxial in-focus image size is independent of pupil diameter,21.686653,81.566893,-0.32510512,18.455569,267.51291,True,-5.9279914e-18
+child_6y,6-year-old child,2,500,-5,12,Paraxial in-focus image size is independent of pupil diameter,6.4993954,66.379635,-0.031552297,190.16048,28400.789,True,-2.9200642e-17
+child_6y,6-year-old child,5,200,-5,12,Paraxial in-focus image size is independent of pupil diameter,9.182128,69.062368,-0.07904203,75.908982,4525.6005,True,1.5902168e-17
+child_6y,6-year-old child,10,100,-5,12,Paraxial in-focus image size is independent of pupil diameter,13.677812,73.558051,-0.15862462,37.82515,1123.7021,True,2.0243807e-18
+child_6y,6-year-old child,15,66.666667,-5,12,Paraxial in-focus image size is independent of pupil diameter,18.204346,78.084586,-0.23875334,25.130539,496.01349,True,1.0278889e-17
+child_6y,6-year-old child,20,50,-5,12,Paraxial in-focus image size is independent of pupil diameter,22.76205,82.64229,-0.31943382,18.783234,277.09622,False,2.8965719e-19
+child_6y,6-year-old child,2,500,-10,12,Paraxial in-focus image size is independent of pupil diameter,10.52707,70.407309,-0.02989831,200.68024,31629.994,True,4.5682125e-17
+child_6y,6-year-old child,5,200,-10,12,Paraxial in-focus image size is independent of pupil diameter,12.940331,72.82057,-0.075035945,79.961677,5021.7335,True,-1.676792e-17
+child_6y,6-year-old child,10,100,-10,12,Paraxial in-focus image size is independent of pupil diameter,17.004342,76.884581,-0.1510492,39.722156,1239.2402,True,1.46958e-17
+child_6y,6-year-old child,15,66.666667,-10,12,Paraxial in-focus image size is independent of pupil diameter,21.121631,81.001871,-0.22805899,26.308982,543.62318,True,-1.0905943e-17
+child_6y,6-year-old child,20,50,-10,12,Paraxial in-focus image size is independent of pupil diameter,25.293255,85.173495,-0.30608504,19.602395,301.79231,False,-6.1208816e-18
+child_6y,6-year-old child,2,500,-15,12,Paraxial in-focus image size is independent of pupil diameter,14.153511,74.033751,-0.028409091,211.2,35033.031,True,-3.8552272e-17
+child_6y,6-year-old child,5,200,-15,12,Paraxial in-focus image size is independent of pupil diameter,16.335956,76.216196,-0.071416353,84.014371,5543.6658,True,-7.8046458e-18
+child_6y,6-year-old child,10,100,-15,12,Paraxial in-focus image size is independent of pupil diameter,20.027624,79.907864,-0.14416436,41.619162,1360.4311,True,3.0810909e-18
+child_6y,6-year-old child,15,66.666667,-15,12,Paraxial in-focus image size is independent of pupil diameter,23.788777,83.669016,-0.21828163,27.487425,593.41429,False,-6.2705396e-19
+child_6y,6-year-old child,20,50,-15,12,Paraxial in-focus image size is independent of pupil diameter,27.621393,87.501633,-0.29380718,20.421557,327.54244,False,-5.8312244e-18
+child_6y,6-year-old child,2,500,-20,12,Paraxial in-focus image size is independent of pupil diameter,17.435831,77.31607,-0.027061187,221.71976,38609.901,True,-8.2108098e-17
+child_6y,6-year-old child,5,200,-20,12,Paraxial in-focus image size is independent of pupil diameter,19.41906,79.2993,-0.068129896,88.067066,6091.3974,True,-1.2719159e-17
+child_6y,6-year-old child,10,100,-20,12,Paraxial in-focus image size is independent of pupil diameter,22.787318,82.667558,-0.13787979,43.516168,1487.2746,False,1.6360246e-18
+child_6y,6-year-old child,15,66.666667,-20,12,Paraxial in-focus image size is independent of pupil diameter,26.236631,86.116871,-0.20930816,28.665868,645.38681,False,-9.9520392e-19
+child_6y,6-year-old child,20,50,-20,12,Paraxial in-focus image size is independent of pupil diameter,29.769959,89.650199,-0.28247632,21.240719,354.34662,False,1.6360246e-18
+adult_18y,18-year-old adult,2,500,0,12,Paraxial in-focus image size is independent of pupil diameter,2,61.88024,-0.0334,179.64072,25345.417,True,3.469447e-18
+adult_18y,18-year-old adult,5,200,0,12,Paraxial in-focus image size is independent of pupil diameter,5,64.88024,-0.0835,71.856287,4055.2668,True,0
+adult_18y,18-year-old adult,10,100,0,12,Paraxial in-focus image size is independent of pupil diameter,10,69.88024,-0.167,35.928144,1013.8167,True,0
+adult_18y,18-year-old adult,15,66.666667,0,12,Paraxial in-focus image size is independent of pupil diameter,15,74.88024,-0.2505,23.952096,450.5852,True,0
+adult_18y,18-year-old adult,20,50,0,12,Paraxial in-focus image size is independent of pupil diameter,20,79.88024,-0.334,17.964072,253.45417,False,0
+adult_18y,18-year-old adult,2,500,-1,12,Paraxial in-focus image size is independent of pupil diameter,2.9415486,62.821788,-0.033013348,181.74467,25942.585,True,2.3997115e-17
+adult_18y,18-year-old adult,5,200,-1,12,Paraxial in-focus image size is independent of pupil diameter,5.8737442,65.753984,-0.082568626,72.666826,4147.2696,True,-7.2756468e-18
+adult_18y,18-year-old adult,10,100,-1,12,Paraxial in-focus image size is independent of pupil diameter,10.766308,70.646547,-0.16525491,36.307545,1035.3416,True,6.7453598e-18
+adult_18y,18-year-old adult,15,66.666667,-1,12,Paraxial in-focus image size is independent of pupil diameter,15.665848,75.546088,-0.2480591,24.187784,459.49634,True,2.0080382e-18
+adult_18y,18-year-old adult,20,50,-1,12,Paraxial in-focus image size is independent of pupil diameter,20.57238,80.452619,-0.33098145,18.127904,258.09826,False,-1.9759971e-18
+adult_18y,18-year-old adult,2,500,-3,12,Paraxial in-focus image size is independent of pupil diameter,4.7607271,64.640967,-0.032266292,185.95257,27157.781,True,-3.5561509e-17
+adult_18y,18-year-old adult,5,200,-3,12,Paraxial in-focus image size is independent of pupil diameter,7.5640331,67.444273,-0.08076685,74.287904,4334.3711,True,9.6367803e-18
+adult_18y,18-year-old adult,10,100,-3,12,Paraxial in-focus image size is independent of pupil diameter,12.251861,72.132101,-0.1618719,37.066347,1079.0696,True,2.6501468e-18
+adult_18y,18-year-old adult,15,66.666667,-3,12,Paraxial in-focus image size is independent of pupil diameter,16.95936,76.839599,-0.24331727,24.659162,477.5804,True,6.0241145e-18
+adult_18y,18-year-old adult,20,50,-3,12,Paraxial in-focus image size is independent of pupil diameter,21.686653,81.566893,-0.32510512,18.455569,267.51291,False,-5.9279914e-18
+adult_18y,18-year-old adult,2,500,-5,12,Paraxial in-focus image size is independent of pupil diameter,6.4993954,66.379635,-0.031552297,190.16048,28400.789,True,-2.9200642e-17
+adult_18y,18-year-old adult,5,200,-5,12,Paraxial in-focus image size is independent of pupil diameter,9.182128,69.062368,-0.07904203,75.908982,4525.6005,True,1.5902168e-17
+adult_18y,18-year-old adult,10,100,-5,12,Paraxial in-focus image size is independent of pupil diameter,13.677812,73.558051,-0.15862462,37.82515,1123.7021,True,2.0243807e-18
+adult_18y,18-year-old adult,15,66.666667,-5,12,Paraxial in-focus image size is independent of pupil diameter,18.204346,78.084586,-0.23875334,25.130539,496.01349,False,1.0278889e-17
+adult_18y,18-year-old adult,20,50,-5,12,Paraxial in-focus image size is independent of pupil diameter,22.76205,82.64229,-0.31943382,18.783234,277.09622,False,2.8965719e-19
+adult_18y,18-year-old adult,2,500,-10,12,Paraxial in-focus image size is independent of pupil diameter,10.52707,70.407309,-0.02989831,200.68024,31629.994,True,4.5682125e-17
+adult_18y,18-year-old adult,5,200,-10,12,Paraxial in-focus image size is independent of pupil diameter,12.940331,72.82057,-0.075035945,79.961677,5021.7335,True,-1.676792e-17
+adult_18y,18-year-old adult,10,100,-10,12,Paraxial in-focus image size is independent of pupil diameter,17.004342,76.884581,-0.1510492,39.722156,1239.2402,True,1.46958e-17
+adult_18y,18-year-old adult,15,66.666667,-10,12,Paraxial in-focus image size is independent of pupil diameter,21.121631,81.001871,-0.22805899,26.308982,543.62318,False,-1.0905943e-17
+adult_18y,18-year-old adult,20,50,-10,12,Paraxial in-focus image size is independent of pupil diameter,25.293255,85.173495,-0.30608504,19.602395,301.79231,False,-6.1208816e-18
+adult_18y,18-year-old adult,2,500,-15,12,Paraxial in-focus image size is independent of pupil diameter,14.153511,74.033751,-0.028409091,211.2,35033.031,True,-3.8552272e-17
+adult_18y,18-year-old adult,5,200,-15,12,Paraxial in-focus image size is independent of pupil diameter,16.335956,76.216196,-0.071416353,84.014371,5543.6658,True,-7.8046458e-18
+adult_18y,18-year-old adult,10,100,-15,12,Paraxial in-focus image size is independent of pupil diameter,20.027624,79.907864,-0.14416436,41.619162,1360.4311,False,3.0810909e-18
+adult_18y,18-year-old adult,15,66.666667,-15,12,Paraxial in-focus image size is independent of pupil diameter,23.788777,83.669016,-0.21828163,27.487425,593.41429,False,-6.2705396e-19
+adult_18y,18-year-old adult,20,50,-15,12,Paraxial in-focus image size is independent of pupil diameter,27.621393,87.501633,-0.29380718,20.421557,327.54244,False,-5.8312244e-18
+adult_18y,18-year-old adult,2,500,-20,12,Paraxial in-focus image size is independent of pupil diameter,17.435831,77.31607,-0.027061187,221.71976,38609.901,True,-8.2108098e-17
+adult_18y,18-year-old adult,5,200,-20,12,Paraxial in-focus image size is independent of pupil diameter,19.41906,79.2993,-0.068129896,88.067066,6091.3974,False,-1.2719159e-17
+adult_18y,18-year-old adult,10,100,-20,12,Paraxial in-focus image size is independent of pupil diameter,22.787318,82.667558,-0.13787979,43.516168,1487.2746,False,1.6360246e-18
+adult_18y,18-year-old adult,15,66.666667,-20,12,Paraxial in-focus image size is independent of pupil diameter,26.236631,86.116871,-0.20930816,28.665868,645.38681,False,-9.9520392e-19
+adult_18y,18-year-old adult,20,50,-20,12,Paraxial in-focus image size is independent of pupil diameter,29.769959,89.650199,-0.28247632,21.240719,354.34662,False,1.6360246e-18

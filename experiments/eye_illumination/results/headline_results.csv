@@ -1,0 +1,16 @@
+eye_id,eye_label,source_demand_D,source_distance_mm,source_diameter_mm,source_area_mm2,accommodation_D,feasible_accommodation
+chick_30_45d,30–45 day chick,2,500,178.57143,25044.584,2,True
+chick_30_45d,30–45 day chick,5,200,71.428571,4007.1335,5,True
+chick_30_45d,30–45 day chick,10,100,35.714286,1001.7834,10,True
+chick_30_45d,30–45 day chick,15,66.666667,23.809524,445.23705,15,True
+chick_30_45d,30–45 day chick,20,50,17.857143,250.44584,20,False
+child_6y,6-year-old child,2,500,179.64072,25345.417,2,True
+child_6y,6-year-old child,5,200,71.856287,4055.2668,5,True
+child_6y,6-year-old child,10,100,35.928144,1013.8167,10,True
+child_6y,6-year-old child,15,66.666667,23.952096,450.5852,15,True
+child_6y,6-year-old child,20,50,17.964072,253.45417,20,True
+adult_18y,18-year-old adult,2,500,179.64072,25345.417,2,True
+adult_18y,18-year-old adult,5,200,71.856287,4055.2668,5,True
+adult_18y,18-year-old adult,10,100,35.928144,1013.8167,10,True
+adult_18y,18-year-old adult,15,66.666667,23.952096,450.5852,15,True
+adult_18y,18-year-old adult,20,50,17.964072,253.45417,20,False

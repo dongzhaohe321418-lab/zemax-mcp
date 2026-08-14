@@ -11,6 +11,7 @@ outputs/
 scratch/
 *.tmp
 *.bak
+.build/
 
 # Experiment records in experiments/ are intentionally versioned.
 # Zemax and large binary files there are handled by Git LFS.
