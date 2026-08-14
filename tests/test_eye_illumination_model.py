@@ -29,6 +29,19 @@ def test_no_external_lens_accommodation_matches_source_demand(eyes):
         assert focus_solution(eye, 0.2, 0.0)["accommodation_D"] == pytest.approx(5.0)
 
 
+def test_requested_source_demand_grid_is_60_to_120_by_10():
+    config = json.loads((EXPERIMENT / "config" / "experiment.json").read_text(encoding="utf-8"))
+    assert config["source_demands_D"] == list(range(60, 121, 10))
+
+
+def test_requested_grid_exceeds_all_supplied_accommodation_limits(eyes):
+    for eye in eyes:
+        for demand in range(60, 121, 10):
+            result = focus_solution(eye, 1.0 / demand, 0.0)
+            assert result["accommodation_D"] == pytest.approx(demand)
+            assert not result["feasible_accommodation"]
+
+
 def test_negative_lens_increases_accommodation_demand(eyes):
     for eye in eyes:
         baseline = focus_solution(eye, 0.2, 0.0)["accommodation_D"]

@@ -56,27 +56,44 @@ def run() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
 
     focused_rows: list[dict] = []
+    external_reference_rows: list[dict] = []
     infinity_rows: list[dict] = []
     for eye in eyes:
         for external_power in config["external_lens_powers_D"]:
             infinity_rows.append({"eye_id": eye.eye_id, "eye_label": eye.label, "source_demand_D": 0.0, "source_distance_mm": np.inf, "external_lens_D": external_power, **infinity_solution(eye, external_power)})
-            for demand in config["source_demands_D"]:
-                if demand == 0:
-                    continue
-                distance_m = 1.0 / demand
-                focused_rows.append({
-                    "eye_id": eye.eye_id,
-                    "eye_label": eye.label,
-                    "source_demand_D": demand,
-                    "source_distance_mm": distance_m * 1000.0,
-                    "external_lens_D": external_power,
-                    "vertex_distance_mm": eye.external_lens_vertex_distance_mm,
-                    "pupil_independence_note": "Paraxial in-focus image size is independent of pupil diameter",
-                    **focus_solution(eye, distance_m, external_power),
-                })
+        for demand in config["source_demands_D"]:
+            distance_m = 1.0 / demand
+            focused_rows.append({
+                "eye_id": eye.eye_id,
+                "eye_label": eye.label,
+                "source_demand_D": demand,
+                "source_distance_mm": distance_m * 1000.0,
+                "external_lens_D": 0.0,
+                "vertex_distance_mm": 0.0,
+                "sweep_role": "requested_60_120D_no_external_lens",
+                "pupil_independence_note": "Paraxial in-focus image size is independent of pupil diameter",
+                **focus_solution(eye, distance_m, 0.0),
+            })
+
+        reference_demand = float(config["external_lens_reference_demand_D"])
+        reference_distance_m = 1.0 / reference_demand
+        for external_power in config["external_lens_powers_D"]:
+            external_reference_rows.append({
+                "eye_id": eye.eye_id,
+                "eye_label": eye.label,
+                "source_demand_D": reference_demand,
+                "source_distance_mm": reference_distance_m * 1000.0,
+                "external_lens_D": external_power,
+                "vertex_distance_mm": eye.external_lens_vertex_distance_mm,
+                "sweep_role": "external_lens_reference_10D",
+                "pupil_independence_note": "Paraxial in-focus image size is independent of pupil diameter",
+                **focus_solution(eye, reference_distance_m, external_power),
+            })
     focused = pd.DataFrame(focused_rows)
+    external_reference = pd.DataFrame(external_reference_rows)
     infinity = pd.DataFrame(infinity_rows)
     save_csv(focused, "focused_source_sweep.csv")
+    save_csv(external_reference, "external_lens_reference.csv")
     save_csv(infinity, "infinity_angular_sweep.csv")
 
     defocus_rows: list[dict] = []
@@ -128,17 +145,13 @@ def run() -> None:
     plt.close(fig)
 
     # Chart 2: adult accommodation demand with external negative lenses.
-    adult_focus = focused[focused.eye_id == "adult_18y"].pivot(index="external_lens_D", columns="source_demand_D", values="accommodation_D")
+    adult_focus = external_reference[external_reference.eye_id == "adult_18y"].sort_values("external_lens_D")
     fig, ax = plt.subplots(figsize=(8.4, 5.2))
-    image = ax.imshow(adult_focus.values, cmap="Blues", aspect="auto")
-    ax.set_xticks(range(len(adult_focus.columns)), [f"{v:g}" for v in adult_focus.columns])
-    ax.set_yticks(range(len(adult_focus.index)), [f"{v:g}" for v in adult_focus.index])
-    ax.set(xlabel="Source demand (D)", ylabel="External lens power (D)", title="Adult required accommodation")
-    for i in range(adult_focus.shape[0]):
-        for j in range(adult_focus.shape[1]):
-            value = adult_focus.iloc[i, j]
-            ax.text(j, i, f"{value:.1f}", ha="center", va="center", color="white" if value > 15 else INK, fontsize=8)
-    fig.colorbar(image, ax=ax, label="Required accommodation (D)")
+    ax.plot(adult_focus.external_lens_D, adult_focus.accommodation_D, marker="o", linewidth=2.2, color=BLUE)
+    ax.axhline(adult.accommodation_limit_D, color=ORANGE, linestyle="--", linewidth=1.4, label="Adult accommodation limit")
+    ax.set(xlabel="External lens power (D)", ylabel="Required accommodation (D)", title="Adult external-lens reference at 10 D source demand")
+    ax.legend(frameon=False)
+    style_axes(ax)
     fig.tight_layout()
     fig.savefig(FIGURES / "adult_accommodation_heatmap.png", dpi=180)
     plt.close(fig)
@@ -176,7 +189,7 @@ def run() -> None:
     plt.close(fig)
 
     # Exact headline table and reproducibility manifest.
-    headline = focused[(focused.external_lens_D == 0) & (focused.source_demand_D.isin([2, 5, 10, 15, 20]))][[
+    headline = focused[[
         "eye_id", "eye_label", "source_demand_D", "source_distance_mm", "source_diameter_mm", "source_area_mm2", "accommodation_D", "feasible_accommodation"
     ]]
     save_csv(headline, "headline_results.csv")

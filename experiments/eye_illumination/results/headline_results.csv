@@ -1,16 +1,22 @@
 eye_id,eye_label,source_demand_D,source_distance_mm,source_diameter_mm,source_area_mm2,accommodation_D,feasible_accommodation
-chick_30_45d,30–45 day chick,2,500,178.57143,25044.584,2,True
-chick_30_45d,30–45 day chick,5,200,71.428571,4007.1335,5,True
-chick_30_45d,30–45 day chick,10,100,35.714286,1001.7834,10,True
-chick_30_45d,30–45 day chick,15,66.666667,23.809524,445.23705,15,True
-chick_30_45d,30–45 day chick,20,50,17.857143,250.44584,20,False
-child_6y,6-year-old child,2,500,179.64072,25345.417,2,True
-child_6y,6-year-old child,5,200,71.856287,4055.2668,5,True
-child_6y,6-year-old child,10,100,35.928144,1013.8167,10,True
-child_6y,6-year-old child,15,66.666667,23.952096,450.5852,15,True
-child_6y,6-year-old child,20,50,17.964072,253.45417,20,True
-adult_18y,18-year-old adult,2,500,179.64072,25345.417,2,True
-adult_18y,18-year-old adult,5,200,71.856287,4055.2668,5,True
-adult_18y,18-year-old adult,10,100,35.928144,1013.8167,10,True
-adult_18y,18-year-old adult,15,66.666667,23.952096,450.5852,15,True
-adult_18y,18-year-old adult,20,50,17.964072,253.45417,20,False
+chick_30_45d,30–45 day chick,60,16.666667,5.952381,27.827316,60,False
+chick_30_45d,30–45 day chick,70,14.285714,5.1020408,20.444559,70,False
+chick_30_45d,30–45 day chick,80,12.5,4.4642857,15.652865,80,False
+chick_30_45d,30–45 day chick,90,11.111111,3.968254,12.367696,90,False
+chick_30_45d,30–45 day chick,100,10,3.5714286,10.017834,100,False
+chick_30_45d,30–45 day chick,110,9.0909091,3.2467532,8.2792014,110,False
+chick_30_45d,30–45 day chick,120,8.3333333,2.9761905,6.956829,120,False
+child_6y,6-year-old child,60,16.666667,5.988024,28.161575,60,False
+child_6y,6-year-old child,70,14.285714,5.132592,20.690137,70,False
+child_6y,6-year-old child,80,12.5,4.491018,15.840886,80,False
+child_6y,6-year-old child,90,11.111111,3.992016,12.516256,90,False
+child_6y,6-year-old child,100,10,3.5928144,10.138167,100,False
+child_6y,6-year-old child,110,9.0909091,3.2661949,8.3786504,110,False
+child_6y,6-year-old child,120,8.3333333,2.994012,7.0403937,120,False
+adult_18y,18-year-old adult,60,16.666667,5.988024,28.161575,60,False
+adult_18y,18-year-old adult,70,14.285714,5.132592,20.690137,70,False
+adult_18y,18-year-old adult,80,12.5,4.491018,15.840886,80,False
+adult_18y,18-year-old adult,90,11.111111,3.992016,12.516256,90,False
+adult_18y,18-year-old adult,100,10,3.5928144,10.138167,100,False
+adult_18y,18-year-old adult,110,9.0909091,3.2661949,8.3786504,110,False
+adult_18y,18-year-old adult,120,8.3333333,2.994012,7.0403937,120,False

@@ -1,11 +1,12 @@
 {
   "schema_version": 1,
-  "experiment_id": "eye-illumination-650nm-v1",
+  "experiment_id": "eye-illumination-650nm-60-120d-v2",
   "wavelength_nm": 650.0,
   "source_model": "uniform circular Lambertian emitter; paraxial geometric propagation",
   "retinal_coverage_definition": "source image disk covers the specified posterior-pole disk",
   "random_seed": 20260814,
-  "source_demands_D": [0, 2, 5, 10, 15, 20],
+  "source_demands_D": [60, 70, 80, 90, 100, 110, 120],
+  "external_lens_reference_demand_D": 10,
   "defocus_sweep_D": [-10, -5, 0, 2, 5, 10, 15, 20],
   "external_lens_powers_D": [0, -1, -3, -5, -10, -15, -20],
   "eyes": [
@@ -51,5 +52,6 @@
     "The source is spatially uniform and circular; absolute radiometric power and tissue safety are out of scope because the PPT supplies no source flux or exposure time.",
     "The -15 D external lens value resolves the likely missing minus sign in slide 5.",
     "External-lens vertex distances are provisional: 5 mm for chick and 12 mm for human eyes."
+    ,"The requested 60–120 D main sweep is evaluated without an external lens; the external-lens sweep remains a separate 10 D reference because 90–120 D object distances are shorter than the provisional 12 mm human vertex distance."
   ]
 }

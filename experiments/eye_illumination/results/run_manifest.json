@@ -1,6 +1,6 @@
 {
-  "experiment_id": "eye-illumination-650nm-v1",
-  "config_sha256": "a02ea2c61568df9e0b342d9e9d28806c422f126d96994a1a7156f996bd45288d",
+  "experiment_id": "eye-illumination-650nm-60-120d-v2",
+  "config_sha256": "57085e8b8ad79b0852deac8a7062348c7b02b0d43198de61b6ecea6b652b446b",
   "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 12:24:25) [MSC v.1938 64 bit (ARM64)]",
   "platform": "Windows-10-10.0.26200-SP0",
   "numpy": "2.4.6",
@@ -9,6 +9,7 @@
   "outputs": [
     "axial_length_sensitivity.csv",
     "defocus_pupil_sweep.csv",
+    "external_lens_reference.csv",
     "focused_source_sweep.csv",
     "headline_results.csv",
     "infinity_angular_sweep.csv",

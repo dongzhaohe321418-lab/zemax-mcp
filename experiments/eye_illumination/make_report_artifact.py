@@ -43,9 +43,12 @@ def load_table(connection: sqlite3.Connection, name: str, rows: list[dict[str, o
         f"CREATE TABLE {name} ({', '.join(f'[{column}]' for column in columns)})"
     )
     placeholders = ", ".join("?" for _ in columns)
+    def sqlite_value(value: object) -> object:
+        return json.dumps(value, ensure_ascii=False) if isinstance(value, (list, dict)) else value
+
     connection.executemany(
         f"INSERT INTO {name} VALUES ({placeholders})",
-        [[row[column] for column in columns] for row in rows],
+        [[sqlite_value(row[column]) for column in columns] for row in rows],
     )
 
 
@@ -58,6 +61,7 @@ def query_rows(connection: sqlite3.Connection, sql: str) -> list[dict[str, objec
 def build() -> dict[str, object]:
     headline = read_csv(RESULTS / "headline_results.csv")
     focused = read_csv(RESULTS / "focused_source_sweep.csv")
+    external_reference = read_csv(RESULTS / "external_lens_reference.csv")
     infinity = read_csv(RESULTS / "infinity_angular_sweep.csv")
     defocus = read_csv(RESULTS / "defocus_pupil_sweep.csv")
     zos = read_csv(RESULTS / "zemax" / "zosapi_validation.csv")
@@ -70,8 +74,8 @@ FROM headline_results"""
     adult_external_sql = """SELECT external_lens_D, printf('%g D', external_lens_D) AS lens_label,
 accommodation_D, source_diameter_mm, source_area_mm2,
 CASE WHEN feasible_accommodation THEN '可行' ELSE '超出调节范围' END AS feasibility
-FROM focused_source_sweep
-WHERE eye_id = 'adult_18y' AND source_demand_D = 10"""
+FROM external_lens_reference
+WHERE eye_id = 'adult_18y'"""
     adult_defocus_sql = """SELECT defocus_D, printf('%+g D', defocus_D) AS defocus_label,
 blur_diameter_mm, geometric_min_angular_diameter_deg AS geometric_min_deg,
 uniform_conservative_angular_diameter_deg AS uniform_conservative_deg
@@ -83,7 +87,8 @@ ABS(mean_image_y_mm - target_radius_mm) * 1000.0 AS edge_error_um,
 rms_spread_um, valid_rays, zos_file
 FROM zosapi_validation"""
     summary_sql = """SELECT
-(SELECT source_diameter_mm FROM headline_results WHERE eye_id='adult_18y' AND source_demand_D=10) AS adult_10D_source_diameter_mm,
+(SELECT source_diameter_mm FROM headline_results WHERE eye_id='adult_18y' AND source_demand_D=60) AS adult_60D_source_diameter_mm,
+(SELECT source_diameter_mm FROM headline_results WHERE eye_id='adult_18y' AND source_demand_D=120) AS adult_120D_source_diameter_mm,
 (SELECT angular_diameter_deg FROM infinity_angular_sweep WHERE eye_id='adult_18y' AND source_demand_D=0 AND external_lens_D=0) AS adult_infinity_full_angle_deg,
 (SELECT focused_zos_edge_max_error_um FROM validation_summary) AS zos_max_focused_edge_error_um,
 (SELECT focused_capture_fraction FROM monte_carlo_summary) AS focused_capture_fraction"""
@@ -91,6 +96,7 @@ FROM zosapi_validation"""
     connection = sqlite3.connect(":memory:")
     for name, rows in [
         ("headline_results", headline), ("focused_source_sweep", focused),
+        ("external_lens_reference", external_reference),
         ("infinity_angular_sweep", infinity), ("defocus_pupil_sweep", defocus),
         ("zosapi_validation", zos),
     ]:
@@ -111,7 +117,7 @@ FROM zosapi_validation"""
         {"id": "ppt_input", "label": "用户提供的眼部光学参数 PPT", "path": rel(EXPERIMENT / "source" / "小鸡和人眼光学仿真参数.pptx")},
         query_source("summary_query", "汇总指标 SQL", EXPERIMENT / "make_report_artifact.py", summary_sql, ["headline_results", "infinity_angular_sweep", "validation_summary", "monte_carlo_summary"]),
         query_source("source_size_query", "主要光源尺寸 SQL", RESULTS / "headline_results.csv", source_size_sql, ["headline_results"]),
-        query_source("adult_external_query", "成人外置镜片 SQL", RESULTS / "focused_source_sweep.csv", adult_external_sql, ["focused_source_sweep"]),
+        query_source("adult_external_query", "成人外置镜片参考 SQL", RESULTS / "external_lens_reference.csv", adult_external_sql, ["external_lens_reference"]),
         query_source("defocus_query", "成人离焦 SQL", RESULTS / "defocus_pupil_sweep.csv", adult_defocus_sql, ["defocus_pupil_sweep"]),
         query_source("zos_query", "OpticStudio 交叉验证 SQL", RESULTS / "zemax" / "zosapi_validation.csv", zos_detail_sql, ["zosapi_validation"]),
     ]
@@ -123,7 +129,8 @@ FROM zosapi_validation"""
         "description": "独立近轴模型、蒙特卡洛照度评估与 Ansys Zemax OpticStudio ZOS-API 交叉验证技术报告。",
         "generatedAt": GENERATED_AT,
         "cards": [
-            {"id": "geometry", "description": "成人眼在 10 D（100 mm）物距、无外置镜片时覆盖直径 6 mm 后极部所需的圆形光源直径。", "dataset": "summary", "sourceId": "summary_query", "metrics": [{"label": "成人 10 D 光源直径 (mm)", "field": "adult_10D_source_diameter_mm", "format": "number"}]},
+            {"id": "geometry60", "description": "成人眼在 60 D（16.67 mm）物距、无外置镜片时覆盖直径 6 mm 后极部所需的圆形光源直径。", "dataset": "summary", "sourceId": "summary_query", "metrics": [{"label": "成人 60 D 光源直径 (mm)", "field": "adult_60D_source_diameter_mm", "format": "number"}]},
+            {"id": "geometry120", "description": "成人眼在 120 D（8.33 mm）物距、无外置镜片时覆盖直径 6 mm 后极部所需的圆形光源直径。", "dataset": "summary", "sourceId": "summary_query", "metrics": [{"label": "成人 120 D 光源直径 (mm)", "field": "adult_120D_source_diameter_mm", "format": "number"}]},
             {"id": "infinity", "description": "成人眼无穷远照明覆盖直径 6 mm 后极部所需的完整角直径。", "dataset": "summary", "sourceId": "summary_query", "metrics": [{"label": "无穷远完整角直径 (deg)", "field": "adult_infinity_full_angle_deg", "format": "number"}]},
             {"id": "zos_error", "description": "聚焦验证案例中独立模型与 OpticStudio 视网膜边缘位置的最大绝对误差。", "dataset": "summary", "sourceId": "summary_query", "metrics": [{"label": "ZOS 最大边缘误差 (µm)", "field": "zos_max_focused_edge_error_um", "format": "number"}]},
             {"id": "capture", "description": "成人 10 D 聚焦案例中命中目标后极部区域的蒙特卡洛光线比例。", "dataset": "summary", "sourceId": "summary_query", "metrics": [{"label": "聚焦捕获比例", "field": "focused_capture_fraction", "format": "percent"}]},
@@ -131,16 +138,16 @@ FROM zosapi_validation"""
         "charts": [
             {
                 "id": "source_diameter",
-                "title": "物距越近，覆盖后极部所需的实体光源越小",
-                "subtitle": "三种眼模型的目标视网膜直径不同，但所需角尺寸均约 20°，因此曲线接近。",
+                "title": "60–120 D 物方需求对应的圆形光源直径",
+                "subtitle": "无外置镜片；7 个离散水平，步长 10 D。三种眼模型所需角尺寸均约 20°。",
                 "type": "bar", "dataset": "source_size", "sourceId": "source_size_query",
                 "encodings": {"x": {"field": "demand_label", "type": "ordinal", "label": "物方屈光需求"}, "y": {"field": "source_diameter_mm", "type": "quantitative", "label": "光源直径 (mm)", "format": "number"}, "color": {"field": "eye_label", "type": "nominal", "label": "眼模型"}},
                 "yAxisTitle": "光源直径 (mm)", "valueFormat": "number", "layout": "full",
             },
             {
                 "id": "external_lens",
-                "title": "负外置镜片显著增加成人眼调节需求",
-                "subtitle": "光源固定在 100 mm；-15 D 及 -20 D 时超过成人 18 D 调节上限。",
+                "title": "成人 10 D 参考工况的外置镜片调节需求",
+                "subtitle": "该参考扫描独立于 60–120 D 主扫描；-15 D 及 -20 D 时超过成人 18 D 调节上限。",
                 "type": "bar", "dataset": "adult_external", "sourceId": "adult_external_query",
                 "encodings": {"x": {"field": "lens_label", "type": "ordinal", "label": "外置镜片度数"}, "y": {"field": "accommodation_D", "type": "quantitative", "label": "所需调节 (D)", "format": "number"}},
                 "yAxisTitle": "所需调节 (D)", "valueFormat": "number", "layout": "full",
@@ -168,17 +175,17 @@ FROM zosapi_validation"""
         "sources": sources,
         "blocks": [
             {"id": "title", "type": "markdown", "body": "# 小鸡与人眼 650 nm 全视网膜照明仿真\n\n**技术报告｜独立模型 + 蒙特卡洛 + Ansys Zemax OpticStudio 24.1**"},
-            {"id": "summary", "type": "markdown", "sourceId": "summary_query", "body": "## 技术摘要\n\n本研究建立三个有效眼模型，计算圆形均匀光源覆盖指定后极部区域所需的尺寸，并扫描物距、离焦、瞳孔、眼轴和负外置镜片。自动验证状态为 **passed**；独立模型与 OpticStudio 聚焦边缘位置的最大误差为 **4.44×10⁻¹³ µm**，属于双精度数值舍入量级。"},
-            {"id": "metrics", "type": "metric-strip", "cardIds": ["geometry", "infinity", "zos_error", "capture"]},
+            {"id": "summary", "type": "markdown", "sourceId": "summary_query", "body": "## 技术摘要\n\n物方需求主扫描已改为 **60–120 D、步长 10 D**，且在无外置镜片条件下执行。所有 21 个请求案例均超过三种眼模型的给定调节上限；独立模型与 OpticStudio 聚焦边缘位置的最大误差仍为 **4.44×10⁻¹³ µm**，属于双精度数值舍入量级。"},
+            {"id": "metrics", "type": "metric-strip", "cardIds": ["geometry60", "geometry120", "infinity", "zos_error", "capture"]},
             {"id": "findings", "type": "markdown", "body": "## 关键结论与设计含义\n\n几何设计的首要控制量是视网膜覆盖角，而不是瞳孔直径。实体光源尺寸随物距变化；瞳孔主要影响离焦容差和通过量。下图把离散设计工况放在同一尺度上比较。"},
             {"id": "source_chart", "type": "chart", "chartId": "source_diameter", "layout": "full"},
-            {"id": "source_explain", "type": "markdown", "sourceId": "source_size_query", "body": "成人与儿童在 **100 mm / 10 D** 工况均需约 **35.93 mm** 直径光源；小鸡需约 **35.71 mm**。小鸡的 20 D 工况超过 15.69 D 调节上限，成人的 20 D 工况超过 18 D 上限，6 岁儿童在给定 22.5 D 上限内仍可行。"},
+            {"id": "source_explain", "type": "markdown", "sourceId": "source_size_query", "body": "成人与儿童在 **60 D / 16.67 mm** 工况均需约 **5.99 mm** 直径光源，在 **120 D / 8.33 mm** 时减半为约 **2.99 mm**；小鸡分别约 **5.95 mm** 与 **2.98 mm**。三个模型在全部 60–120 D 请求工况均超过给定调节上限，因此这些尺寸是几何覆盖解，而不是生理可调焦解。"},
             {"id": "headline_table", "type": "table", "tableId": "headline", "layout": "full"},
-            {"id": "lens_section", "type": "markdown", "body": "## 外置负镜片建模\n\n外置薄透镜与眼的有效薄透镜通过 ABCD 矩阵串联，镜片顶点距暂定为小鸡 5 mm、人眼 12 mm。负镜片不仅提高调节需求，也轻微改变覆盖同一视网膜区域所需的光源尺寸。"},
+            {"id": "lens_section", "type": "markdown", "body": "## 外置负镜片建模\n\n外置薄透镜与眼的有效薄透镜通过 ABCD 矩阵串联，镜片顶点距暂定为小鸡 5 mm、人眼 12 mm。由于 90–120 D 对应的人眼物距短于 12 mm，主扫描不与外置镜片组合；外置镜片仍在物理顺序有效的 10 D（100 mm）参考工况中单独评估。"},
             {"id": "lens_chart", "type": "chart", "chartId": "external_lens", "layout": "full"},
             {"id": "lens_explain", "type": "markdown", "sourceId": "adult_external_query", "body": "成人眼在 100 mm 物距时，外置镜片从 0 D 变为 -10 D，所需调节从 **10.00 D** 增至 **17.00 D**，仍在 18 D 上限内；-15 D 和 -20 D 分别需要 **20.03 D** 与 **22.79 D**，不可由该模型的成人调节范围补偿。"},
             {"id": "lens_table", "type": "table", "tableId": "adult_lens", "layout": "full"},
-            {"id": "method", "type": "markdown", "body": "## 范围、定义与方法\n\n- 波长固定为 650 nm；几何追迹在近轴条件下进行。\n- 每只眼由校准后的有效薄透镜表示，视网膜位置固定，调节通过改变眼的有效屈光力实现。\n- 圆形朗伯均匀发光面在聚焦状态下成像为覆盖目标后极部的圆盘。\n- 离焦以光焦度偏差定义，边缘光线给出几何模糊斑；蒙特卡洛每个案例追迹 600,000 条光线。\n- OpticStudio 验证使用 ZOS-API 创建顺序模式 Paraxial 系统并批量追迹真实光线；生成 6 个 `.zos` 系统文件。"},
+            {"id": "method", "type": "markdown", "body": "## 范围、定义与方法\n\n- 波长固定为 650 nm；主物方需求为 60、70、80、90、100、110、120 D，对应物距 16.67–8.33 mm，均无外置镜片。\n- 每只眼由校准后的有效薄透镜表示，视网膜位置固定，调节通过改变眼的有效屈光力实现。\n- 圆形朗伯均匀发光面在聚焦状态下成像为覆盖目标后极部的圆盘。\n- 离焦以光焦度偏差定义，边缘光线给出几何模糊斑；蒙特卡洛每个案例追迹 600,000 条光线。\n- 外置镜片与 OpticStudio 验证保留为 10 D 参考案例，避免在物距短于顶点距时使用错误的元件顺序。\n- OpticStudio 验证使用 ZOS-API 创建顺序模式 Paraxial 系统并批量追迹真实光线；生成 6 个 `.zos` 系统文件。"},
             {"id": "defocus_chart", "type": "chart", "chartId": "defocus_blur", "layout": "full"},
             {"id": "defocus_explain", "type": "markdown", "sourceId": "defocus_query", "body": "成人 5 mm 瞳孔在 ±10 D 离焦时产生约 **0.835 mm** 几何模糊斑。若要在该离焦范围仍保持均匀覆盖，应采用保守角直径而不能只采用聚焦态最小角直径；代价是有一部分光线落到目标后极部之外。"},
             {"id": "zos_section", "type": "markdown", "sourceId": "zos_query", "body": "## OpticStudio 交叉验证\n\n5 个已调焦案例的最大视网膜边缘误差为 **4.44×10⁻¹³ µm**，最大 RMS 展宽为 **5.66×10⁻¹² µm**。故意不调焦的成人 10 D 案例预测展宽 **0.82665 mm**，OpticStudio 观测值同为 **0.82665 mm**。"},

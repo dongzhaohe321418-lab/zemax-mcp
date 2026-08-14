@@ -1,6 +1,6 @@
 {
   "pdf": "eye_illumination_experiment_report.pdf",
-  "page_count": 29,
+  "page_count": 30,
   "embedded_raster_image_instances": 5,
   "font_names": [
     "BYANTN+CMR17",
@@ -43,8 +43,8 @@
   "preview_pages": [
     0,
     7,
-    14,
-    21,
-    28
+    15,
+    22,
+    29
   ]
 }

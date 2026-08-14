@@ -6,7 +6,7 @@ A safety-first, stdio-only MCP server that lets Codex, Claude Code, or another M
 
 ## Completed reference experiment
 
-The repository also contains a fully executed 650 nm posterior-pole illumination study for chick, child, and adult effective-eye models. It includes deterministic ABCD calculations, parameter sweeps, 600,000-ray Monte Carlo cases, six independently created OpticStudio 24.1 ZOS-API systems, an executed Notebook, CSV/JSON outputs, and a 29-page Chinese LaTeX/PDF report with embedded SimSun text. See [`experiments/eye_illumination/`](experiments/eye_illumination/) and build the report with [`report/latex/build_report.ps1`](experiments/eye_illumination/report/latex/build_report.ps1).
+The repository also contains a fully executed 650 nm posterior-pole illumination study for chick, child, and adult effective-eye models. Its current main object-demand sweep is 60–120 D in 10 D increments, with a physically separate 10 D external-lens reference. It includes deterministic ABCD calculations, parameter sweeps, 600,000-ray Monte Carlo cases, six independently created OpticStudio 24.1 ZOS-API systems, an executed Notebook, CSV/JSON outputs, and a Chinese LaTeX/PDF report with embedded SimSun text. See [`experiments/eye_illumination/`](experiments/eye_illumination/) and build the report with [`report/latex/build_report.ps1`](experiments/eye_illumination/report/latex/build_report.ps1).
 
 ```text
 MCP host (Codex / Claude Code)

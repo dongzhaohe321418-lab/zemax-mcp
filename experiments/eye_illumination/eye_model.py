@@ -55,7 +55,9 @@ def pre_eye_matrix(source_distance_m: float, external_power_D: float, vertex_dis
 
 
 def focus_solution(eye: Eye, source_distance_m: float, external_power_D: float = 0.0) -> dict[str, float | bool]:
-    vertex_m = eye.external_lens_vertex_distance_mm / 1000.0
+    # A zero-power external surface is optically absent, so its provisional
+    # mechanical vertex distance must not invalidate ultra-near no-lens cases.
+    vertex_m = 0.0 if external_power_D == 0.0 else eye.external_lens_vertex_distance_mm / 1000.0
     pre = pre_eye_matrix(source_distance_m, external_power_D, vertex_m)
     b = float(pre[0, 1])
     d = float(pre[1, 1])
@@ -96,7 +98,7 @@ def general_mapping(
     external_power_D: float = 0.0,
 ) -> tuple[float, float]:
     """Return retina coefficients: y_retina = m_source*y_source + m_pupil*y_pupil."""
-    vertex_m = eye.external_lens_vertex_distance_mm / 1000.0
+    vertex_m = 0.0 if external_power_D == 0.0 else eye.external_lens_vertex_distance_mm / 1000.0
     pre = pre_eye_matrix(source_distance_m, external_power_D, vertex_m)
     total = translation(eye.reduced_retina_distance_m) @ thin_lens(eye_power_D) @ pre
     a_pre, b_pre = float(pre[0, 0]), float(pre[0, 1])

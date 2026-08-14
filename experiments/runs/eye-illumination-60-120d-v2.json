@@ -1,0 +1,77 @@
+{
+  "application": {
+    "name": "Ansys Zemax OpticStudio",
+    "version": "24.1.0",
+    "zosapi_license_valid": true
+  },
+  "artifacts": [
+    "experiments/eye_illumination/results/focused_source_sweep.csv",
+    "experiments/eye_illumination/results/headline_results.csv",
+    "experiments/eye_illumination/results/external_lens_reference.csv",
+    "experiments/eye_illumination/results/validation_report.json",
+    "experiments/eye_illumination/results/zemax/zosapi_validation.csv",
+    "experiments/eye_illumination/notebooks/eye_illumination_analysis.ipynb",
+    "experiments/eye_illumination/report/artifact.json",
+    "experiments/eye_illumination/report/eye_illumination_report.html",
+    "experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf",
+    "experiments/eye_illumination/report/latex/qa_report.json"
+  ],
+  "experiment_id": "eye-illumination-60-120d-v2",
+  "hypothesis": "For the calibrated paraxial eyes without an external lens, accommodation equals object demand while the required physical source diameter scales inversely with demand; therefore doubling demand from 60 D to 120 D halves source diameter and exceeds all supplied accommodation limits.",
+  "inputs": {
+    "configuration": "experiments/eye_illumination/config/experiment.json",
+    "configuration_sha256": "57085e8b8ad79b0852deac8a7062348c7b02b0d43198de61b6ecea6b652b446b",
+    "external_lens_reference_demand_D": 10,
+    "monte_carlo_rays_per_case": 600000,
+    "random_seed": 20260814,
+    "source_commit": "bbb7c8c25a97ac5134d4a1105f1114d790f8e55e",
+    "source_demand_step_D": 10,
+    "source_demands_D": [
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120
+    ],
+    "wavelength_nm": 650.0
+  },
+  "limitations": [
+    "All requested 60\u2013120 D cases are accommodation-infeasible under the supplied biological limits; source sizes remain conditional geometric solutions.",
+    "External-lens combinations at 90\u2013120 D require a revised mechanical geometry because the requested object plane lies inside the provisional human lens vertex distance.",
+    "Absolute irradiance and biological safety remain out of scope without measured radiometry, exposure, spectrum, and tissue transmission.",
+    "The model remains a paraxial effective thin-eye model rather than a multi-surface anatomical eye."
+  ],
+  "next_step": "Confirm the intended mechanical placement for ultra-near sources, then acquire measured radiometry and implement multi-surface anatomical eye and non-sequential stray-light models.",
+  "objective": "Replace the finite object-demand sweep with 60\u2013120 D in 10 D increments, regenerate all model outputs and reports, and preserve a physically valid external-lens reference.",
+  "observations": [
+    "The requested demand grid is exactly 60, 70, 80, 90, 100, 110, and 120 D.",
+    "Adult and child source diameters decrease from 5.988 mm at 60 D to 2.994 mm at 120 D; chick diameters decrease from 5.952 mm to 2.976 mm.",
+    "All 21 requested eye-demand combinations exceed the accommodation limits supplied in the source presentation.",
+    "The 90\u2013120 D human object distances are shorter than the provisional 12 mm external-lens vertex distance, so those combinations are not modeled with an external lens.",
+    "A separate 10 D external-lens reference preserves the prior sensitivity analysis without violating optical element order.",
+    "The 30-page Chinese SimSun PDF passed automated PDF QA and manual visual inspection."
+  ],
+  "outputs": {
+    "adult_120D_source_diameter_mm": 2.994012,
+    "adult_60D_source_diameter_mm": 5.988024,
+    "all_imaging_residuals_below_1e_12_m": true,
+    "all_requested_cases_exceed_accommodation_limits": true,
+    "chick_120D_source_diameter_mm": 2.97619,
+    "chick_60D_source_diameter_mm": 5.952381,
+    "external_lens_reference_rows": 21,
+    "external_lens_reference_sha256": "62ae0708beb2d5b1d6c5380147988a7c56098180fd6319492b13ad64462fe2eb",
+    "focused_zos_edge_max_error_um": 4.440892098500626e-13,
+    "headline_results_sha256": "9a3b7d115ef48e33b91e0f915decd6b246dfef56f9ebc85b591ac4ac691c58d4",
+    "main_focused_rows": 21,
+    "pdf_page_count": 30,
+    "pdf_sha256": "98e8200fb712b259b2616d43185e2bdf5ee2ac22e15c5d93a83508de5770527d",
+    "pdf_songti_embedded": true,
+    "tests_passed": 23,
+    "validation_status": "passed"
+  },
+  "payload_sha256": "42fbdec52eab30ba355f199fb1338770e5018d45d0239e223027b0a7f93c8419",
+  "recorded_at_utc": "2026-08-14T09:28:30.028965+00:00",
+  "schema_version": 1
+}

@@ -72,13 +72,13 @@ display(headline)
         markdown("""
 ## Results
 
-### Source size scales linearly with distance
+### Requested 60–120 D source-demand sweep
 
-At a fixed target angular field, the required physical source becomes large at long working distance. Pupil diameter does not change in-focus paraxial image size; it changes throughput and the defocused blur footprint.
+The main sweep now covers 60, 70, 80, 90, 100, 110, and 120 D without an external lens. At a fixed target angular field, the required physical source diameter decreases as object distance decreases. All requested demands exceed the supplied accommodation limits.
         """),
         code("display(Image(filename=str(FIGURES / 'source_diameter_vs_demand.png')))"),
         markdown("""
-### External negative lenses consume accommodation reserve
+### External negative lenses consume accommodation reserve in a separate 10 D reference
 
 The table and heatmap use the stated provisional vertex distances. A negative lens increases the positive accommodation required to focus the same physical source plane.
         """),
@@ -103,8 +103,9 @@ validation
 ## Takeaways
 
 - All focused ZOS-API cases place the source edge on the requested retinal edge to numerical precision.
-- At 10 D (100 mm), the required circular source diameter is about 35.7 mm for chick and 35.9 mm for either human model.
-- The 20 D source is beyond the assumed chick and adult accommodation limits, but within the assumed 6-year-old limit.
+- At 60 D, the required circular source diameter is about 5.95 mm for chick and 5.99 mm for either human model; at 120 D those diameters halve to about 2.98 mm and 2.99 mm.
+- Every requested 60–120 D case exceeds the supplied accommodation limits for chick, child, and adult models.
+- The external-lens comparison remains a separate 10 D reference because 90–120 D object distances are shorter than the provisional 12 mm human vertex distance.
 - Negative external lenses rapidly reduce the set of focusable source distances.
 - These are geometric/paraxial design results, not absolute irradiance or biological-safety results. A full anatomical/GRIN and measured-QLED model is the next validation layer.
         """),

@@ -45,6 +45,7 @@ def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     plt.rcParams.update({"axes.unicode_minus": False, "font.size": 10})
     focused = pd.read_csv(RESULTS / "focused_source_sweep.csv")
+    external_reference = pd.read_csv(RESULTS / "external_lens_reference.csv")
     defocus = pd.read_csv(RESULTS / "defocus_pupil_sweep.csv")
     config = json.loads((EXPERIMENT / "config" / "experiment.json").read_text(encoding="utf-8"))
     eyes = load_eyes(config)
@@ -58,17 +59,13 @@ def main() -> None:
     ax.legend(frameon=False, prop=SONGTI)
     style(ax); fig.tight_layout(); fig.savefig(FIGURES / "source_diameter_cn.png", dpi=220); plt.close(fig)
 
-    adult = focused[focused.eye_id == "adult_18y"].pivot(index="external_lens_D", columns="source_demand_D", values="accommodation_D")
+    adult = external_reference[external_reference.eye_id == "adult_18y"].sort_values("external_lens_D")
     fig, ax = plt.subplots(figsize=(8.4, 5.2))
-    image = ax.imshow(adult.values, cmap="Blues", aspect="auto")
-    ax.set_xticks(range(len(adult.columns)), [f"{v:g}" for v in adult.columns])
-    ax.set_yticks(range(len(adult.index)), [f"{v:g}" for v in adult.index])
-    cn(ax, title="成人眼在不同物距与外置负镜片下的调节需求", xlabel="物方屈光需求（D）", ylabel="外置镜片度数（D）")
-    for i in range(adult.shape[0]):
-        for j in range(adult.shape[1]):
-            value = adult.iloc[i, j]
-            ax.text(j, i, f"{value:.1f}", ha="center", va="center", color="white" if value > 15 else INK)
-    bar = fig.colorbar(image, ax=ax); bar.set_label("所需调节（D）", fontproperties=SONGTI)
+    ax.plot(adult.external_lens_D, adult.accommodation_D, marker="o", linewidth=2.2, color=BLUE, label="10 D参考工况")
+    ax.axhline(18.0, color=ORANGE, linestyle="--", linewidth=1.4, label="成人调节上限 18 D")
+    cn(ax, title="成人眼10 D参考工况的外置镜片调节需求", xlabel="外置镜片度数（D）", ylabel="所需调节（D）")
+    ax.legend(frameon=False, prop=SONGTI)
+    style(ax)
     fig.tight_layout(); fig.savefig(FIGURES / "adult_accommodation_cn.png", dpi=220); plt.close(fig)
 
     fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.4))
