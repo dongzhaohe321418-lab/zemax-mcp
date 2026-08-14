@@ -1,0 +1,50 @@
+{
+  "pdf": "eye_illumination_experiment_report.pdf",
+  "page_count": 29,
+  "embedded_raster_image_instances": 5,
+  "font_names": [
+    "BYANTN+CMR17",
+    "DFUDTL+CMEX10",
+    "DPKYKM+SimSun",
+    "FPFBJA+ArialMT",
+    "FXJMZE+CMMIB10",
+    "GGIGJT+CMR10",
+    "HGULVP+SimSun",
+    "ICVCHA+TimesNewRomanPS-BoldMT",
+    "IYJQCM+CMR7",
+    "JQUVPC+CMMI10",
+    "KMVWNC+CMMI12",
+    "LIKDDX+SimSun",
+    "LXKTAB+SimSun",
+    "PAABIO+Consolas",
+    "PALLLW+CMSY10",
+    "QCIDYR+CMR8",
+    "RXPNXT+SimSun",
+    "TFCVNM+CMMI8",
+    "TUFXIV+TimesNewRomanPSMT",
+    "UITBQS+CMSY7",
+    "VXDYAE+CMSY8",
+    "WMKHGO+SimSun",
+    "YSPCSO+CMR12",
+    "ZIPWPU+CMMI7"
+  ],
+  "songti_font_names": [
+    "DPKYKM+SimSun",
+    "HGULVP+SimSun",
+    "LIKDDX+SimSun",
+    "LXKTAB+SimSun",
+    "RXPNXT+SimSun",
+    "WMKHGO+SimSun"
+  ],
+  "missing_required_text": [],
+  "sparse_pages": [],
+  "all_pages_a4": true,
+  "status": "passed",
+  "preview_pages": [
+    0,
+    7,
+    14,
+    21,
+    28
+  ]
+}

@@ -1,6 +1,6 @@
 # 小鸡与人眼 650 nm 全视网膜照明仿真
 
-本目录把用户提供的《小鸡和人眼光学仿真参数》转换为可重复执行、可审计的光学实验。它包含独立近轴模型、参数扫描、蒙特卡洛照度均匀性评估、真实 Ansys Zemax OpticStudio 24.1 ZOS-API 光线追迹、自动测试、执行完成的 Jupyter Notebook 和自包含 HTML 技术报告。
+本目录把用户提供的《小鸡和人眼光学仿真参数》转换为可重复执行、可审计的光学实验。它包含独立近轴模型、参数扫描、蒙特卡洛照度均匀性评估、真实 Ansys Zemax OpticStudio 24.1 ZOS-API 光线追迹、自动测试、执行完成的 Jupyter Notebook、自包含 HTML 技术报告，以及 29 页中文宋体 LaTeX/PDF 综合实验报告。
 
 ## 已完成的建模
 
@@ -32,6 +32,17 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\run_all.ps
 
 脚本依次重建独立模型结果和图、编译并运行 64 位 ZOS-API 验证器、验证数值、重建并执行 Notebook、运行全部测试、生成规范化报告数据和便携 HTML 报告。`.build/` 仅用于临时编译产物，不进入版本控制。
 
+## LaTeX/PDF 综合报告
+
+报告正文、表格和中文数据图均由版本化 CSV/JSON 结果生成，包含等效眼与外置负镜片光路图、端到端可复现工作流图、全部实验细节、结果、限制和下一阶段计划。Windows 上安装 MiKTeX/XeLaTeX 与分析依赖后，在仓库根目录执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\latex\build_report.ps1 `
+  -PythonPath "C:\path\to\python.exe"
+```
+
+构建脚本会重新生成表格宏和五张中文图，连续编译三次，并自动检查 A4 页面、宋体嵌入、图片数量、关键文本、稀疏页、未解析引用和版面越界。最终 PDF 位于 `report/latex/eye_illumination_experiment_report.pdf`，机器审计结果位于 `report/latex/qa_report.json`。
+
 ## 主要结果
 
 - 成人与儿童在 100 mm（10 D）物距、无外置镜片时，需要约 35.93 mm 直径的圆形光源覆盖 6 mm 后极部；小鸡需要约 35.71 mm 覆盖 3 mm 后极部。
@@ -53,6 +64,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\run_all.ps
 - `notebooks/eye_illumination_analysis.ipynb`：含输出的可执行分析 Notebook。
 - `report/artifact.json`：报告的规范化、带来源数据。
 - `report/eye_illumination_report.html`：自包含技术报告。
+- `report/latex/`：中文宋体 LaTeX 源码、五张数据图、TikZ 示意图、29 页 PDF 与自动 QA。
 - `validate_results.py` 与 `tests/test_eye_illumination_model.py`：自动数值验证和单元测试。
 
 ## 限制

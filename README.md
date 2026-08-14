@@ -4,6 +4,10 @@ A safety-first, stdio-only MCP server that lets Codex, Claude Code, or another M
 
 > Current status: the mock backend is implemented and testable. The ZOS-API adapter deliberately stops after read-only runtime discovery until its object names and connection sequence are checked against the samples installed with the target OpticStudio release. It has **not** been verified against a live licensed OpticStudio instance.
 
+## Completed reference experiment
+
+The repository also contains a fully executed 650 nm posterior-pole illumination study for chick, child, and adult effective-eye models. It includes deterministic ABCD calculations, parameter sweeps, 600,000-ray Monte Carlo cases, six independently created OpticStudio 24.1 ZOS-API systems, an executed Notebook, CSV/JSON outputs, and a 29-page Chinese LaTeX/PDF report with embedded SimSun text. See [`experiments/eye_illumination/`](experiments/eye_illumination/) and build the report with [`report/latex/build_report.ps1`](experiments/eye_illumination/report/latex/build_report.ps1).
+
 ```text
 MCP host (Codex / Claude Code)
              | stdio
@@ -161,6 +165,7 @@ backend/                 backend protocol, mock, and guarded ZOS-API adapter
 experiments/runs/        immutable JSON experiment records
 experiments/artifacts/   Git LFS-backed designs and large results
 experiments/templates/   record template
+experiments/eye_illumination/ completed reproducible 650 nm eye study and report
 scripts/                 diagnostics and experiment recorder
 tests/                   validation, path, and mock-physics tests
 server.py                FastMCP stdio tools
