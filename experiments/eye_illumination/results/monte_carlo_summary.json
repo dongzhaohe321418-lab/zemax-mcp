@@ -1,14 +1,19 @@
 {
   "sample_count_per_case": 600000,
   "seed": 20260814,
-  "focused_adult_10D": {
+  "eye_id": "adult_18y",
+  "fixed_focal_length_mm": 16.7,
+  "pupil_diameter_mm": 5.0,
+  "source_demand_D": 60.0,
+  "source_distance_mm": 16.666666666666668,
+  "geometric_minimum": {
     "captured_ray_fraction": 1.0,
-    "p10_to_mean_uniformity": 0.8455859344278206,
-    "pixels_at_least_half_mean": 0.9985039271911234
+    "p10_to_mean_uniformity": 0.12031560157800789,
+    "pixels_at_least_half_mean": 0.7532726592694178
   },
-  "adult_infinity_plus10D_defocus": {
-    "captured_ray_fraction": 0.7713016666666667,
-    "p10_to_mean_uniformity": 0.8310499720470818,
-    "pixels_at_least_half_mean": 1.0
+  "conservative_full_overlap": {
+    "captured_ray_fraction": 0.29805333333333334,
+    "p10_to_mean_uniformity": 0.7171051161127378,
+    "pixels_at_least_half_mean": 0.9930183268919087
   }
 }

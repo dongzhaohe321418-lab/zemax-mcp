@@ -8,7 +8,7 @@ EXPERIMENT = Path(__file__).parents[1] / "experiments" / "eye_illumination"
 import sys
 sys.path.insert(0, str(EXPERIMENT))
 
-from eye_model import axial_blur, defocus_bounds_for_infinity, focus_solution, infinity_solution, load_eyes
+from eye_model import axial_blur, defocus_bounds_for_infinity, fixed_focal_source_solution, load_eyes
 
 
 @pytest.fixture(scope="module")
@@ -17,16 +17,23 @@ def eyes():
     return load_eyes(config)
 
 
-def test_focused_solution_closes_imaging_condition(eyes):
+def test_fixed_focal_solution_closes_conservative_plateau_condition(eyes):
     for eye in eyes:
-        result = focus_solution(eye, 0.1, 0.0)
-        assert abs(result["imaging_B_residual_m"]) < 1e-12
-        assert result["source_diameter_mm"] > eye.posterior_pole_diameter_mm
+        for focal in eye.fixed_effective_focal_lengths_mm:
+            for pupil in eye.pupil_diameters_mm:
+                result = fixed_focal_source_solution(eye, 1.0 / 60.0, focal, pupil)
+                assert abs(result["conservative_plateau_margin_um"]) < 1e-8
+                assert result["conservative_source_diameter_mm"] > 0
 
 
-def test_no_external_lens_accommodation_matches_source_demand(eyes):
+def test_fixed_focal_lengths_match_ppt_endpoints_and_midpoints(eyes):
+    expected = {
+        "chick_30_45d": (7.5, 8.0, 8.5),
+        "child_6y": (13.5, 15.1, 16.7),
+        "adult_18y": (12.8, 14.75, 16.7),
+    }
     for eye in eyes:
-        assert focus_solution(eye, 0.2, 0.0)["accommodation_D"] == pytest.approx(5.0)
+        assert eye.fixed_effective_focal_lengths_mm == expected[eye.eye_id]
 
 
 def test_requested_source_demand_grid_is_60_to_120_by_10():
@@ -34,25 +41,27 @@ def test_requested_source_demand_grid_is_60_to_120_by_10():
     assert config["source_demands_D"] == list(range(60, 121, 10))
 
 
-def test_requested_grid_exceeds_all_supplied_accommodation_limits(eyes):
+def test_requested_grid_uses_fixed_focal_lengths_without_fitting(eyes):
     for eye in eyes:
+        solutions = []
         for demand in range(60, 121, 10):
-            result = focus_solution(eye, 1.0 / demand, 0.0)
-            assert result["accommodation_D"] == pytest.approx(demand)
-            assert not result["feasible_accommodation"]
+            for focal in eye.fixed_effective_focal_lengths_mm:
+                result = fixed_focal_source_solution(eye, 1.0 / demand, focal, eye.pupil_diameters_mm[-1])
+                assert result["fixed_focal_length_mm"] == focal
+                assert result["fixed_eye_power_D"] == pytest.approx(1000.0 / focal)
+                solutions.append(result["conservative_source_diameter_mm"])
+        assert len(set(round(value, 8) for value in solutions)) > 3
 
 
-def test_negative_lens_increases_accommodation_demand(eyes):
+def test_geometric_minimum_covers_target_support(eyes):
     for eye in eyes:
-        baseline = focus_solution(eye, 0.2, 0.0)["accommodation_D"]
-        corrected = focus_solution(eye, 0.2, -5.0)["accommodation_D"]
-        assert corrected > baseline
-
-
-def test_infinity_angular_diameter_is_about_twenty_degrees(eyes):
-    for eye in eyes:
-        angle = infinity_solution(eye, 0.0)["angular_diameter_deg"]
-        assert 19.0 < angle < 22.0
+        result = fixed_focal_source_solution(
+            eye,
+            1.0 / 60.0,
+            eye.fixed_effective_focal_lengths_mm[1],
+            eye.pupil_diameters_mm[-1],
+        )
+        assert result["geometric_coverage_margin_um"] >= -1e-8
 
 
 def test_defocus_blur_is_zero_at_zero_defocus(eyes):

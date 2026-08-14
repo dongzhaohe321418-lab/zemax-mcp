@@ -1,4 +1,4 @@
-"""Run the complete reduced-eye sweep and generate versionable outputs."""
+"""Run the fixed-focal reduced-eye sweep and generate versionable outputs."""
 
 from __future__ import annotations
 
@@ -18,9 +18,8 @@ from eye_model import (
     axial_blur,
     defocus_bounds_for_infinity,
     detector_metrics,
-    focus_solution,
+    fixed_focal_source_solution,
     general_mapping,
-    infinity_solution,
     load_eyes,
     sample_retina,
 )
@@ -40,7 +39,7 @@ GREY = "#89909A"
 
 
 def save_csv(frame: pd.DataFrame, name: str) -> None:
-    frame.to_csv(RESULTS / name, index=False, float_format="%.8g")
+    frame.to_csv(RESULTS / name, index=False, float_format="%.10g")
 
 
 def style_axes(ax: plt.Axes) -> None:
@@ -55,108 +54,156 @@ def run() -> None:
     RESULTS.mkdir(parents=True, exist_ok=True)
     FIGURES.mkdir(parents=True, exist_ok=True)
 
-    focused_rows: list[dict] = []
-    external_reference_rows: list[dict] = []
-    infinity_rows: list[dict] = []
+    rows: list[dict] = []
     for eye in eyes:
-        for external_power in config["external_lens_powers_D"]:
-            infinity_rows.append({"eye_id": eye.eye_id, "eye_label": eye.label, "source_demand_D": 0.0, "source_distance_mm": np.inf, "external_lens_D": external_power, **infinity_solution(eye, external_power)})
-        for demand in config["source_demands_D"]:
-            distance_m = 1.0 / demand
-            focused_rows.append({
-                "eye_id": eye.eye_id,
-                "eye_label": eye.label,
-                "source_demand_D": demand,
-                "source_distance_mm": distance_m * 1000.0,
-                "external_lens_D": 0.0,
-                "vertex_distance_mm": 0.0,
-                "sweep_role": "requested_60_120D_no_external_lens",
-                "pupil_independence_note": "Paraxial in-focus image size is independent of pupil diameter",
-                **focus_solution(eye, distance_m, 0.0),
-            })
+        for focal_length_mm in eye.fixed_effective_focal_lengths_mm:
+            for pupil_diameter_mm in eye.pupil_diameters_mm:
+                for demand in config["source_demands_D"]:
+                    distance_m = 1.0 / demand
+                    rows.append({
+                        "eye_id": eye.eye_id,
+                        "eye_label": eye.label,
+                        "source_demand_D": demand,
+                        "source_distance_mm": 1000.0 * distance_m,
+                        "posterior_pole_diameter_mm": eye.posterior_pole_diameter_mm,
+                        "reported_axial_length_mm": eye.reported_axial_length_mm,
+                        "image_medium_refractive_index": eye.image_medium_refractive_index,
+                        "external_lens_D": 0.0,
+                        "sweep_role": "fixed_focal_object_distance_source_sizing",
+                        **fixed_focal_source_solution(
+                            eye,
+                            distance_m,
+                            focal_length_mm,
+                            pupil_diameter_mm,
+                        ),
+                    })
+    fixed = pd.DataFrame(rows)
+    save_csv(fixed, "fixed_focal_source_sweep.csv")
 
-        reference_demand = float(config["external_lens_reference_demand_D"])
-        reference_distance_m = 1.0 / reference_demand
-        for external_power in config["external_lens_powers_D"]:
-            external_reference_rows.append({
-                "eye_id": eye.eye_id,
-                "eye_label": eye.label,
-                "source_demand_D": reference_demand,
-                "source_distance_mm": reference_distance_m * 1000.0,
-                "external_lens_D": external_power,
-                "vertex_distance_mm": eye.external_lens_vertex_distance_mm,
-                "sweep_role": "external_lens_reference_10D",
-                "pupil_independence_note": "Paraxial in-focus image size is independent of pupil diameter",
-                **focus_solution(eye, reference_distance_m, external_power),
-            })
-    focused = pd.DataFrame(focused_rows)
-    external_reference = pd.DataFrame(external_reference_rows)
-    infinity = pd.DataFrame(infinity_rows)
-    save_csv(focused, "focused_source_sweep.csv")
-    save_csv(external_reference, "external_lens_reference.csv")
-    save_csv(infinity, "infinity_angular_sweep.csv")
+    # Headline lookup uses the largest configured pupil for each eye, keeping all
+    # three fixed focal lengths and all seven requested object distances.
+    headline_parts = []
+    for eye in eyes:
+        headline_parts.append(fixed[(fixed.eye_id == eye.eye_id) & (fixed.pupil_diameter_mm == max(eye.pupil_diameters_mm))])
+    headline = pd.concat(headline_parts, ignore_index=True)
+    save_csv(headline, "headline_results.csv")
 
     defocus_rows: list[dict] = []
     axial_rows: list[dict] = []
     for eye in eyes:
         for pupil in eye.pupil_diameters_mm:
             for defocus in config["defocus_sweep_D"]:
-                defocus_rows.append({"eye_id": eye.eye_id, "eye_label": eye.label, "pupil_diameter_mm": pupil, "defocus_D": defocus, **defocus_bounds_for_infinity(eye, defocus, pupil)})
+                defocus_rows.append({
+                    "eye_id": eye.eye_id,
+                    "eye_label": eye.label,
+                    "reference_focal_length_mm": eye.reference_focal_length_mm,
+                    "pupil_diameter_mm": pupil,
+                    "defocus_D": defocus,
+                    **defocus_bounds_for_infinity(eye, defocus, pupil),
+                })
             for axial in eye.axial_sensitivity_mm:
-                axial_rows.append({"eye_id": eye.eye_id, "eye_label": eye.label, "pupil_diameter_mm": pupil, "axial_length_mm": axial, **axial_blur(eye, axial, pupil)})
+                axial_rows.append({
+                    "eye_id": eye.eye_id,
+                    "eye_label": eye.label,
+                    "reference_focal_length_mm": eye.reference_focal_length_mm,
+                    "pupil_diameter_mm": pupil,
+                    "axial_length_mm": axial,
+                    **axial_blur(eye, axial, pupil),
+                })
     defocus = pd.DataFrame(defocus_rows)
     axial = pd.DataFrame(axial_rows)
     save_csv(defocus, "defocus_pupil_sweep.csv")
     save_csv(axial, "axial_length_sensitivity.csv")
 
-    # Deterministic Monte Carlo checks for a focused case and a deliberately defocused case.
+    # Deterministic Monte Carlo comparison: geometric minimum versus the
+    # conservative full-overlap design at one fixed adult focal length.
     adult = next(eye for eye in eyes if eye.eye_id == "adult_18y")
-    focused_case = focus_solution(adult, 0.1, 0.0)
-    m_source, m_pupil = general_mapping(adult, 0.1, focused_case["eye_power_D"], 0.0)
-    xf, yf = sample_retina(focused_case["source_diameter_mm"] / 2000.0, 5.0 / 2000.0, m_source, m_pupil, 600_000, config["random_seed"])
-    focused_metrics = detector_metrics(xf, yf, adult.target_radius_m)
-
-    defocus_D = 10.0
+    demand_D = 60.0
+    focal_mm = 16.7
     pupil_mm = 5.0
-    bounds = defocus_bounds_for_infinity(adult, defocus_D, pupil_mm)
-    theta_radius = np.radians(bounds["uniform_conservative_angular_diameter_deg"] / 2.0)
-    # At infinity, source_radius is angular radius and m_source is reduced retina distance.
-    xd, yd = sample_retina(theta_radius, pupil_mm / 2000.0, adult.reduced_retina_distance_m, -adult.reduced_retina_distance_m * defocus_D, 600_000, config["random_seed"] + 1)
-    defocused_metrics = detector_metrics(xd, yd, adult.target_radius_m)
+    distance_m = 1.0 / demand_D
+    solution = fixed_focal_source_solution(adult, distance_m, focal_mm, pupil_mm)
+    ms, mp = general_mapping(adult, distance_m, 1000.0 / focal_mm)
+    cases = {}
+    maps = {}
+    for index, (name, diameter_key) in enumerate([
+        ("geometric_minimum", "geometric_min_source_diameter_mm"),
+        ("conservative_full_overlap", "conservative_source_diameter_mm"),
+    ]):
+        x, y = sample_retina(
+            solution[diameter_key] / 2000.0,
+            pupil_mm / 2000.0,
+            ms,
+            mp,
+            600_000,
+            config["random_seed"] + index,
+        )
+        metrics = detector_metrics(x, y, adult.target_radius_m)
+        cases[name] = {key: value for key, value in metrics.items() if not isinstance(value, np.ndarray)}
+        maps[name] = metrics
     monte_carlo_summary = {
         "sample_count_per_case": 600000,
         "seed": config["random_seed"],
-        "focused_adult_10D": {key: value for key, value in focused_metrics.items() if not isinstance(value, np.ndarray)},
-        "adult_infinity_plus10D_defocus": {key: value for key, value in defocused_metrics.items() if not isinstance(value, np.ndarray)},
+        "eye_id": adult.eye_id,
+        "fixed_focal_length_mm": focal_mm,
+        "pupil_diameter_mm": pupil_mm,
+        "source_demand_D": demand_D,
+        "source_distance_mm": 1000.0 / demand_D,
+        **cases,
     }
     (RESULTS / "monte_carlo_summary.json").write_text(json.dumps(monte_carlo_summary, indent=2), encoding="utf-8")
 
-    # Chart 1: source diameter vs near demand, no external lens.
-    fig, ax = plt.subplots(figsize=(8.2, 5.2))
-    colors = [BLUE, ORANGE, PINK]
-    for eye, color in zip(eyes, colors):
-        subset = focused[(focused.eye_id == eye.eye_id) & (focused.external_lens_D == 0)]
-        ax.plot(subset.source_demand_D, subset.source_diameter_mm, marker="o", linewidth=2.2, label=eye.label, color=color)
-    ax.set(title="Required circular source diameter", xlabel="Accommodation demand / object vergence magnitude (D)", ylabel="Source diameter (mm)")
-    ax.legend(frameon=False)
-    style_axes(ax)
+    # Chart 1: conservative source diameter by demand, with one panel per eye.
+    fig, axes = plt.subplots(1, 3, figsize=(14.2, 4.6), sharey=False)
+    focal_colors = [BLUE, ORANGE, PINK]
+    for ax, eye in zip(axes, eyes):
+        subset_eye = headline[headline.eye_id == eye.eye_id]
+        for focal, color in zip(eye.fixed_effective_focal_lengths_mm, focal_colors):
+            subset = subset_eye[np.isclose(subset_eye.fixed_focal_length_mm, focal)]
+            ax.plot(
+                subset.source_demand_D,
+                subset.conservative_source_diameter_mm,
+                marker="o",
+                linewidth=2.0,
+                color=color,
+                label=f"f={focal:g} mm",
+            )
+        ax.set(
+            title=eye.label,
+            xlabel="Object-side requirement (D)",
+            ylabel="Conservative source diameter (mm)",
+        )
+        ax.legend(frameon=False, fontsize=8)
+        style_axes(ax)
+    fig.suptitle("Fixed focal lengths: conservative source size at the largest pupil")
     fig.tight_layout()
     fig.savefig(FIGURES / "source_diameter_vs_demand.png", dpi=180)
     plt.close(fig)
 
-    # Chart 2: adult accommodation demand with external negative lenses.
-    adult_focus = external_reference[external_reference.eye_id == "adult_18y"].sort_values("external_lens_D")
-    fig, ax = plt.subplots(figsize=(8.4, 5.2))
-    ax.plot(adult_focus.external_lens_D, adult_focus.accommodation_D, marker="o", linewidth=2.2, color=BLUE)
-    ax.axhline(adult.accommodation_limit_D, color=ORANGE, linestyle="--", linewidth=1.4, label="Adult accommodation limit")
-    ax.set(xlabel="External lens power (D)", ylabel="Required accommodation (D)", title="Adult external-lens reference at 10 D source demand")
-    ax.legend(frameon=False)
-    style_axes(ax)
+    # Chart 2: pupil dependence for the adult model at the two endpoint demands.
+    adult_fixed = fixed[(fixed.eye_id == "adult_18y") & (fixed.source_demand_D.isin([60, 120]))]
+    fig, axes = plt.subplots(1, 2, figsize=(10.8, 4.5), sharey=True)
+    for ax, demand in zip(axes, [60, 120]):
+        subset_demand = adult_fixed[adult_fixed.source_demand_D == demand]
+        for focal, color in zip(adult.fixed_effective_focal_lengths_mm, focal_colors):
+            subset = subset_demand[np.isclose(subset_demand.fixed_focal_length_mm, focal)]
+            ax.plot(
+                subset.pupil_diameter_mm,
+                subset.conservative_source_diameter_mm,
+                marker="o",
+                linewidth=2.0,
+                color=color,
+                label=f"f={focal:g} mm",
+            )
+        ax.set(title=f"Adult, {demand} D", xlabel="Pupil diameter (mm)", ylabel="Conservative source diameter (mm)")
+        style_axes(ax)
+    axes[0].legend(frameon=False, fontsize=8)
+    fig.suptitle("Pupil and fixed focal length jointly determine source size")
     fig.tight_layout()
-    fig.savefig(FIGURES / "adult_accommodation_heatmap.png", dpi=180)
+    fig.savefig(FIGURES / "fixed_focal_pupil_comparison.png", dpi=180)
     plt.close(fig)
 
-    # Chart 3: defocus blur by pupil size.
+    # Chart 3: defocus blur by pupil size, retained as a sensitivity view.
     fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.4), sharey=False)
     for ax, eye in zip(axes, eyes):
         for pupil, color in zip(eye.pupil_diameters_mm, [BLUE, GOLD, ORANGE, PINK]):
@@ -171,28 +218,22 @@ def run() -> None:
     fig.savefig(FIGURES / "defocus_blur_by_pupil.png", dpi=180)
     plt.close(fig)
 
-    # Chart 4: Monte Carlo detector maps.
+    # Chart 4: Monte Carlo detector maps for the two source-sizing definitions.
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.7))
-    for ax, metrics, title in [
-        (axes[0], focused_metrics, "Focused: adult, 10 D source"),
-        (axes[1], defocused_metrics, "Defocused: adult, +10 D"),
+    for ax, name, title in [
+        (axes[0], "geometric_minimum", "Geometric minimum"),
+        (axes[1], "conservative_full_overlap", "Conservative full-overlap"),
     ]:
-        hist = metrics["histogram"].T
+        hist = maps[name]["histogram"].T
         vmax = np.percentile(hist[hist > 0], 99) if np.any(hist > 0) else 1
         im = ax.imshow(hist, origin="lower", extent=[-3, 3, -3, 3], cmap="magma", vmin=0, vmax=vmax)
-        circle = plt.Circle((0, 0), 3, fill=False, color="white", linewidth=1.0)
-        ax.add_patch(circle)
+        ax.add_patch(plt.Circle((0, 0), 3, fill=False, color="white", linewidth=1.0))
         ax.set(title=title, xlabel="Retina x (mm)", ylabel="Retina y (mm)", aspect="equal")
         fig.colorbar(im, ax=ax, fraction=0.046, label="Relative ray count")
     fig.tight_layout()
     fig.savefig(FIGURES / "retinal_irradiance_monte_carlo.png", dpi=180)
     plt.close(fig)
 
-    # Exact headline table and reproducibility manifest.
-    headline = focused[[
-        "eye_id", "eye_label", "source_demand_D", "source_distance_mm", "source_diameter_mm", "source_area_mm2", "accommodation_D", "feasible_accommodation"
-    ]]
-    save_csv(headline, "headline_results.csv")
     manifest = {
         "experiment_id": config["experiment_id"],
         "config_sha256": hashlib.sha256(CONFIG_PATH.read_bytes()).hexdigest(),
@@ -201,8 +242,10 @@ def run() -> None:
         "numpy": np.__version__,
         "pandas": pd.__version__,
         "matplotlib": matplotlib.__version__,
+        "main_sweep_rows": int(len(fixed)),
+        "headline_rows": int(len(headline)),
         "outputs": sorted(path.name for path in RESULTS.iterdir()) + sorted(path.name for path in FIGURES.iterdir()),
-        "model_status": "executed reduced-order paraxial model; selected cases cross-validated by the ZOS-API workflow",
+        "model_status": "executed fixed-focal reduced-eye model; selected footprint bounds cross-validated by ZOS-API",
     }
     (RESULTS / "run_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 

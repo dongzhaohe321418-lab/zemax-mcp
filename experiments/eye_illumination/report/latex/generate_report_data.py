@@ -1,4 +1,4 @@
-"""Generate LaTeX macros and table rows from validated experiment outputs."""
+"""Generate LaTeX macros and tables from validated fixed-focal outputs."""
 
 from __future__ import annotations
 
@@ -21,97 +21,78 @@ def num(value: str | float, digits: int = 3) -> str:
     return f"{float(value):.{digits}f}"
 
 
-def tf(value: str) -> str:
-    return "可行" if value.lower() == "true" else "超限"
-
-
 def esc(value: str) -> str:
     return value.replace("_", r"\_").replace("%", r"\%")
 
 
 def main() -> None:
+    fixed = read_csv(RESULTS / "fixed_focal_source_sweep.csv")
     headline = read_csv(RESULTS / "headline_results.csv")
-    focused = read_csv(RESULTS / "focused_source_sweep.csv")
-    external_reference = read_csv(RESULTS / "external_lens_reference.csv")
-    infinity = read_csv(RESULTS / "infinity_angular_sweep.csv")
-    defocus = read_csv(RESULTS / "defocus_pupil_sweep.csv")
-    axial = read_csv(RESULTS / "axial_length_sensitivity.csv")
     zos = read_csv(RESULTS / "zemax" / "zosapi_validation.csv")
     monte = json.loads((RESULTS / "monte_carlo_summary.json").read_text(encoding="utf-8"))
     validation = json.loads((RESULTS / "validation_report.json").read_text(encoding="utf-8"))
 
     eye_order = ["chick_30_45d", "child_6y", "adult_18y"]
     eye_cn = {"chick_30_45d": "30--45日龄小鸡", "child_6y": "6岁儿童", "adult_18y": "18岁成人"}
-    by_case = {(row["eye_id"], int(float(row["source_demand_D"]))): row for row in headline}
-    headline_rows = []
-    demands = sorted({int(float(row["source_demand_D"])) for row in headline})
-    for demand in demands:
-        cells = []
-        for eye in eye_order:
-            row = by_case[(eye, demand)]
-            cells.append(f"{num(row['source_diameter_mm'])} ({tf(row['feasible_accommodation'])})")
-        headline_rows.append(f"{demand} & {num(1000 / demand, 1)} & " + " & ".join(cells) + r" \\")
-
-    adult_lens = [row for row in external_reference if row["eye_id"] == "adult_18y"]
-    adult_lens.sort(key=lambda row: float(row["external_lens_D"]), reverse=True)
-    lens_rows = [
-        f"{num(row['external_lens_D'], 0)} & {num(row['accommodation_D'])} & {num(row['source_diameter_mm'])} & {num(row['source_area_mm2'], 1)} & {tf(row['feasible_accommodation'])} " + r"\\"
-        for row in adult_lens
-    ]
-
-    defocus_rows = []
-    for eye in eye_order:
-        candidates = [row for row in defocus if row["eye_id"] == eye and float(row["defocus_D"]) == 10.0]
-        row = max(candidates, key=lambda item: float(item["pupil_diameter_mm"]))
-        defocus_rows.append(
-            f"{eye_cn[eye]} & {num(row['pupil_diameter_mm'], 1)} & {num(row['blur_diameter_mm'])} & "
-            f"{num(row['geometric_min_angular_diameter_deg'])} & {num(row['uniform_conservative_angular_diameter_deg'])} " + r"\\"
+    focal_rows = []
+    endpoint_rows = []
+    for eye_id in eye_order:
+        eye_rows = [row for row in fixed if row["eye_id"] == eye_id]
+        focals = sorted({float(row["fixed_focal_length_mm"]) for row in eye_rows})
+        pupil = max(float(row["pupil_diameter_mm"]) for row in eye_rows)
+        axial = float(eye_rows[0]["reported_axial_length_mm"])
+        target = float(eye_rows[0]["posterior_pole_diameter_mm"])
+        focal_rows.append(
+            f"{eye_cn[eye_id]} & {axial:.2f} & {target:.1f} & {pupil:.1f} & "
+            + ", ".join(f"{f:g}" for f in focals) + " \\\\"
         )
-
-    axial_rows = []
-    for eye in eye_order:
-        candidates = [row for row in axial if row["eye_id"] == eye]
-        row = max(candidates, key=lambda item: (abs(float(item["equivalent_defocus_D"])), float(item["blur_diameter_mm"])))
-        axial_rows.append(
-            f"{eye_cn[eye]} & {num(row['pupil_diameter_mm'], 1)} & {num(row['axial_delta_mm'], 1)} & "
-            f"{num(row['equivalent_defocus_D'])} & {num(row['blur_diameter_mm'])} " + r"\\"
-        )
+        for focal in focals:
+            row60 = next(row for row in headline if row["eye_id"] == eye_id and float(row["fixed_focal_length_mm"]) == focal and float(row["source_demand_D"]) == 60.0)
+            row120 = next(row for row in headline if row["eye_id"] == eye_id and float(row["fixed_focal_length_mm"]) == focal and float(row["source_demand_D"]) == 120.0)
+            endpoint_rows.append(
+                f"{eye_cn[eye_id]} & {focal:g} & {pupil:.1f} & "
+                f"{num(row60['geometric_min_source_diameter_mm'])} & {num(row60['conservative_source_diameter_mm'])} & "
+                f"{num(row120['geometric_min_source_diameter_mm'])} & {num(row120['conservative_source_diameter_mm'])} " + "\\\\"
+            )
 
     zos_rows = []
     for row in zos:
-        edge_error = abs(abs(float(row["mean_image_y_mm"])) - float(row["target_radius_mm"])) * 1000
-        spread = float(row["max_image_y_mm"]) - float(row["min_image_y_mm"])
         zos_rows.append(
-            f"{esc(row['case_id'])} & {'是' if row['accommodated'].lower() == 'true' else '否'} & "
-            f"{num(row['target_radius_mm'], 4)} & {num(abs(float(row['mean_image_y_mm'])), 4)} & "
-            f"{edge_error:.3e} & {num(row['rms_spread_um'], 3)} & {num(spread, 5)} " + r"\\"
+            rf"\nolinkurl{{{row['case_id']}}} & {num(row['fixed_focal_length_mm'], 2)} & {num(row['source_distance_mm'], 3)} & "
+            f"{num(row['pupil_diameter_mm'], 1)} & {num(row['conservative_source_diameter_mm'])} & "
+            f"{float(row['bound_error_um']):.3e} " + "\\\\"
         )
 
-    adult_60 = by_case[("adult_18y", 60)]
-    adult_120 = by_case[("adult_18y", 120)]
-    chick_60 = by_case[("chick_30_45d", 60)]
-    chick_120 = by_case[("chick_30_45d", 120)]
-    adult_inf = next(row for row in infinity if row["eye_id"] == "adult_18y" and float(row["external_lens_D"]) == 0.0)
-    chick_inf = next(row for row in infinity if row["eye_id"] == "chick_30_45d" and float(row["external_lens_D"]) == 0.0)
+    def headline_case(eye_id: str, focal: float, demand: float) -> dict[str, str]:
+        return next(
+            row for row in headline
+            if row["eye_id"] == eye_id
+            and float(row["fixed_focal_length_mm"]) == focal
+            and float(row["source_demand_D"]) == demand
+        )
+
+    adult60 = headline_case("adult_18y", 16.7, 60.0)
+    adult120 = headline_case("adult_18y", 16.7, 120.0)
+    chick60 = headline_case("chick_30_45d", 8.5, 60.0)
+    chick120 = headline_case("chick_30_45d", 8.5, 120.0)
+    geometric_zero_count = sum(float(row["geometric_min_source_diameter_mm"]) == 0.0 for row in fixed)
 
     content = [
         "% Generated by generate_report_data.py; do not edit manually.",
-        rf"\newcommand{{\AdultSixtyDDiameter}}{{{num(adult_60['source_diameter_mm'])}}}",
-        rf"\newcommand{{\AdultOneTwentyDDiameter}}{{{num(adult_120['source_diameter_mm'])}}}",
-        rf"\newcommand{{\ChickSixtyDDiameter}}{{{num(chick_60['source_diameter_mm'])}}}",
-        rf"\newcommand{{\ChickOneTwentyDDiameter}}{{{num(chick_120['source_diameter_mm'])}}}",
-        rf"\newcommand{{\AdultInfinityAngle}}{{{num(adult_inf['angular_diameter_deg'])}}}",
-        rf"\newcommand{{\ChickInfinityAngle}}{{{num(chick_inf['angular_diameter_deg'])}}}",
-        rf"\newcommand{{\ZosMaxError}}{{{float(validation['focused_zos_edge_max_error_um']):.3e}}}",
-        rf"\newcommand{{\ZosUnfocusedSpread}}{{{num(validation['unaccommodated_observed_spread_mm'], 5)}}}",
-        rf"\newcommand{{\FocusedCapture}}{{{100 * monte['focused_adult_10D']['captured_ray_fraction']:.2f}}}",
-        rf"\newcommand{{\FocusedUniformity}}{{{monte['focused_adult_10D']['p10_to_mean_uniformity']:.3f}}}",
-        rf"\newcommand{{\DefocusedCapture}}{{{100 * monte['adult_infinity_plus10D_defocus']['captured_ray_fraction']:.2f}}}",
-        rf"\newcommand{{\DefocusedUniformity}}{{{monte['adult_infinity_plus10D_defocus']['p10_to_mean_uniformity']:.3f}}}",
-        r"\newcommand{\HeadlineRows}{" + "\n".join(headline_rows) + "}",
-        r"\newcommand{\AdultLensRows}{" + "\n".join(lens_rows) + "}",
-        r"\newcommand{\DefocusRows}{" + "\n".join(defocus_rows) + "}",
-        r"\newcommand{\AxialRows}{" + "\n".join(axial_rows) + "}",
+        rf"\newcommand{{\MainSweepRows}}{{{validation['fixed_focal_sweep_rows']}}}",
+        rf"\newcommand{{\HeadlineRowsCount}}{{{validation['headline_rows']}}}",
+        rf"\newcommand{{\AdultSixtyConservative}}{{{num(adult60['conservative_source_diameter_mm'])}}}",
+        rf"\newcommand{{\AdultOneTwentyConservative}}{{{num(adult120['conservative_source_diameter_mm'])}}}",
+        rf"\newcommand{{\ChickSixtyConservative}}{{{num(chick60['conservative_source_diameter_mm'])}}}",
+        rf"\newcommand{{\ChickOneTwentyConservative}}{{{num(chick120['conservative_source_diameter_mm'])}}}",
+        rf"\newcommand{{\GeometricZeroCount}}{{{geometric_zero_count}}}",
+        rf"\newcommand{{\ZosMaxError}}{{{float(validation['zos_bound_max_error_um']):.3e}}}",
+        rf"\newcommand{{\GeometricCapture}}{{{100 * monte['geometric_minimum']['captured_ray_fraction']:.2f}}}",
+        rf"\newcommand{{\GeometricUniformity}}{{{monte['geometric_minimum']['p10_to_mean_uniformity']:.3f}}}",
+        rf"\newcommand{{\ConservativeCapture}}{{{100 * monte['conservative_full_overlap']['captured_ray_fraction']:.2f}}}",
+        rf"\newcommand{{\ConservativeUniformity}}{{{monte['conservative_full_overlap']['p10_to_mean_uniformity']:.3f}}}",
+        r"\newcommand{\FocalRows}{" + "\n".join(focal_rows) + "}",
+        r"\newcommand{\EndpointRows}{" + "\n".join(endpoint_rows) + "}",
         r"\newcommand{\ZosRows}{" + "\n".join(zos_rows) + "}",
     ]
     (HERE / "generated_results.tex").write_text("\n".join(content) + "\n", encoding="utf-8")

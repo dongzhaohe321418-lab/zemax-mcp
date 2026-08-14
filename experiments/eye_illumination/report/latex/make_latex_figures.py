@@ -1,15 +1,15 @@
-"""Render Chinese, Songti-labelled figures for the LaTeX report."""
+"""Create Chinese fixed-focal figures for the LaTeX report."""
 
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
+import sys
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
+from matplotlib import font_manager
 import numpy as np
 import pandas as pd
 
@@ -19,96 +19,120 @@ EXPERIMENT = HERE.parents[1]
 RESULTS = EXPERIMENT / "results"
 FIGURES = HERE / "figures"
 sys.path.insert(0, str(EXPERIMENT))
-from eye_model import detector_metrics, defocus_bounds_for_infinity, focus_solution, general_mapping, load_eyes, sample_retina
+
+from eye_model import detector_metrics, fixed_focal_source_solution, general_mapping, load_eyes, sample_retina
 
 
-SONGTI_PATH = Path(r"C:\Windows\Fonts\simsun.ttc")
-SONGTI = FontProperties(fname=str(SONGTI_PATH))
-BLUE, ORANGE, GOLD, PINK, INK = "#2457A6", "#D9782D", "#B28A20", "#B44D73", "#252A34"
+BLUE, ORANGE, PINK, GOLD, INK = "#2457A6", "#D9782D", "#B44D73", "#B28A20", "#252A34"
+
+
+def setup() -> None:
+    font_path = Path("C:/Windows/Fonts/simsun.ttc")
+    if font_path.exists():
+        font_manager.fontManager.addfont(font_path)
+        plt.rcParams["font.family"] = font_manager.FontProperties(fname=font_path).get_name()
+    plt.rcParams["axes.unicode_minus"] = False
 
 
 def style(ax: plt.Axes) -> None:
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(True, color="#E5E7EB", linewidth=0.7)
-    ax.tick_params(colors=INK)
-
-
-def cn(ax: plt.Axes, *, title: str, xlabel: str, ylabel: str) -> None:
-    ax.set_title(title, fontproperties=SONGTI, fontsize=13)
-    ax.set_xlabel(xlabel, fontproperties=SONGTI)
-    ax.set_ylabel(ylabel, fontproperties=SONGTI)
 
 
 def main() -> None:
-    if not SONGTI_PATH.exists():
-        raise FileNotFoundError(f"宋体文件不存在：{SONGTI_PATH}")
+    setup()
     FIGURES.mkdir(parents=True, exist_ok=True)
-    plt.rcParams.update({"axes.unicode_minus": False, "font.size": 10})
-    focused = pd.read_csv(RESULTS / "focused_source_sweep.csv")
-    external_reference = pd.read_csv(RESULTS / "external_lens_reference.csv")
+    fixed = pd.read_csv(RESULTS / "fixed_focal_source_sweep.csv")
+    headline = pd.read_csv(RESULTS / "headline_results.csv")
+    zos = pd.read_csv(RESULTS / "zemax" / "zosapi_validation.csv")
     defocus = pd.read_csv(RESULTS / "defocus_pupil_sweep.csv")
     config = json.loads((EXPERIMENT / "config" / "experiment.json").read_text(encoding="utf-8"))
     eyes = load_eyes(config)
-    labels = {"chick_30_45d": "30--45日龄小鸡", "child_6y": "6岁儿童", "adult_18y": "18岁成人"}
+    labels = {"chick_30_45d": "30–45日龄小鸡", "child_6y": "6岁儿童", "adult_18y": "18岁成人"}
+    colors = [BLUE, ORANGE, PINK]
 
-    fig, ax = plt.subplots(figsize=(8.2, 5.2))
-    for eye, color in zip(eyes, [BLUE, ORANGE, PINK]):
-        subset = focused[(focused.eye_id == eye.eye_id) & (focused.external_lens_D == 0)]
-        ax.plot(subset.source_demand_D, subset.source_diameter_mm, marker="o", linewidth=2.2, label=labels[eye.eye_id], color=color)
-    cn(ax, title="覆盖目标后极部所需的圆形光源直径", xlabel="物方屈光需求 / 调节需求（D）", ylabel="光源直径（mm）")
-    ax.legend(frameon=False, prop=SONGTI)
-    style(ax); fig.tight_layout(); fig.savefig(FIGURES / "source_diameter_cn.png", dpi=220); plt.close(fig)
+    fig, axes = plt.subplots(1, 3, figsize=(13.8, 4.5))
+    for ax, eye in zip(axes, eyes):
+        subset_eye = headline[headline.eye_id == eye.eye_id]
+        for focal, color in zip(eye.fixed_effective_focal_lengths_mm, colors):
+            subset = subset_eye[np.isclose(subset_eye.fixed_focal_length_mm, focal)]
+            ax.plot(subset.source_demand_D, subset.conservative_source_diameter_mm, marker="o", linewidth=2, color=color, label=f"f={focal:g} mm")
+        ax.set_title(labels[eye.eye_id])
+        ax.set_xlabel("物方需求（D）")
+        ax.set_ylabel("保守光源直径（mm）")
+        ax.legend(frameon=False, fontsize=8)
+        style(ax)
+    fig.suptitle("三个固定焦距下的保守光源直径（各模型最大瞳孔）")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "source_diameter_cn.png", dpi=220)
+    plt.close(fig)
 
-    adult = external_reference[external_reference.eye_id == "adult_18y"].sort_values("external_lens_D")
-    fig, ax = plt.subplots(figsize=(8.4, 5.2))
-    ax.plot(adult.external_lens_D, adult.accommodation_D, marker="o", linewidth=2.2, color=BLUE, label="10 D参考工况")
-    ax.axhline(18.0, color=ORANGE, linestyle="--", linewidth=1.4, label="成人调节上限 18 D")
-    cn(ax, title="成人眼10 D参考工况的外置镜片调节需求", xlabel="外置镜片度数（D）", ylabel="所需调节（D）")
-    ax.legend(frameon=False, prop=SONGTI)
-    style(ax)
-    fig.tight_layout(); fig.savefig(FIGURES / "adult_accommodation_cn.png", dpi=220); plt.close(fig)
+    adult = next(eye for eye in eyes if eye.eye_id == "adult_18y")
+    adult_fixed = fixed[(fixed.eye_id == "adult_18y") & (fixed.source_demand_D.isin([60, 120]))]
+    fig, axes = plt.subplots(1, 2, figsize=(10.6, 4.4), sharey=True)
+    for ax, demand in zip(axes, [60, 120]):
+        for focal, color in zip(adult.fixed_effective_focal_lengths_mm, colors):
+            subset = adult_fixed[(adult_fixed.source_demand_D == demand) & np.isclose(adult_fixed.fixed_focal_length_mm, focal)]
+            ax.plot(subset.pupil_diameter_mm, subset.conservative_source_diameter_mm, marker="o", linewidth=2, color=color, label=f"f={focal:g} mm")
+        ax.set_title(f"成人眼，{demand} D")
+        ax.set_xlabel("瞳孔直径（mm）")
+        ax.set_ylabel("保守光源直径（mm）")
+        style(ax)
+    axes[0].legend(frameon=False, fontsize=8)
+    fig.suptitle("固定焦距与瞳孔共同决定光源尺寸")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "fixed_focal_pupil_cn.png", dpi=220)
+    plt.close(fig)
 
-    fig, axes = plt.subplots(1, 3, figsize=(13.5, 4.4))
+    fig, axes = plt.subplots(1, 3, figsize=(13.3, 4.2))
     for ax, eye in zip(axes, eyes):
         for pupil, color in zip(eye.pupil_diameters_mm, [BLUE, GOLD, ORANGE, PINK]):
             subset = defocus[(defocus.eye_id == eye.eye_id) & (defocus.pupil_diameter_mm == pupil)]
-            ax.plot(subset.defocus_D, subset.blur_diameter_mm, marker="o", label=f"{pupil:g} mm", color=color)
-        ax.axhline(eye.posterior_pole_diameter_mm, color=INK, linestyle="--", linewidth=1.2, label="目标直径")
-        cn(ax, title=labels[eye.eye_id], xlabel="离焦（D）", ylabel="几何模糊斑直径（mm）")
+            ax.plot(subset.defocus_D, subset.blur_diameter_mm, marker="o", color=color, label=f"{pupil:g} mm")
+        ax.axhline(eye.posterior_pole_diameter_mm, color=INK, linestyle="--", linewidth=1.2)
+        ax.set_title(labels[eye.eye_id])
+        ax.set_xlabel("等效离焦（D）")
+        ax.set_ylabel("模糊斑直径（mm）")
         style(ax)
-    axes[0].legend(frameon=False, prop=SONGTI, fontsize=8)
-    fig.suptitle("离焦模糊斑随瞳孔直径近似线性增加", fontproperties=SONGTI, fontsize=14)
-    fig.tight_layout(); fig.savefig(FIGURES / "defocus_blur_cn.png", dpi=220); plt.close(fig)
+    axes[0].legend(frameon=False, fontsize=8)
+    fig.suptitle("瞳孔直径控制固定像面上的离焦 footprint")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "defocus_blur_cn.png", dpi=220)
+    plt.close(fig)
 
-    adult_eye = next(eye for eye in eyes if eye.eye_id == "adult_18y")
-    focused_case = focus_solution(adult_eye, 0.1, 0.0)
-    ms, mp = general_mapping(adult_eye, 0.1, focused_case["eye_power_D"], 0.0)
-    xf, yf = sample_retina(focused_case["source_diameter_mm"] / 2000, 5 / 2000, ms, mp, 600_000, config["random_seed"])
-    fm = detector_metrics(xf, yf, adult_eye.target_radius_m)
-    bounds = defocus_bounds_for_infinity(adult_eye, 10.0, 5.0)
-    theta = np.radians(bounds["uniform_conservative_angular_diameter_deg"] / 2)
-    xd, yd = sample_retina(theta, 5 / 2000, adult_eye.reduced_retina_distance_m, -adult_eye.reduced_retina_distance_m * 10, 600_000, config["random_seed"] + 1)
-    dm = detector_metrics(xd, yd, adult_eye.target_radius_m)
+    solution = fixed_focal_source_solution(adult, 1.0 / 60.0, 16.7, 5.0)
+    ms, mp = general_mapping(adult, 1.0 / 60.0, 1000.0 / 16.7)
+    maps = []
+    for index, key in enumerate(["geometric_min_source_diameter_mm", "conservative_source_diameter_mm"]):
+        x, y = sample_retina(solution[key] / 2000.0, 5.0 / 2000.0, ms, mp, 600_000, config["random_seed"] + index)
+        maps.append(detector_metrics(x, y, adult.target_radius_m))
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.7))
-    for ax, metrics, title in [(axes[0], fm, "成人眼：100 mm物距，已调焦"), (axes[1], dm, "成人眼：无穷远，+10 D离焦")]:
+    for ax, metrics, title in zip(axes, maps, ["几何最小尺寸", "保守全重叠尺寸"]):
         hist = metrics["histogram"].T
-        vmax = np.percentile(hist[hist > 0], 99)
+        vmax = np.percentile(hist[hist > 0], 99) if np.any(hist > 0) else 1
         im = ax.imshow(hist, origin="lower", extent=[-3, 3, -3, 3], cmap="magma", vmin=0, vmax=vmax)
-        ax.add_patch(plt.Circle((0, 0), 3, fill=False, color="white", linewidth=1))
-        cn(ax, title=title, xlabel="视网膜 x（mm）", ylabel="视网膜 y（mm）")
-        ax.set_aspect("equal"); bar = fig.colorbar(im, ax=ax, fraction=0.046); bar.set_label("相对光线计数", fontproperties=SONGTI)
-    fig.tight_layout(); fig.savefig(FIGURES / "monte_carlo_cn.png", dpi=220); plt.close(fig)
+        ax.add_patch(plt.Circle((0, 0), 3, fill=False, color="white", linewidth=1.0))
+        ax.set_title(title)
+        ax.set_xlabel("视网膜 x（mm）")
+        ax.set_ylabel("视网膜 y（mm）")
+        ax.set_aspect("equal")
+        fig.colorbar(im, ax=ax, fraction=0.046, label="相对光线计数")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "monte_carlo_cn.png", dpi=220)
+    plt.close(fig)
 
-    zos = pd.read_csv(RESULTS / "zemax" / "zosapi_validation.csv")
-    zf = zos[zos.accommodated].copy()
-    x = np.arange(len(zf))
-    fig, ax = plt.subplots(figsize=(8.2, 5.0))
-    ax.scatter(x, zf.target_radius_mm, s=75, color=BLUE, label="独立模型目标")
-    ax.scatter(x, zf.mean_image_y_mm.abs(), s=55, marker="x", color=ORANGE, label="OpticStudio追迹")
-    ax.set_xticks(x, zf.case_id, rotation=22, ha="right")
-    cn(ax, title="独立模型与OpticStudio聚焦视网膜边缘交叉验证", xlabel="验证案例", ylabel="视网膜边缘高度（mm）")
-    ax.legend(frameon=False, prop=SONGTI); style(ax); fig.tight_layout(); fig.savefig(FIGURES / "zos_validation_cn.png", dpi=220); plt.close(fig)
-    print(FIGURES)
+    fig, ax = plt.subplots(figsize=(8.3, 4.8))
+    x = np.arange(len(zos))
+    ax.scatter(x - 0.08, zos.expected_max_y_mm, s=65, color=BLUE, label="解析上界")
+    ax.scatter(x + 0.08, zos.observed_max_y_mm, s=50, marker="x", color=ORANGE, label="OpticStudio 上界")
+    ax.set_xticks(x, zos.case_id, rotation=28, ha="right")
+    ax.set_ylabel("视网膜光线高度上界（mm）")
+    ax.set_title("固定焦距解析 footprint 与 OpticStudio 一致")
+    ax.legend(frameon=False)
+    style(ax)
+    fig.tight_layout()
+    fig.savefig(FIGURES / "zos_validation_cn.png", dpi=220)
+    plt.close(fig)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-"""Independent numerical QA of generated results and ZOS-API cross-checks."""
+"""Independent numerical QA of fixed-focal results and ZOS-API checks."""
 
 from __future__ import annotations
 
@@ -18,56 +18,66 @@ FIGURES = ROOT / "figures"
 
 
 def main() -> int:
-    focused = pd.read_csv(RESULTS / "focused_source_sweep.csv")
-    external_reference = pd.read_csv(RESULTS / "external_lens_reference.csv")
+    fixed = pd.read_csv(RESULTS / "fixed_focal_source_sweep.csv")
     headline = pd.read_csv(RESULTS / "headline_results.csv")
     zos = pd.read_csv(RESULTS / "zemax" / "zosapi_validation.csv")
 
-    focused_zos = zos[zos["accommodated"]].copy()
-    focused_zos["edge_error_um"] = 1000.0 * (focused_zos["mean_image_y_mm"].abs() - focused_zos["target_radius_mm"]).abs()
-    focused_zos["expected_rms_um"] = 0.0
-
-    unfocused = zos[~zos["accommodated"]].iloc[0]
-    expected_width_mm = (unfocused["eye_focal_length_mm"] / 1000.0) * unfocused["accommodation_D"] * unfocused["pupil_diameter_mm"] * 0.99
-    observed_width_mm = unfocused["max_image_y_mm"] - unfocused["min_image_y_mm"]
-
+    expected_focals = {
+        "chick_30_45d": [7.5, 8.0, 8.5],
+        "child_6y": [13.5, 15.1, 16.7],
+        "adult_18y": [12.8, 14.75, 16.7],
+    }
+    observed_focals = {
+        eye_id: sorted(float(value) for value in fixed.loc[fixed.eye_id == eye_id, "fixed_focal_length_mm"].unique())
+        for eye_id in expected_focals
+    }
+    demand_levels = sorted(float(value) for value in fixed.source_demand_D.unique())
+    expected_rows = 3 * 3 * 4 * 7
+    zos_files = list((RESULTS / "zemax").glob("*_fixed_*.zos"))
     checks = {
-        "focused_zos_edge_max_error_um": float(focused_zos["edge_error_um"].max()),
-        "focused_zos_rms_max_um": float(focused_zos["rms_spread_um"].max()),
-        "unaccommodated_expected_spread_mm": float(expected_width_mm),
-        "unaccommodated_observed_spread_mm": float(observed_width_mm),
-        "unaccommodated_spread_error_um": float(1000.0 * abs(observed_width_mm - expected_width_mm)),
+        "fixed_focal_sweep_rows": int(len(fixed)),
+        "expected_fixed_focal_sweep_rows": expected_rows,
         "headline_rows": int(len(headline)),
-        "full_focused_sweep_rows": int(len(focused)),
-        "external_lens_reference_rows": int(len(external_reference)),
-        "source_demand_levels_D": sorted(float(value) for value in focused["source_demand_D"].unique()),
-        "source_demand_step_D": float(np.diff(sorted(focused["source_demand_D"].unique())).min()),
-        "all_requested_cases_exceed_accommodation_limits": bool((~focused["feasible_accommodation"]).all()),
-        "all_imaging_residuals_below_1e_12_m": bool((focused["imaging_B_residual_m"].abs() < 1e-12).all()),
-        "opticstudio_version": str(zos["opticstudio_version"].iloc[0]),
-        "api_license_valid": bool(zos["api_license_valid"].iloc[0]),
+        "source_demand_levels_D": demand_levels,
+        "source_demand_step_D": float(np.diff(demand_levels).min()),
+        "fixed_focal_lengths_mm": observed_focals,
+        "expected_fixed_focal_lengths_mm": expected_focals,
+        "contains_accommodation_output": bool(any("accommodation" in column for column in fixed.columns)),
+        "all_conservative_sizes_at_least_geometric": bool(
+            (fixed.conservative_source_diameter_mm + 1e-12 >= fixed.geometric_min_source_diameter_mm).all()
+        ),
+        "max_conservative_plateau_residual_um": float(fixed.conservative_plateau_margin_um.abs().max()),
+        "min_geometric_coverage_margin_um": float(fixed.geometric_coverage_margin_um.min()),
+        "zos_case_count": int(len(zos)),
+        "zos_system_file_count": int(len(zos_files)),
+        "zos_bound_max_error_um": float(zos.bound_error_um.max()),
+        "opticstudio_version": str(zos.opticstudio_version.iloc[0]),
+        "api_license_valid": bool(zos.api_license_valid.iloc[0]),
     }
     checks["overall_status"] = "passed" if (
-        checks["focused_zos_edge_max_error_um"] < 1e-6
-        and checks["focused_zos_rms_max_um"] < 1e-6
-        and checks["unaccommodated_spread_error_um"] < 1e-6
-        and checks["all_imaging_residuals_below_1e_12_m"]
-        and checks["headline_rows"] == 21
-        and checks["full_focused_sweep_rows"] == 21
-        and checks["external_lens_reference_rows"] == 21
+        checks["fixed_focal_sweep_rows"] == expected_rows
+        and checks["headline_rows"] == 63
         and checks["source_demand_levels_D"] == [60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0]
         and checks["source_demand_step_D"] == 10.0
-        and checks["all_requested_cases_exceed_accommodation_limits"]
+        and checks["fixed_focal_lengths_mm"] == expected_focals
+        and not checks["contains_accommodation_output"]
+        and checks["all_conservative_sizes_at_least_geometric"]
+        and checks["max_conservative_plateau_residual_um"] < 1e-8
+        and checks["min_geometric_coverage_margin_um"] >= -1e-8
+        and checks["zos_case_count"] == 6
+        and checks["zos_system_file_count"] == 6
+        and checks["zos_bound_max_error_um"] < 1e-6
+        and checks["api_license_valid"]
     ) else "failed"
     (RESULTS / "validation_report.json").write_text(json.dumps(checks, indent=2), encoding="utf-8")
 
-    fig, ax = plt.subplots(figsize=(7.6, 4.8))
-    x = np.arange(len(focused_zos))
-    ax.scatter(x, focused_zos["target_radius_mm"], s=70, marker="o", color="#2457A6", label="Independent target")
-    ax.scatter(x, focused_zos["mean_image_y_mm"].abs(), s=48, marker="x", color="#D9782D", label="OpticStudio ray trace")
-    ax.set_xticks(x, focused_zos["case_id"], rotation=25, ha="right")
-    ax.set_ylabel("Retinal edge height (mm)")
-    ax.set_title("Independent model and OpticStudio agree on focused retinal edge")
+    fig, ax = plt.subplots(figsize=(8.4, 4.9))
+    x = np.arange(len(zos))
+    ax.scatter(x - 0.08, zos.expected_max_y_mm, s=65, marker="o", color="#2457A6", label="Analytical upper bound")
+    ax.scatter(x + 0.08, zos.observed_max_y_mm, s=50, marker="x", color="#D9782D", label="OpticStudio upper bound")
+    ax.set_xticks(x, zos.case_id, rotation=28, ha="right")
+    ax.set_ylabel("Retinal ray-height bound (mm)")
+    ax.set_title("Fixed-focal analytical footprint and OpticStudio agree")
     ax.grid(True, color="#E5E7EB", linewidth=0.7)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(frameon=False)

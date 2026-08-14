@@ -1,6 +1,6 @@
 \documentclass[UTF8,zihao=-4,openany,fontset=none]{ctexrep}
 
-\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.6cm,right=2.6cm,headheight=15pt]{geometry}
+\usepackage[a4paper,top=2.45cm,bottom=2.45cm,left=2.55cm,right=2.55cm,headheight=15pt]{geometry}
 \usepackage{fontspec}
 \usepackage{xeCJK}
 \setmainfont{Times New Roman}
@@ -9,11 +9,7 @@
 \setCJKmainfont[AutoFakeBold=2.5,AutoFakeSlant=0.15]{SimSun}
 \setCJKsansfont[AutoFakeBold=2.5]{SimSun}
 \setCJKmonofont{SimSun}
-\ctexset{
-  chapter={format=\LARGE\bfseries,number=\chinese{chapter},name={第,章}},
-  section={format=\Large\bfseries},
-  subsection={format=\large\bfseries}
-}
+\ctexset{chapter={format=\LARGE\bfseries},section={format=\Large\bfseries},subsection={format=\large\bfseries}}
 
 \usepackage{amsmath,amssymb,bm}
 \usepackage{booktabs,longtable,tabularx,array,multirow}
@@ -42,619 +38,385 @@
 \setlength{\parindent}{2em}
 \setlength{\parskip}{0.35em}
 \setlength{\emergencystretch}{3em}
-\renewcommand{\arraystretch}{1.28}
+\renewcommand{\arraystretch}{1.26}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small 小鸡与人眼 650 nm 全视网膜照明仿真实验报告}
+\fancyhead[L]{\small 小鸡与人眼 650 nm 固定焦距后极照明仿真实验报告}
 \fancyfoot[C]{第 \thepage\ 页}
 
-\lstdefinestyle{workflow}{
-  basicstyle=\ttfamily\small,
-  backgroundcolor=\color{ReportLight},
-  frame=single,
-  rulecolor=\color{ReportBlue!45},
-  breaklines=true,
-  columns=fullflexible,
-  showstringspaces=false,
-  xleftmargin=1em,
-  xrightmargin=1em
-}
+\lstdefinestyle{workflow}{basicstyle=\ttfamily\small,backgroundcolor=\color{ReportLight},frame=single,rulecolor=\color{ReportBlue!45},breaklines=true,columns=fullflexible,showstringspaces=false,xleftmargin=1em,xrightmargin=1em}
 \lstset{style=workflow}
 
 \newcommand{\D}{\,\mathrm{D}}
 \newcommand{\mm}{\,\mathrm{mm}}
 \newcommand{\um}{\,\mu\mathrm{m}}
-\newcommand{\degree}{\ensuremath{^{\circ}}}
-\newcommand{\sourcefile}[1]{\texttt{#1}}
+\newcommand{\sourcefile}[1]{\nolinkurl{#1}}
 \newcommand{\keyresult}[1]{\textcolor{ReportBlue}{\textbf{#1}}}
-
 \input{generated_results.tex}
 
-\title{小鸡与人眼 650 nm 全视网膜照明\\光学仿真实验报告}
-\author{可复现计算模型与 Ansys Zemax OpticStudio ZOS-API 交叉验证}
-\date{2026年8月14日\quad 报告版本 1.1.0}
+\title{小鸡与人眼 650 nm 固定焦距后极照明\\光学仿真实验报告}
+\author{固定参数 ABCD 模型与 Ansys Zemax OpticStudio ZOS-API 交叉验证}
+\date{2026年8月14日\quad 报告版本 2.0.0}
 
 \begin{document}
 \pagenumbering{Roman}
 
 \begin{titlepage}
   \centering
-  \vspace*{2.2cm}
-  {\Huge\bfseries 小鸡与人眼 650 nm 全视网膜照明\par}
-  \vspace{0.45cm}
+  \vspace*{1.8cm}
+  {\Huge\bfseries 小鸡与人眼 650 nm 固定焦距后极照明\par}
+  \vspace{0.4cm}
   {\Huge\bfseries 光学仿真实验报告\par}
-  \vspace{1.1cm}
-  {\Large 独立 ABCD 近轴模型、蒙特卡洛照度评估\par}
-  \vspace{0.25cm}
-  {\Large 与 Ansys Zemax OpticStudio 24.1 交叉验证\par}
-  \vspace{1.5cm}
-  \begin{tikzpicture}[x=1cm,y=1cm]
-    \draw[ReportGrey,thin] (-6,0)--(6,0);
-    \draw[ReportOrange,very thick] (-5,-1.2)--(-5,1.2);
-    \node[below] at (-5,-1.35) {圆形面光源};
-    \draw[ReportBlue,fill=ReportLight,thick]
-      (-1,-1.25) .. controls (-0.45,-0.65) and (-0.45,0.65) .. (-1,1.25)
-      .. controls (-1.55,0.65) and (-1.55,-0.65) .. cycle;
-    \node[below] at (-1,-1.45) {等效眼透镜};
-    \draw[ReportPink,very thick] (4,-1.5) arc[start angle=-90,end angle=90,x radius=0.55,y radius=1.5];
-    \node[below] at (4,-1.7) {目标后极部};
-    \draw[ReportGold,thick] (-5,1.05)--(-1,0.55)--(4,1.22);
-    \draw[ReportBlue,thick] (-5,0)--(-1,0)--(4,0);
-    \draw[ReportGold,thick] (-5,-1.05)--(-1,-0.55)--(4,-1.22);
+  \vspace{0.9cm}
+  {\Large 已知后极参数、三个离散固定焦距、60--120 D 物方需求\par}
+  \vspace{1.2cm}
+  \begin{tikzpicture}[x=1cm,y=1cm,>=Latex]
+    \draw[ReportGrey,thin] (-6.2,0)--(6.2,0);
+    \draw[ReportOrange,very thick] (-5.6,-1.25)--(-5.6,1.25);
+    \node[below] at (-5.6,-1.4) {圆形面光源};
+    \draw[ReportBlue,fill=ReportLight,thick] (-1.3,-1.3) .. controls (-0.55,-0.7) and (-0.55,0.7) .. (-1.3,1.3) .. controls (-2.05,0.7) and (-2.05,-0.7) .. cycle;
+    \node[below,align=center] at (-1.3,-1.48) {固定焦距\\等效眼透镜};
+    \draw[ReportGrey,line width=3pt] (-1.3,-0.7)--(-1.3,0.7);
+    \node[above] at (-1.3,1.48) {固定瞳孔};
+    \draw[ReportPink,very thick] (4.6,-1.55) arc[start angle=-90,end angle=90,x radius=0.6,y radius=1.55];
+    \node[below,align=center] at (4.6,-1.75) {固定后极平面\\目标圆盘};
+    \draw[ReportGold,thick] (-5.6,1.05)--(-1.3,0.65)--(4.6,1.32);
+    \draw[ReportBlue,thick] (-5.6,0)--(-1.3,0)--(4.6,0);
+    \draw[ReportGold,thick] (-5.6,-1.05)--(-1.3,-0.65)--(4.6,-1.32);
+    \draw[<->,ReportGrey] (-5.6,-2.2)--node[below]{物距 $s=1/D$}(-1.3,-2.2);
+    \draw[<->,ReportGrey] (-1.3,-2.2)--node[below]{约化后极距 $t=L/n'$}(4.6,-2.2);
   \end{tikzpicture}
   \vfill
   {\large 技术报告｜中文正文：宋体｜A4\par}
-  \vspace{0.3cm}
+  \vspace{0.25cm}
   {\large 2026年8月14日\par}
-  \vspace{1.2cm}
 \end{titlepage}
 
 \chapter*{技术摘要}
 \addcontentsline{toc}{chapter}{技术摘要}
-本研究依据用户提供的《小鸡和人眼光学仿真参数》建立三个旋转对称等效眼模型，研究波长为 $650\,\mathrm{nm}$ 的均匀圆形朗伯面光源在不同物距、瞳孔、离焦、眼轴和外置负镜片条件下覆盖指定后极部区域所需的尺寸。独立模型采用光线状态 $[y,n\theta]^\mathsf{T}$ 与 ABCD 矩阵，在调焦条件 $B=0$ 下求解眼的附加调节力、横向放大率与光源直径；再用每个案例 $600{,}000$ 条确定性随机光线计算相对照度均匀性。最后，ZOS-API 在已安装且 API 许可证有效的 Ansys Zemax OpticStudio 24.1 中自动创建顺序模式 Paraxial 系统并执行批量光线追迹。
+本版纠正了上一版模型的核心假设。上一版通过连续改变小鸡眼和人眼的等效焦距，使每个物距都满足严格调焦条件，因此把 $60$--$120\D$ 物方需求错误地等同于眼的调节需求，并得到“全部超过调节上限”的结论。当前模型不再这样处理：\keyresult{每种眼模型只使用三个离散固定焦距，后极平面由已知眼轴参数固定，物距、焦距和瞳孔作为相互独立的输入。}
 
-主要结论如下：
-\begin{itemize}[leftmargin=2.2em]
-  \item 物方需求主扫描已改为 $60,70,80,90,100,110,120\D$。无外置镜片时，成人与儿童所需光源直径从 $60\D$ 的 \keyresult{\AdultSixtyDDiameter\,mm} 降至 $120\D$ 的 \keyresult{\AdultOneTwentyDDiameter\,mm}；小鸡分别为 \keyresult{\ChickSixtyDDiameter\,mm} 与 \keyresult{\ChickOneTwentyDDiameter\,mm}。
-  \item 三种眼模型在全部 $60$--$120\D$ 请求工况下均超过源文件给定的调节上限，因此上述尺寸是几何覆盖解，而不是生理可调焦解。
-  \item 无穷远入射时，所需完整角直径为成人/儿童 \keyresult{\AdultInfinityAngle\degree}、小鸡 \keyresult{\ChickInfinityAngle\degree}。因此三种眼模型的核心设计量都是约 $20\degree$ 的覆盖角，而实体光源尺寸随工作距离变化。
-  \item 外置镜片仍采用独立的 $10\D$ 参考工况：成人配合 $-10\D$ 镜片时需要 $17.004\D$ 调节，仍低于给定的 $18\D$ 上限；$-15\D$ 与 $-20\D$ 分别需要 $20.028\D$ 与 $22.787\D$，判为不可调节。
-  \item 成人最大 $5\mm$ 瞳孔在 $10\D$ 离焦时产生 $0.835\mm$ 几何模糊斑。采用覆盖该离焦的保守光源后，目标区域捕获光线比例由 \FocusedCapture\% 降至 \DefocusedCapture\%，说明均匀覆盖与光利用率之间存在明确权衡。
-  \item 五个聚焦 ZOS-API 案例中，独立模型与 OpticStudio 的视网膜边缘最大差异仅为 \keyresult{$\ZosMaxError\um$}；故意不调焦的成人 $10\D$ 案例得到 \ZosUnfocusedSpread\,mm 展宽，与解析预测一致。
+固定焦距取 PPT 范围的两端及算术中点：
+\begin{itemize}[leftmargin=2.2em,noitemsep]
+  \item 小鸡：$7.5\mm$、$8.0\mm$、$8.5\mm$；
+  \item 儿童：$13.5\mm$、$15.1\mm$、$16.7\mm$；
+  \item 成人：$12.8\mm$、$14.75\mm$、$16.7\mm$。
 \end{itemize}
+物方需求仍为 $60,70,80,90,100,110,120\D$；每种眼还扫描四个瞳孔。完整主矩阵为
+\[
+3\text{种眼}\times3\text{个固定焦距}\times4\text{个瞳孔}\times7\text{个物距}=\keyresult{\MainSweepRows\text{个工况}}.
+\]
+每一行同时给出“几何最小光源直径”和“保守全重叠光源直径”。前者只保证光线 footprint 的外边界达到目标，后者保证整个后极目标位于源像与瞳孔 footprint 卷积的全重叠平台内，因此本报告推荐后者作为首轮机械尺寸设计值。以最大瞳孔和最长固定焦距为例，成人眼 $f=16.7\mm$ 时，$60\D$ 与 $120\D$ 的保守直径分别为 \keyresult{\AdultSixtyConservative\,mm} 和 \keyresult{\AdultOneTwentyConservative\,mm}；小鸡 $f=8.5\mm$ 时分别为 \keyresult{\ChickSixtyConservative\,mm} 和 \keyresult{\ChickOneTwentyConservative\,mm}。
 
-这些结果支持第一阶段几何尺寸与离焦容差设计，但\textbf{不构成绝对视网膜辐照度或眼组织安全结论}。源文件未提供光源辐亮度、光谱带宽、曝光时间、组织透射率及完整解剖曲面；当前 ZOS 验证的是在真实 OpticStudio 中运行的近轴等效系统，而不是多曲面生理眼模型。
+ZOS-API 在 OpticStudio 24.1 中建立六个固定焦距 Paraxial 系统，解析 footprint 上下界与真实光线追迹的最大误差为 \keyresult{$\ZosMaxError\um$}。该验证证明固定参数 ABCD 实现与 Zemax 一阶光线传播一致，但不等价于真实生物眼像差、散射、绝对辐照度或光安全验证。
 
-\clearpage
 \tableofcontents
 \clearpage
 \pagenumbering{arabic}
 
-\chapter{约 $20\degree$ 覆盖角决定系统的第一阶段几何设计}
-\section{研究问题与决策目标}
-本实验要回答的工程问题是：在小鸡、儿童与成人三个眼模型中，怎样选择 $650\,\mathrm{nm}$ 圆形面光源的实体尺寸或角尺寸，才能使其在调焦或给定离焦条件下覆盖目标后极部区域；同时，外置负镜片、瞳孔和眼轴变化会如何改变调节需求、模糊斑和相对照度分布。
+\chapter{问题修正与工程结论}
 
-报告把“覆盖”定义为\textbf{几何像盘覆盖指定后极部圆盘}。对于聚焦系统，像盘半径至少等于目标半径；对于离焦系统，同时给出几何最低覆盖角与均匀性保守覆盖角。该定义是工程筛选条件，并不等价于生物学上的“全视网膜剂量达标”。
+\section{旧结论失效的原因是模型强制调焦，而不是物距本身不可实现}
+旧模型对每一个物距求解新的眼屈光力，使总传递矩阵满足成像条件 $B_m=0$。当基准像距又被校准为 $t=1/F_0$ 时，无外置镜片情形会退化为“附加屈光力等于物方需求”。因此 $60$--$120\D$ 必然被解释成 $60$--$120\D$ 调节，随后与生理调节上限比较。这一结论回答的是“眼是否能通过连续改变焦距把该物面精确成像到后极”，而不是用户实际提出的“固定焦距与固定后极参数下，需要多大的光源覆盖后极”。
 
-\section{主要设计输出}
+\section{当前模型保持焦距和后极位置固定，只改变外部工况}
+当前实验对每个离散焦距单独运行。一次工况中，$f$、眼轴 $L$、后极直径、瞳孔和物距全部是已知量，不允许求解一个新的 $f$。输出变量只有源面尺寸、映射系数、瞳孔 footprint、几何覆盖裕量和保守覆盖裕量。报告不再使用“调节是否超限”作为主扫描判据。
+
+\section{推荐读数是保守全重叠直径，而不是几何最小值}
+几何最小值可能为零：当固定焦距导致的瞳孔离焦 footprint 已经大于后极目标时，点源在纯几何意义上也能把光线扩展到目标边缘。本次 \MainSweepRows 个工况中有 \GeometricZeroCount 个出现这种情况。它不表示工程上可安装零面积光源，也不保证边缘最低照度。保守直径始终为正，并把完整目标放入全重叠区域，因此更适合与后续照度阈值、散射和安全约束衔接。
+
+\chapter{输入参数与固定焦距定义}
+
+\section{来自原始 PPT 的眼模型参数}
 \begin{table}[H]
 \centering
-\caption{无外置镜片时的主要光源直径；括号内为给定调节上限下的可行性}
-\label{tab:headline}
-\small
-\begin{tabularx}{\textwidth}{ccXXX}
+\caption{固定后极参数与三个离散焦距}
+\begin{tabularx}{\textwidth}{lrrr>{\raggedright\arraybackslash}X}
 \toprule
-物方需求（D） & 物距（mm） & 小鸡直径（mm） & 儿童直径（mm） & 成人直径（mm） \\
+模型 & 报告眼轴（mm） & 后极直径（mm） & 最大瞳孔（mm） & 固定焦距（mm）\\
 \midrule
-\HeadlineRows
+\FocalRows
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\Cref{tab:headline} 显示，物方需求由 $60\D$ 增至 $120\D$ 时，物距由 $16.67\mm$ 缩短至 $8.33\mm$，所需实体光源直径恰好减半。由于无外置镜片时调节力等于物方需求，三个模型的全部请求工况均超过给定调节上限。表中的“超限”仅表示生理调节约束失败；几何光源尺寸仍可用于固定焦度或非生理模型的尺寸研究。
+小鸡眼轴取 $11.7\mm$、目标后极直径取 $3\mm$；儿童和成人分别取 $23.0\mm$ 与 $23.6\mm$ 眼轴，目标直径均为 $6\mm$。每种眼的瞳孔均按 PPT 给出的范围离散为四级。图表中的最长焦距对应 PPT 的远端推荐值，最短焦距对应范围另一端；中间焦距是算术中点，而不是再次拟合得到的结果。
+
+\section{物方需求与物距}
+采用正数表示物距倒数的幅值：
+\[
+D=\frac{1}{s},\qquad s=\frac{1}{D}.
+\]
+$60\D$ 对应 $16.667\mm$，$120\D$ 对应 $8.333\mm$。这些数值仅描述光源平面与等效眼透镜之间的几何距离，不再被称为调节需求。
+
+\section{后极平面采用固定约化距离}
+光线状态为 $[y,n\theta]^\mathsf{T}$。像方采用 $n'=1.336$ 的约化传播，固定后极距离为
+\[
+t=\frac{L}{n'}.
+\]
+这一处理把 PPT 的完整眼轴转为 ABCD 约化角坐标下的传播距离。它比把 $t$ 强制设为 $1/F$ 更符合“后极参数已知且固定”的要求，但等效主平面位置仍是下一阶段需要实测或通过解剖模型校准的参数。
+
+\chapter{固定参数 ABCD 模型}
+
+\section{透镜和传播矩阵}
+空气中的传播与固定眼屈光力分别写为
+\[
+T(s)=\begin{bmatrix}1&s\\0&1\end{bmatrix},\qquad
+L(P)=\begin{bmatrix}1&0\\-P&1\end{bmatrix},\qquad P=\frac{1}{f}.
+\]
+总矩阵为
+\[
+M=T(t)L(P)T(s).
+\]
+与旧模型不同，当前不对 $P$ 求解；$P$ 只能取配置中的三个离散值。
+
+\section{源面与瞳孔的独立映射}
+令源面高度为 $y_s$，透镜平面瞳孔高度为 $y_p$，则视网膜高度可写为
+\[
+y_r=m_s y_s+m_p y_p,
+\]
+其中
+\[
+m_s=-\frac{t}{s},\qquad
+m_p=1+\frac{t}{s}-tP.
+\]
+$m_s$ 决定源面尺寸如何映射到后极，$m_p$ 决定固定焦距与固定物距不匹配时，有限瞳孔如何形成离焦 footprint。因而当前结果会随瞳孔和固定焦距改变，避免了旧版“聚焦像尺寸与瞳孔无关”的错误适用范围。
+
+\section{两种光源尺寸定义}
+设后极目标半径为 $R_t$，瞳孔半径为 $R_p$，源半径为 $R_s$，并记
+\[
+a=|m_s|,\qquad b=|m_p|R_p.
+\]
+源圆盘与瞳孔圆盘的线性映射形成卷积 footprint。其外支持域半径为 $aR_s+b$，全重叠平台半径为 $aR_s-b$。因此：
+\begin{align}
+R_{s,\mathrm{geo}}&=\frac{\max(0,R_t-b)}{a},\\
+R_{s,\mathrm{cons}}&=\frac{R_t+b}{a}.
+\end{align}
+几何最小值满足外支持域刚好覆盖目标；保守值满足全重叠平台覆盖目标。两者都由固定参数直接计算，没有焦距迭代。
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth]{source_diameter_cn.png}
-\caption{无外置镜片时，不同物方屈光需求下的光源直径。数据来自 \sourcefile{headline\_results.csv}。}
-\label{fig:source-diameter}
-\end{figure}
-
-\Cref{fig:source-diameter} 应按七个有序离散工况阅读：$60\D$ 到 $120\D$ 对应 $16.67\mm$ 到 $8.33\mm$ 物距，步长为 $10\D$。三条曲线高度接近的原因不是三个眼完全相同，而是目标后极部直径与有效焦距近似按比例变化，使所需角覆盖接近。设计含义是：先以约 $20\degree$ 完整角作为视场约束，再根据安装距离换算实体光源尺寸。
-
-\chapter{输入数据、参数定义与边界条件}
-\section{源文件与证据范围}
-唯一外部输入是用户提供的参数演示文稿，其原始副本保存在本实验的 \sourcefile{source} 目录，文件名为《小鸡和人眼光学仿真参数.pptx》。该文件的 SHA-256 为
-\begin{center}
-\small\ttfamily b8bcfe66c559081daecc29fa6426de1c297667848a2c1f7e60a5a3f198640e39。
-\end{center}
-模型参数被结构化到 \sourcefile{config/experiment.json}；所有报告数字由版本化 CSV/JSON 结果生成，而不是手工录入。源文件中的第5页“15 D”结合相邻的负镜片序列暂解释为 $-15\D$，这是需要实验人员确认的关键假设。
-
-\section{三个等效眼模型}
-\begin{table}[H]
-\centering
-\caption{模型参数与扫描范围}
-\label{tab:eye-parameters}
-\small
-\begin{tabularx}{\textwidth}{lXXXXX}
-\toprule
-模型 & 有效焦距（mm） & 报告眼轴（mm） & 目标直径（mm） & 瞳孔扫描（mm） & 调节上限（D） \\
-\midrule
-30--45日龄小鸡 & 8.4 & 11.7 & 3.0 & 2.0, 2.5, 3.0, 3.5 & 15.69 \\
-6岁儿童 & 16.7 & 23.0 & 6.0 & 2.0, 3.0, 4.0, 5.0 & 22.50 \\
-18岁成人 & 16.7 & 23.6 & 6.0 & 2.0, 3.0, 4.0, 5.0 & 18.00 \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-基准眼屈光力定义为 $F_0=1000/f_0$（单位 D）。为了把源文件的完整眼轴与有效焦距之间的主平面偏置分离，模型把基准约化视网膜距离校准为 $t=1/F_0$。完整眼轴只用于轴长敏感性分析，不直接替换校准后的约化像距。
-
-\section{实验变量、固定量与响应量}
-\begin{table}[H]
-\centering
-\caption{实验设计中的变量分类}
-\label{tab:variables}
-\small
-\begin{tabularx}{\textwidth}{p{2.6cm}p{5.3cm}X}
-\toprule
-类别 & 参数/水平 & 作用 \\
-\midrule
-固定量 & 波长 $650\,\mathrm{nm}$；均匀圆形朗伯面源；旋转对称近轴传播 & 限定本报告为单色几何光学和相对照度研究 \\
-物方主扫描 & $60,70,80,90,100,110,120\D$；$s=1/|L|$ & 按用户要求以 $10\D$ 步长改变工作距离和调节需求 \\
-外置镜片参考 & $10\D$ 物方需求；镜片 $0,-1,-3,-5,-10,-15,-20\D$ & 在物理元件顺序有效时测试负镜片与调节上限 \\
-离焦扫描 & $-10,-5,0,2,5,10,15,20\D$ & 量化正负离焦的几何模糊 \\
-个体参数 & 瞳孔直径、报告眼轴及其敏感性水平 & 量化通光口径与轴长偏差 \\
-响应量 & 调节力、光源直径/面积、覆盖角、模糊斑、捕获比例、均匀性 & 支持几何尺寸和容差判断 \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\chapter{等效眼、外置镜片与后极部的光学系统}
-\section{示意光路说明模型部件及其顺序}
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[x=1.12cm,y=1.05cm,>=Latex,font=\small]
-  \draw[ReportGrey,thin] (-0.4,0)--(12.2,0);
-  \draw[ReportOrange,very thick] (0,-1.5)--(0,1.5);
-  \fill[ReportOrange] (0,1.5) circle(1.8pt) (0,-1.5) circle(1.8pt);
-  \node[align=center,below=8pt] at (0,-1.5) {均匀圆形\\朗伯面源};
-
-  % negative external lens
-  \draw[ReportGold,fill=ReportWarm,thick]
-    (3,-1.35) .. controls (3.45,-0.8) and (3.45,0.8) .. (3,1.35)
-    -- (3.28,1.35) .. controls (2.83,0.8) and (2.83,-0.8) .. (3.28,-1.35) -- cycle;
-  \node[align=center,below=8pt] at (3.14,-1.35) {外置负镜片\\$F_{\mathrm{ext}}$};
-
-  % pupil
-  \draw[ReportInk,very thick] (5,-1.35)--(5,-0.45) (5,0.45)--(5,1.35);
-  \draw[ReportInk,<->] (4.78,-0.43)--(4.78,0.43);
-  \node[below=8pt] at (5,-1.35) {瞳孔 $D_p$};
-
-  % eye lens
-  \draw[ReportBlue,fill=ReportLight,thick]
-    (6.8,-1.45) .. controls (7.55,-0.75) and (7.55,0.75) .. (6.8,1.45)
-    .. controls (6.05,0.75) and (6.05,-0.75) .. cycle;
-  \node[align=center,below=8pt] at (6.8,-1.45) {可调等效眼\\$F_0+A$};
-
-  % retina
-  \draw[ReportPink,very thick] (10.45,-1.8) arc[start angle=-90,end angle=90,x radius=0.72,y radius=1.8];
-  \draw[ReportPink,<->] (10.6,-1.5)--(10.6,1.5);
-  \node[align=center,below=8pt] at (10.7,-1.8) {目标后极部\\直径 $D_r$};
-
-  % rays
-  \draw[ReportOrange,thick] (0,1.5)--(3,0.96)--(5,0.48)--(6.8,0.25)--(10.45,1.5);
-  \draw[ReportBlue,thick] (0,0)--(3,0)--(5,0)--(6.8,0)--(10.45,0);
-  \draw[ReportOrange,thick] (0,-1.5)--(3,-0.96)--(5,-0.48)--(6.8,-0.25)--(10.45,-1.5);
-
-  \draw[<->,ReportGrey] (0,2.15)--(6.8,2.15) node[midway,fill=white] {物距 $s$};
-  \draw[<->,ReportGrey] (3,1.75)--(6.8,1.75) node[midway,fill=white] {顶点距 $v$};
-  \draw[<->,ReportGrey] (6.8,2.15)--(10.45,2.15) node[midway,fill=white] {约化视网膜距 $t$};
+\begin{tikzpicture}[scale=0.95,>=Latex]
+  \draw[->] (-0.5,0)--(13,0) node[right]{光轴};
+  \draw[ReportOrange,very thick] (0,-1.4)--(0,1.4) node[above]{源面 $2R_s$};
+  \draw[ReportBlue,fill=ReportLight,thick] (5,-1.4) .. controls (5.8,-0.7) and (5.8,0.7) .. (5,1.4) .. controls (4.2,0.7) and (4.2,-0.7) .. cycle;
+  \draw[ReportGrey,line width=3pt] (5,-0.85)--(5,0.85);
+  \node[below,align=center] at (5,-1.65){固定 $f$\\瞳孔 $2R_p$};
+  \draw[ReportPink,very thick] (11,-1.65) arc[start angle=-90,end angle=90,x radius=0.7,y radius=1.65];
+  \node[below] at (11,-1.85){固定后极 $2R_t$};
+  \draw[ReportGold,thick] (0,1.2)--(5,0.75)--(11,1.4);
+  \draw[ReportGold,dashed,thick] (0,1.2)--(5,-0.75)--(11,-0.4);
+  \draw[ReportBlue,thick] (0,-1.2)--(5,-0.75)--(11,-1.4);
+  \draw[ReportBlue,dashed,thick] (0,-1.2)--(5,0.75)--(11,0.4);
+  \draw[<->] (0,-2.5)--node[below]{$s$}(5,-2.5);
+  \draw[<->] (5,-2.5)--node[below]{$t=L/n'$}(11,-2.5);
 \end{tikzpicture}
-\caption{带外置负镜片的等效眼照明系统示意图。图中光线仅用于说明部件、孔径和覆盖关系，不按真实曲率或角度比例绘制。}
-\label{fig:lens-system}
+\caption{固定焦距、固定瞳孔和固定后极平面的光线映射示意。实线和虚线表示源边缘与瞳孔边缘的不同组合。}
 \end{figure}
 
-\Cref{fig:lens-system} 是本实验的建模边界。外置镜片位于光源与等效眼之间，其顶点距暂定为小鸡 $5\mm$、人眼 $12\mm$；瞳孔作为限束孔径；眼内全部解剖折射面折算为一个可调薄透镜；视网膜用固定约化距离处的目标圆盘表示。聚焦像盘尺寸在一阶模型中与瞳孔直径无关，但离焦模糊与通过量依赖瞳孔。
+\chapter{实验矩阵与可复现工作流}
 
-\section{该示意图不代表的内容}
-图中未建立角膜前后表面、前房、晶状体梯度折射率、玻璃体、视网膜曲率、像差、散射和眼球转动。因此，光路图用于解释矩阵顺序和变量耦合，不能作为机械结构图或组织剂量图。后续多曲面模型应保持同一输入/输出定义，以便与本报告结果逐项比较。
+\section{完整实验设计}
+主扫描的因素和水平如下：
+\begin{itemize}[leftmargin=2.2em]
+  \item 眼模型：30--45日龄小鸡、6岁儿童、18岁成人；
+  \item 固定焦距：每种眼三个离散值；
+  \item 物方需求：$60$--$120\D$，步长 $10\D$；
+  \item 瞳孔：每种眼四个直径；
+  \item 后极：眼轴和目标直径按模型固定；
+  \item 输出：映射系数、离焦 footprint、几何最小与保守光源直径/面积、覆盖裕量。
+\end{itemize}
+外置负镜片不进入本次主矩阵。原 PPT 把它定义为“上述模型顺利建模后”的进一步工作；应先确认本次三个固定焦距和等效主平面，再组合实际顶点距，避免把基线模型和后续镜片实验混在一起。
 
-\chapter{ABCD 模型把调焦条件转化为可审计的矩阵方程}
-\section{光线状态与基本矩阵}
-采用约化角光线状态
-\begin{equation}
-  \bm{r}=\begin{bmatrix}y\\u\end{bmatrix},\qquad u=n\theta,
-\end{equation}
-其中 $y$ 是光线高度，$n$ 是介质折射率，$\theta$ 为近轴角。距离 $d$、折射率 $n$ 中的平移矩阵和光焦度 $F$ 的薄透镜矩阵分别为
-\begin{equation}
-  \bm{T}(d,n)=
-  \begin{bmatrix}1&d/n\\0&1\end{bmatrix},\qquad
-  \bm{L}(F)=
-  \begin{bmatrix}1&0\\-F&1\end{bmatrix}.
-  \label{eq:basic-matrices}
-\end{equation}
-
-带外置镜片的眼前矩阵写为
-\begin{equation}
-  \bm{M}_{\mathrm{pre}}=
-  \bm{T}(v,1)\,\bm{L}(F_{\mathrm{ext}})\,\bm{T}(s-v,1)
-  =\begin{bmatrix}a&b\\c&d\end{bmatrix}.
-\end{equation}
-从光源到视网膜的总矩阵为
-\begin{equation}
-  \bm{M}_{\mathrm{tot}}=
-  \bm{T}(t,1)\,\bm{L}(F_0+A)\,\bm{M}_{\mathrm{pre}}
-  =\begin{bmatrix}A_m&B_m\\C_m&D_m\end{bmatrix}.
-  \label{eq:total-matrix}
-\end{equation}
-这里 $A$ 表示附加调节力，避免与矩阵元素 $A_m$ 混淆。
-
-\section{$B_m=0$ 同时给出调节力和横向放大率}
-光源平面与视网膜共轭时，像高不依赖初始光线角，因此成像条件是
-\begin{equation}
-  B_m=0.
-\end{equation}
-代入\Cref{eq:total-matrix}，并利用 $t=1/F_0$，得到代码中使用的调节解
-\begin{equation}
-  A=\frac{d}{b},\qquad F_{\mathrm{eye}}=F_0+A.
-  \label{eq:accommodation}
-\end{equation}
-在调焦状态，横向放大率为 $m=A_m$，覆盖目标直径 $D_r$ 所需的最小圆形光源直径和面积为
-\begin{equation}
-  D_s=\frac{D_r}{|m|},\qquad S_s=\pi\left(\frac{D_s}{2}\right)^2.
-  \label{eq:source-size}
-\end{equation}
-数值质量控制要求所有扫描行满足 $|B_m|<10^{-12}\,\mathrm{m}$；21 行 $60$--$120\D$ 主扫描与 21 行 $10\D$ 外置镜片参考扫描全部通过。
-
-\section{无穷远角覆盖与离焦模糊}
-无外置镜片时，无穷远目标的完整角直径近似为
-\begin{equation}
-  \Theta_{\infty}=\frac{D_r}{t}.
-\end{equation}
-当眼存在离焦 $\Delta F$、瞳孔半径为 $r_p$ 时，一阶模糊半径为
-\begin{equation}
-  r_b=|t\,\Delta F|\,r_p.
-  \label{eq:defocus-blur}
-\end{equation}
-因此仅追求“几何至少触及目标边界”的角半径和追求“源盘在离焦卷积后仍完全覆盖目标”的保守角半径分别为
-\begin{equation}
-  \theta_{\min}=\max\left(0,\frac{r_t-r_b}{t}\right),\qquad
-  \theta_{\mathrm{con}}=\frac{r_t+r_b}{t}.
-\end{equation}
-后者提高均匀覆盖的稳健性，但会让更多光线落在目标圆盘之外。
-
-\chapter{可复现实验设计同时覆盖几何、离焦、眼轴与照度}
-\section{确定性工作流将每个结果绑定到配置和代码}
+\section{自动化流程}
 \begin{figure}[H]
 \centering
-\resizebox{0.97\textwidth}{!}{\begin{tikzpicture}[
-  node distance=8mm and 11mm,
-  box/.style={draw=ReportBlue,rounded corners=2pt,fill=ReportLight,minimum width=3.2cm,minimum height=0.9cm,align=center},
-  zbox/.style={draw=ReportOrange,rounded corners=2pt,fill=ReportWarm,minimum width=3.2cm,minimum height=0.9cm,align=center},
-  check/.style={draw=ReportPink,rounded corners=2pt,fill=ReportPink!8,minimum width=3.3cm,minimum height=0.9cm,align=center},
-  >=Latex,font=\small]
-  \node[box] (ppt) {原始 PPT\\参数与问题};
-  \node[box,right=of ppt] (config) {结构化配置\\experiment.json};
-  \node[box,right=of config] (model) {独立 ABCD 模型\\eye\_model.py};
-  \node[box,below=of model] (sweep) {参数扫描与蒙特卡洛\\固定随机种子};
-  \node[zbox,below=of config] (zos) {ZOS-API 自动建模\\OpticStudio 24.1};
-  \node[check,below=of ppt] (tests) {23 项自动测试\\解析恒等式与边界};
-  \node[check,below=14mm of sweep] (validate) {CSV/JSON 交叉验证\\误差与完整性检查};
-  \node[box,left=of validate] (notebook) {执行型 Notebook\\图表与审计轨迹};
-  \node[box,right=of validate] (report) {LaTeX/PDF 报告\\自检与 Git 提交};
-
-  \draw[->] (ppt)--(config);
-  \draw[->] (config)--(model);
-  \draw[->] (model)--(sweep);
-  \draw[->] (config)--(zos);
-  \draw[->] (model)--(tests);
-  \draw[->] (sweep)--(validate);
-  \draw[->] (zos)--(validate);
-  \draw[->] (tests)--(validate);
-  \draw[->] (validate)--(notebook);
-  \draw[->] (validate)--(report);
-\end{tikzpicture}}
-\caption{从原始参数到验证报告的可复现实验工作流。独立模型和 OpticStudio 路径在验证节点汇合。}
-\label{fig:workflow}
+\begin{tikzpicture}[node distance=7mm and 8mm,box/.style={draw=ReportBlue,rounded corners,fill=ReportLight,align=center,minimum width=3.7cm,minimum height=0.9cm},arrow/.style={-{Latex[length=2.5mm]},thick,ReportGrey}]
+  \node[box] (ppt) {读取 PPT 与配置\\固定焦距/眼轴/后极/瞳孔};
+  \node[box,below=of ppt] (matrix) {生成 252 行实验矩阵\\不拟合焦距};
+  \node[box,below left=of matrix] (abcd) {Python ABCD\\解析尺寸与裕量};
+  \node[box,below right=of matrix] (zos) {ZOS-API\\6 个固定焦距系统};
+  \node[box,below=of abcd] (mc) {600,000 光线/案例\\覆盖与均匀性};
+  \node[box,below=of zos] (cross) {解析/Zemax\\边界误差检查};
+  \node[box,below right=10mm and -18mm of mc] (artifacts) {CSV、JSON、Notebook\\HTML、LaTeX、PDF};
+  \draw[arrow] (ppt)--(matrix);
+  \draw[arrow] (matrix)--(abcd);
+  \draw[arrow] (matrix)--(zos);
+  \draw[arrow] (abcd)--(mc);
+  \draw[arrow] (zos)--(cross);
+  \draw[arrow] (mc)--(artifacts);
+  \draw[arrow] (cross)--(artifacts);
+\end{tikzpicture}
+\caption{从固定输入到报告交付物的可复现工作流。}
 \end{figure}
 
-\Cref{fig:workflow} 中的关键原则是把独立计算与软件验证分开实现：Python 模型不依赖 ZOS-API，ZOS-API 验证器则用 C\# 创建系统并写出独立 CSV。两条路径只在 \sourcefile{validate\_results.py} 中比较，从而避免同一段计算逻辑同时生成“预测”和“验证”。
+\section{一键复现命令}
+\begin{lstlisting}
+powershell -ExecutionPolicy Bypass -File `
+  experiments/eye_illumination/run_all.ps1 `
+  -PythonPath <python.exe> `
+  -OpticStudioDir "C:\Program Files\Ansys Zemax OpticStudio 2024 R1.00"
 
-\section{主物方扫描与外置镜片参考扫描保持物理顺序有效}
-主扫描包含 3 个眼模型和 7 个物方需求，共 $3\times7=21$ 行无外置镜片聚焦结果；外置镜片另在 $10\D$ 参考物距扫描 3 个眼模型和 7 个镜片水平，共 21 行；无穷远还有 $3\times7=21$ 行角覆盖结果。每行记录调节力、总眼屈光力、放大率、光源直径、光源面积、调节可行性与成像矩阵残差。
+powershell -ExecutionPolicy Bypass -File `
+  experiments/eye_illumination/report/latex/build_report.ps1 `
+  -PythonPath <python.exe>
+\end{lstlisting}
+第一条命令重新生成主扫描、蒙特卡洛、Zemax 系统、交叉验证、Notebook 和 HTML 报告；第二条命令重新生成中文图表、XeLaTeX PDF 和 PDF 自检记录。
 
-人眼外置镜片的暂定顶点距为 $12\mm$，而 $90$--$120\D$ 的物距只有 $11.11$--$8.33\mm$。若把这一区间与外置镜片直接组合，镜片将不再位于光源与眼之间，违反当前传递矩阵的元件顺序。因此报告不生成该无效组合，而保留几何有效的 $10\D$ 外置镜片参考扫描。
+\chapter{固定焦距光源尺寸结果}
 
-离焦扫描为 3 个眼模型、各自 4 个瞳孔、8 个离焦水平，共 96 行。眼轴敏感性为 3 个眼模型、各自 4 个瞳孔、3 个轴长水平，共 36 行。所有结果保留在 CSV 中，报告只抽取对工程判断最有用的切片。
-
-\section{蒙特卡洛样本与均匀性指标}
-面源点和瞳孔点均在圆盘内按面积均匀采样：若 $U\sim\mathcal{U}(0,1)$，则半径 $r=R\sqrt{U}$、方位角 $\phi=2\pi V$。每个案例使用 $600{,}000$ 条光线，随机种子分别为 20260814 和 20260815。
-
-目标捕获比例定义为落入后极部目标圆盘的光线数除以发射总数；$p_{10}/\bar{N}$ 均匀性定义为目标圆盘内直方图非几何遮罩像素计数的第 10 百分位数除以均值。另记录达到均值一半以上的像素比例。指标描述相对分布，不含光源绝对功率。
-
-\chapter{实体光源尺寸随物距变化，覆盖角保持近似稳定}
-\section{60--120 D 扫描中实体光源直径随物距减半}
-在无外置镜片条件下，成人和儿童从 $60\D$ 到 $120\D$ 分别需要 \AdultSixtyDDiameter\,mm 到 \AdultOneTwentyDDiameter\,mm 光源直径；小鸡需要 \ChickSixtyDDiameter\,mm 到 \ChickOneTwentyDDiameter\,mm。三种模型差异小于 $0.7\%$，说明第一阶段可以共享近似视场规格，但全部案例均超过给定调节上限。
-
-\section{外置负镜片提高调节需求并略微增大光源尺寸}
+\section{三个离散焦距形成不同的设计曲线}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{adult_accommodation_cn.png}
-\caption{成人模型在 $10\D$ 参考工况下，所需调节力随外置负镜片度数变化；虚线为 $18\D$ 调节上限。}
-\label{fig:adult-heatmap}
+\includegraphics[width=0.98\textwidth]{source_diameter_cn.png}
+\caption{每种眼在最大瞳孔下，三个固定焦距对应的保守光源直径。横轴是物方需求，不是调节需求。}
+\label{fig:source}
 \end{figure}
+\Cref{fig:source} 的每条线从始至终保持焦距不变。曲线的非简单反比例形状来自两项竞争：物距缩短提高源面到后极的映射尺度 $|m_s|$，同时固定焦距造成的瞳孔 footprint $|m_p|R_p$ 也随物距改变。由此可见，新模型不再得到“所有眼型尺寸几乎相同且从 60 D 到 120 D 恰好减半”的旧结论。
 
-\Cref{fig:adult-heatmap} 表明，在固定 $10\D$ 参考物距下，负镜片持续推高成人调节需求；$-15\D$ 与 $-20\D$ 越过 $18\D$ 上限。该图不属于 $60$--$120\D$ 主扫描，而是为保留原有外置镜片敏感性证据设置的独立物理有效参考。
-
-\begin{table}[H]
-\centering
-\caption{成人 $100\mm$ 物距（$10\D$）下的外置镜片扫描}
-\label{tab:adult-lens}
+\section{端点工况的精确查表值}
+\begingroup
 \small
-\begin{tabular}{rrrrl}
+\setlength{\tabcolsep}{3.2pt}
+\begin{longtable}{p{2.35cm}*{6}{>{\centering\arraybackslash}p{1.62cm}}}
+\caption{最大瞳孔下，60 D 与 120 D 的几何最小/保守光源直径（mm）}\\
 \toprule
-镜片（D） & 所需调节（D） & 光源直径（mm） & 光源面积（mm$^2$） & 可行性 \\
+模型 & $f$ & 瞳孔 & 60D几何 & 60D保守 & 120D几何 & 120D保守\\
 \midrule
-\AdultLensRows
+\endfirsthead
+\toprule
+模型 & $f$ & 瞳孔 & 60D几何 & 60D保守 & 120D几何 & 120D保守\\
+\midrule
+\endhead
+\EndpointRows
 \bottomrule
-\end{tabular}
-\end{table}
+\end{longtable}
+\endgroup
+表中 $120\D$ 的若干几何最小值为零，是因为瞳孔离焦 footprint 已经触及或超过目标边缘。工程推荐仍应读取“保守”列；若项目最终接受某个最低照度阈值，也可以在几何与保守值之间通过非序列辐射度仿真寻找更小尺寸。
 
-从 $0\D$ 到 $-10\D$，光源直径从 $35.928\mm$ 增至 $39.722\mm$，面积增至 $1239.2\,\mathrm{mm^2}$；同时调节力增至 $17.004\D$。因此外置镜片的影响不能只通过“度数相加”判断，还必须考虑镜片与眼之间的顶点距及其对横向放大率的影响。
-
-\chapter{瞳孔不改变理想聚焦像尺寸，却主导离焦容差}
-\section{离焦模糊随瞳孔直径和离焦绝对值近似线性增加}
+\section{瞳孔成为显式设计变量}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{defocus_blur_cn.png}
-\caption{三个眼模型的离焦—模糊斑关系；黑色虚线为各模型目标后极部直径。}
-\label{fig:defocus}
+\includegraphics[width=0.9\textwidth]{fixed_focal_pupil_cn.png}
+\caption{成人眼 60 D 与 120 D 端点工况中，瞳孔和固定焦距对保守光源尺寸的共同影响。}
+\label{fig:pupil}
 \end{figure}
+\Cref{fig:pupil} 说明不能再用一个最大瞳孔结果代表所有瞳孔状态。保守尺寸会随瞳孔 footprint 增大而增大，因为要保证目标仍位于全重叠平台；相反，几何最小尺寸可能随瞳孔增大而减小。两种定义的方向相反正是必须明确验收标准的原因。
 
-\Cref{fig:defocus} 与\Cref{eq:defocus-blur} 一致：对固定眼模型，模糊斑关于离焦符号对称，并与瞳孔半径成比例。聚焦状态下，像尺寸由放大率决定而与瞳孔无关；离焦后，瞳孔从通光量参数变为几何模糊的直接控制量。
-
-\begin{table}[H]
-\centering
-\caption{$+10\D$ 离焦、各模型最大扫描瞳孔下的模糊与覆盖角}
-\label{tab:defocus-summary}
-\small
-\begin{tabular}{lrrrr}
-\toprule
-模型 & 瞳孔（mm） & 模糊直径（mm） & 几何最小角（$\degree$） & 保守均匀角（$\degree$） \\
-\midrule
-\DefocusRows
-\bottomrule
-\end{tabular}
-\end{table}
-
-若只要求某些光线触及目标边界，离焦使“最小角”减小；若要求整个目标圆盘仍被源盘卷积覆盖，则应采用更大的“保守均匀角”。成人最大瞳孔在 $10\D$ 离焦时，二者分别为 $17.721\degree$ 与 $23.450\degree$。报告后续蒙特卡洛采用后者，因此它检验的是保守覆盖方案而不是最省光方案。
-
-\section{眼轴偏差在小鸡模型中表现出更高的屈光敏感性}
-物理眼轴变化 $\Delta l$ 先按像方折射率 $n'=1.336$ 换算为约化距离变化，再计算等效离焦：
-\begin{equation}
-  \Delta F_{\mathrm{eq}}=-\frac{\Delta l}{n'}F_0^2.
-\end{equation}
-\begin{table}[H]
-\centering
-\caption{各模型扫描范围内绝对等效离焦最大的眼轴案例；采用最大扫描瞳孔}
-\label{tab:axial}
-\small
-\begin{tabular}{lrrrr}
-\toprule
-模型 & 瞳孔（mm） & 眼轴偏差（mm） & 等效离焦（D） & 模糊直径（mm） \\
-\midrule
-\AxialRows
-\bottomrule
-\end{tabular}
-\end{table}
-
-小鸡较短的有效焦距对应更高的基准屈光力，因此同量级轴长偏差产生更大的等效离焦。\Cref{tab:axial} 中小鸡 $-1.2\mm$ 轴长偏差对应 $+12.730\D$，最大瞳孔模糊直径 $0.374\mm$。这提示小鸡系统的轴长实测与个体分层比成人模型更加重要。
-
-\chapter{保守离焦光源改善覆盖稳健性，但降低目标捕获效率}
-\section{聚焦案例在目标圆盘内保持近似均匀分布}
+\section{离焦 footprint 的独立敏感性}
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{monte_carlo_cn.png}
-\caption{成人眼两个蒙特卡洛案例的视网膜相对光线计数。白色圆为直径 $6\mm$ 的目标后极部区域。}
-\label{fig:monte-carlo}
+\includegraphics[width=0.96\textwidth]{defocus_blur_cn.png}
+\caption{不同瞳孔下，固定像面上的等效离焦 footprint；虚线为后极目标直径。}
 \end{figure}
+该图用于解释 $m_p$ 项的物理作用，而不是再次要求眼睛调节。离焦 footprint 扩大可以帮助“外边界覆盖”，却会降低空间选择性和目标内光线利用率；因此必须与光源尺寸、最低照度和光安全共同判断。
 
-\Cref{fig:monte-carlo} 左图使用 $100\mm$ 物距下的最小聚焦光源，捕获比例为 \FocusedCapture\%，$p_{10}/\bar{N}=\FocusedUniformity$。随机采样造成像素级噪声，但没有系统性中心暗斑或边缘缺口。
+\chapter{蒙特卡洛与 OpticStudio 验证}
 
-右图使用覆盖 $+10\D$ 离焦的保守角尺寸，$p_{10}/\bar{N}=\DefocusedUniformity$，目标圆盘仍被照亮；但只有 \DefocusedCapture\% 的发射光线落入目标区域，其余光线落到目标圆盘之外。因未建模全视网膜边界与组织吸收，这部分光线不能被简单称为“损失”，也不能据此评价安全性。
-
-\section{蒙特卡洛结果的统计解释边界}
-本实验的随机性只来自几何采样，模型参数本身不是随机变量。固定种子使图和汇总指标可重复，但没有为生理个体差异建立概率分布。因此这些统计量是给定模型和给定光源的数值积分近似，不是对小鸡或人群的置信区间。
-
-\chapter{OpticStudio 24.1 在六个系统上复现了解析边缘与离焦展宽}
-\section{ZOS-API 验证是独立软件路径，而不是 Python 结果回显}
-C\# 验证器通过 \sourcefile{ZOSAPI\_Initializer} 连接已安装的 OpticStudio，确认 API 许可证有效后，为每个案例新建顺序模式系统。系统使用 Paraxial 表面表示外置镜片和等效眼透镜，保存为独立 \sourcefile{.zos} 文件，并以标准化批量真实光线追迹接口读取像面光线高度。
-
-验证共含五个调焦案例和一个故意不调焦案例。每个案例使用五条具有代表性的边缘/孔径光线进行确定性几何闭合检查。该样本足以验证一阶矩阵边缘位置和离焦展宽，但不等同于高密度光斑、像差或杂散光分析。
-
+\section{几何最小与保守尺寸的照度形态不同}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{zos_validation_cn.png}
-\caption{五个聚焦案例的独立目标边缘与 OpticStudio 光线追迹像高。圆点和叉号重合。}
-\label{fig:zos-validation}
+\includegraphics[width=0.92\textwidth]{monte_carlo_cn.png}
+\caption{成人 $f=16.7\mm$、5 mm 瞳孔、60 D 工况；每个案例 600,000 条确定性随机光线。白圈为 6 mm 后极目标。}
+\label{fig:mc}
 \end{figure}
+几何最小设计的目标捕获比例为 \GeometricCapture\%，目标内第10百分位/均值为 \GeometricUniformity；保守设计分别为 \ConservativeCapture\% 和 \ConservativeUniformity。保守源更大，部分光线落在目标外，因此捕获比例可能下降，但目标内部的边缘滚降显著减弱。这再次说明“覆盖”与“光利用率”不是同一个指标。
 
-\Cref{fig:zos-validation} 中的重合不是视觉分辨率不足造成的模糊判断；\Cref{tab:zos} 给出数值误差。聚焦边缘误差和 RMS 展宽均处于双精度浮点舍入量级。
-
-\begin{table}[H]
+\section{ZOS-API 验证的是固定参数 footprint 边界}
+\begin{figure}[H]
 \centering
-\caption{OpticStudio ZOS-API 六个验证案例的数值结果}
-\label{tab:zos}
+\includegraphics[width=0.88\textwidth]{zos_validation_cn.png}
+\caption{解析模型与 OpticStudio 对固定焦距视网膜光线高度上界的比较。}
+\end{figure}
+\begingroup
 \scriptsize
-\begin{tabularx}{\textwidth}{p{3.1cm}c r r r r r}
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{p{4.0cm}*{5}{>{\centering\arraybackslash}p{1.65cm}}}
+\caption{六个 OpticStudio 固定焦距交叉验证系统}\\
 \toprule
-案例 & 调焦 & 目标边缘（mm） & ZOS边缘（mm） & 边缘误差（$\um$） & RMS（$\um$） & 展宽（mm） \\
+案例 & $f$（mm） & 物距（mm） & 瞳孔（mm） & 保守直径（mm） & 边界误差（$\mu$m）\\
 \midrule
+\endfirsthead
+\toprule
+案例 & $f$（mm） & 物距（mm） & 瞳孔（mm） & 保守直径（mm） & 边界误差（$\mu$m）\\
+\midrule
+\endhead
 \ZosRows
 \bottomrule
-\end{tabularx}
-\end{table}
+\end{longtable}
+\endgroup
+每个系统把等效眼焦距、物距、瞳孔和约化后极距离写入顺序模式 Paraxial 系统；源面正负边缘与瞳孔正负边缘构成四条角点光线。最大边界误差 \ZosMaxError\,$\mu$m 处于数值舍入量级，说明 Python 矩阵和 OpticStudio 使用了相同的固定参数传播关系。
 
-故意不调焦的成人 $10\D$ 案例保持基准眼屈光力，解析预测像高总展宽为 $0.82665\mm$，OpticStudio 观测值为 \ZosUnfocusedSpread\,mm。这个负对照证明验证器能够检测非零离焦，而不是无条件输出目标边缘。
+\section{自动质量控制}
+验证脚本要求：物方需求必须精确为七级且步长 $10\D$；每种眼必须恰有三个指定焦距和四个瞳孔；主扫描必须为 252 行；结果中不得含调节输出列；保守直径不得小于几何最小直径；全重叠裕量残差小于 $10^{-8}\um$；六个 ZOS 系统均存在且 API 许可证有效；解析/Zemax 边界误差小于 $10^{-6}\um$。任何一项失败都会使一键工作流返回非零状态。
 
-\section{验证结论只覆盖当前模型阶次}
-交叉验证说明 Python ABCD 实现、外置镜片顺序、调节解和 ZOS Paraxial 系统在一阶光学上相互一致。它不证明真实眼的角膜/晶状体面形、像差、散射或组织辐照度正确。将来切换到多曲面模型时，应增加光斑 RMS、波前误差、畸变、相对照度、非序列探测器和公差统计等新的验证量。
+\chapter{限制、不确定性与后续建模}
 
-\chapter{限制、不确定性与稳健性检查决定结果的使用边界}
-\section{已完成的稳健性检查}
-\begin{enumerate}[leftmargin=2.5em]
-  \item \textbf{解析恒等式测试：}无外置镜片时，调节力等于物方屈光需求；零离焦时模糊为零；标称眼轴时轴长模糊为零。
-  \item \textbf{矩阵残差检查：}21 行 $60$--$120\D$ 主扫描和 21 行外置镜片参考结果的成像矩阵 $B_m$ 残差全部低于 $10^{-12}\,\mathrm{m}$。
-  \item \textbf{符号和边界检查：}负镜片应提高调节需求；调节可行性要求 $0\le A\le A_{\max}$；顶点距必须位于光源与眼之间。
-  \item \textbf{负对照：}成人 $10\D$ 故意不调焦案例在独立模型和 ZOS 中同时给出 $0.82665\mm$ 展宽。
-  \item \textbf{确定性复现：}蒙特卡洛使用固定种子；配置和源 PPT 具有 SHA-256；实验记录通过不可覆盖脚本写入 Git。
-\end{enumerate}
+\section{三个中间焦距仍需用户确认}
+用户明确要求每种眼只使用三个固定值，但原始 PPT 只给出焦距范围，没有列出三组明确实测值。本报告采用“范围两端加算术中点”的透明规则。若实际指定值不同，只需修改 \sourcefile{config/experiment.json} 的数组并重跑；代码会拒绝数组之外的焦距。
 
-\section{可能改变设计结论的缺失证据}
-\begin{longtable}{p{3.0cm}p{5.0cm}p{5.7cm}}
-\caption{当前不确定性及其潜在影响}\label{tab:limitations}\\
+\section{等效主平面位置仍是模型不确定性}
+用 $t=L/1.336$ 把眼轴转为约化后极距离，是当前可审计的一阶近似。真实眼的等效主平面不在角膜顶点，且会随角膜、晶状体、房水和玻璃体参数变化。后续多曲面模型应显式建立角膜前后表面、晶状体或 GRIN、介质折射率和视网膜曲率，再用实测眼轴校准像面。
+
+\section{几何覆盖不等于辐照度或安全}
+PPT 未给出光源辐亮度、光谱带宽、曝光时间、组织透射率和安全阈值，因此本报告只给相对光线计数与几何尺寸。任何动物或人体实验前，必须补充绝对辐射度标定，并按适用 IEC/ISO 标准完成视网膜热危害和光化学危害评价。
+
+\section{外置镜片应在固定焦距基线确认后加入}
+原 PPT 的负镜片扫描属于后续扩展。需要先确认三个固定焦距、镜片顶点距以及超近物距下的机械元件顺序，再建立“固定焦距 $\times$ 物距 $\times$ 瞳孔 $\times$ 外置镜片”的新矩阵。不得恢复为通过改变眼焦距来补偿外置镜片的旧方法。
+
+\chapter{可复现交付物与审计路径}
+
+\section{主要数据文件}
+\begin{longtable}{p{5.6cm}p{9.2cm}}
 \toprule
-缺失或假设 & 当前处理 & 对结论的可能影响 \\
+文件 & 内容\\
 \midrule
-\endfirsthead
-\toprule
-缺失或假设 & 当前处理 & 对结论的可能影响 \\
-\midrule
-\endhead
-绝对光源功率与曝光 & 未提供，报告只输出相对光线计数 & 无法计算视网膜辐照度、热剂量、光化学剂量或安全裕量 \\
-光谱带宽与组织透射 & 固定单色 $650\,\mathrm{nm}$，未建组织吸收 & 不能外推到宽谱光源或比较组织层吸收 \\
-真实解剖曲面和折射率 & 用一个等效薄透镜代替 & 可能改变像差、场曲、畸变、边缘照度和有效焦距 \\
-外置镜片顶点距 & 小鸡 $5\mm$、人眼 $12\mm$ 暂定 & 会改变调节力与放大率，尤其在高负度数下 \\
-超近距元件顺序 & $90$--$120\D$ 人眼物距短于暂定 $12\mm$ 顶点距 & 不生成外置镜片组合；需重定义机械位置后才能建模 \\
-第5页 15 D 符号 & 按序列解释为 $-15\D$ & 若原意为 $+15\D$，相关调节结论将反向变化 \\
-个体差异分布 & 只做离散眼轴和瞳孔扫描 & 不能给出人群覆盖率或统计置信区间 \\
-眼球转动和全视网膜包络 & 目标固定为后极部圆盘 & “全视网膜”实际机械视场可能大于当前约 $20\degree$ 后极部覆盖角 \\
-散射、遮挡与杂散光 & 未进入非序列模型 & 无法评估非成像路径、虹膜/眼睑遮挡和离轴安全风险 \\
+\sourcefile{fixed\_focal\_source\_sweep.csv} & 252 行完整主矩阵，含固定焦距、物距、瞳孔、映射系数、两种源尺寸和覆盖裕量\\
+\sourcefile{headline\_results.csv} & 各模型最大瞳孔下的 63 行查表结果\\
+\sourcefile{monte\_carlo\_summary.json} & 几何最小与保守设计各 600,000 条光线的捕获和均匀性指标\\
+\sourcefile{zemax/zosapi\_validation.csv} & 六个固定焦距 ZOS 系统的解析/追迹边界比较\\
+\sourcefile{validation\_report.json} & 行数、参数水平、覆盖恒等式、许可证和 ZOS 误差的自动判定\\
+\sourcefile{eye\_illumination\_analysis.ipynb} & 已执行 Notebook，展示数据、图表和验证结果\\
 \bottomrule
 \end{longtable}
 
-\section{结论应被表述为描述性和模型条件性结果}
-本报告的数值是“在给定参数和一阶模型下”的描述性预测，并通过同阶 OpticStudio 系统交叉验证。报告不包含因果推断、临床有效性推断或生物安全认证。任何硬件定型之前，应把实测参数、完整几何和辐射度约束纳入同一可复现管线。
+\section{版本控制策略}
+配置、代码、CSV、JSON、Notebook、Zemax 系统、LaTeX 源码、图表和最终 PDF 一起提交。实验记录包含配置和关键交付物的 SHA-256，以便后续区分参数变化、代码变化和仅排版变化。大型二进制文件使用 Git LFS；GitHub Actions 在 Windows x64 环境复跑单元测试和静态编译检查。
 
-\chapter{一条命令可重建结果、图、Notebook、Zemax 系统与 PDF}
-\section{软件环境}
-已验证环境包括 Windows、Python 3.11、NumPy 2.4.6、pandas 3.0.5、Matplotlib 3.11.1、Ansys Zemax OpticStudio 24.1、有效 ZOS-API 许可证、MiKTeX 25.12 和 XeLaTeX。中文图表和 PDF 正文使用 Windows 宋体；PDF 构建脚本检查宋体字体是否嵌入。
+\chapter{结论与建议}
+本次修正消除了“物方需求等于调节需求”的模型混淆。小鸡、儿童和成人的等效焦距现在各只有三个离散固定值；后极位置固定；物距、瞳孔和焦距共同决定光源 footprint。主扫描不再输出“全部超过调节上限”的结论，而输出可直接审计的几何最小与保守全重叠尺寸。
 
-\section{完整实验复现}
-在仓库根目录安装依赖：
-\begin{lstlisting}
-python -m pip install -e ".[dev,analysis]"
-\end{lstlisting}
-然后运行主实验：
-\begin{lstlisting}
-powershell -ExecutionPolicy Bypass `
-  -File experiments\eye_illumination\run_all.ps1 `
-  -PythonPath "C:\path\to\python.exe" `
-  -OpticStudioDir "C:\Program Files\Ansys Zemax OpticStudio 2024 R1.00"
-\end{lstlisting}
-该命令依次重建独立模型、CSV/JSON、五张基础图、C\# ZOS-API 验证器、六个 Zemax 系统、验证报告、Notebook、23 项测试和 HTML 报告。
-
-\section{LaTeX 报告复现}
-完成主实验后运行：
-\begin{lstlisting}
-powershell -ExecutionPolicy Bypass `
-  -File experiments\eye_illumination\report\latex\build_report.ps1 `
-  -PythonPath "C:\path\to\python.exe"
-\end{lstlisting}
-脚本首先从 CSV/JSON 生成 \sourcefile{generated\_results.tex}，再用宋体重绘五张中文图；随后 XeLaTeX 连续编译三次以稳定目录和交叉引用，最后检查 PDF 页数、A4 页面、字体、图片实例、必要章节文本和稀疏页，并生成联系表预览与机器可读 QA JSON。
-
-\section{版本化输出与数据血缘}
-\begin{longtable}{p{6.4cm}p{8.5cm}}
-\caption{主要文件及其用途}\label{tab:artifacts}\\
-\toprule
-相对路径 & 用途 \\
-\midrule
-\endfirsthead
-\toprule
-相对路径 & 用途 \\
-\midrule
-\endhead
-\sourcefile{config/experiment.json} & 参数、扫描水平、假设与随机种子的唯一配置源 \\
-\sourcefile{eye\_model.py} & ABCD、调节、离焦、眼轴与蒙特卡洛核心 \\
-\sourcefile{run\_experiment.py} & 全部扫参、CSV/JSON 和基础图生成 \\
-{\footnotesize\nolinkurl{zemax/ZosApiEyeValidation.cs}} & 真实 OpticStudio 系统创建与批量光线追迹 \\
-\sourcefile{results/} & 21 行主聚焦、21 行外置镜片参考、96 行离焦、36 行眼轴、21 行无穷远及验证结果 \\
-{\footnotesize\nolinkurl{notebooks/eye_illumination_analysis.ipynb}} & 已执行分析 Notebook 和审计轨迹 \\
-\sourcefile{report/latex/} & 本报告源码、数据生成器、中文图生成器与 PDF 自检 \\
-{\footnotesize\nolinkurl{experiments/runs/eye-illumination-60-120d-v2.json}} & 本次 $60$--$120\D$ 更新的不可覆盖里程碑记录 \\
-\bottomrule
-\end{longtable}
-
-公开仓库地址为 \url{https://github.com/dongzhaohe321418-lab/zemax-mcp}。大体积 PPT、PNG、Zemax 与 PDF 文件由 Git LFS 管理，文本代码和 CSV/JSON 由普通 Git 历史管理。
-
-\chapter{下一阶段应从实测辐射度和多曲面眼模型开始}
-\section{证据支持的优先工作}
-\begin{enumerate}[leftmargin=2.5em]
-  \item \textbf{补齐绝对辐射度：}测量光源光谱辐亮度、曝光时间、工作距离和调制方式，加入角膜到视网膜的光谱透射，输出辐照度与剂量，而不再只输出相对计数。
-  \item \textbf{升级解剖模型：}用角膜前后表面、房水、晶状体、玻璃体和曲面视网膜替换等效薄透镜；保留当前一阶模型作为回归基线。
-  \item \textbf{确认机械几何：}实测外置镜片顶点距、倾斜、偏心、光源尺寸及眼球位置分布，并建立制造/装配公差蒙特卡洛。
-  \item \textbf{扩展全视网膜包络：}将目标从固定后极部圆盘扩展到眼球转动、视轴偏差和边缘视网膜共同形成的三维包络。
-  \item \textbf{进入非序列验证：}加入虹膜、眼睑、外壳、散射和杂散光路径，使用探测器面验证均匀性与非目标区域暴露。
-  \item \textbf{外部实验验证：}用模型眼或实验相机测量照度图，对放大率、模糊斑、边缘照度和捕获效率逐项校准。
-\end{enumerate}
-
-\section{仍需实验负责人确认的问题}
-\begin{itemize}[leftmargin=2.2em]
-  \item 第5页“15 D”是否确为 $-15\D$？
-  \item 小鸡和人眼外置镜片的实际顶点距、倾斜和有效口径是多少？
-  \item “全视网膜覆盖”的验收标准是几何覆盖、最低照度、均匀性，还是累积安全剂量？
-  \item 是否有每只眼的眼轴、屈光状态、瞳孔和调节力原始样本数据，可用于概率模型？
-  \item 光源是否为裸朗伯面源，还是包含扩散片、导光结构或准直透镜？
-\end{itemize}
-
-\chapter*{结论}
-\addcontentsline{toc}{chapter}{结论}
-在当前参数和近轴等效眼假设下，三个模型覆盖指定后极部的完整角需求均约为 $20\degree$。按用户要求，主扫描现为 $60$--$120\D$、步长 $10\D$：成人与儿童的所需圆形光源直径从约 $5.99\mm$ 降至 $2.99\mm$，小鸡从约 $5.95\mm$ 降至 $2.98\mm$；但全部 21 个请求案例均超过给定调节上限。负外置镜片仅在独立 $10\D$ 参考工况中评估，$-15\D$ 及更负镜片越过成人调节上限。瞳孔主要影响离焦模糊而非理想聚焦像尺寸；保守离焦设计可维持覆盖，但会降低目标区域捕获效率。
-
-独立 Python 模型、自动测试、确定性蒙特卡洛与真实 OpticStudio 24.1 ZOS-API 系统共同形成了可复现证据链。六个 ZOS 案例验证了一阶边缘和离焦展宽，但下一阶段必须补齐绝对辐射度、多曲面解剖模型、机械公差、眼球转动与非序列杂散光，才能把本报告从几何预设计推进到硬件和生物安全决策。
+当前建议是：以保守直径作为机械空间和初版光源尺寸上界，以几何最小值作为理论下界；在用户确认三个实际焦距、等效主平面和覆盖验收阈值后，再用非序列 Zemax 模型和实测辐亮度在两者之间优化。成人 $f=16.7\mm$、5 mm 瞳孔的保守直径在 $60\D$ 和 $120\D$ 分别为 \AdultSixtyConservative\,mm 与 \AdultOneTwentyConservative\,mm，体现了固定焦距条件下不同于旧版简单减半关系的结果。
 
 \appendix
 \chapter{结果字段定义}
-\begin{longtable}{p{5.2cm}p{9.7cm}}
-\caption{主要结果字段及单位}\label{tab:fields}\\
+\begin{longtable}{p{5.4cm}p{9.4cm}}
 \toprule
-字段 & 定义 \\
+字段 & 定义\\
 \midrule
-\endfirsthead
-\toprule
-字段 & 定义 \\
-\midrule
-\endhead
-\sourcefile{source\_demand\_D} & 物方屈光需求绝对值；有限物距 $s=1/L$ \\
-\sourcefile{accommodation\_D} & 为满足 $B_m=0$ 所需的眼附加屈光力 \\
-\sourcefile{source\_diameter\_mm} & 聚焦像盘覆盖目标圆盘所需的最小实体光源直径 \\
-\sourcefile{feasible\_accommodation} & $0\le A\le A_{\max}$ 时为真 \\
-\sourcefile{imaging\_B\_residual\_m} & 调焦后总系统矩阵的 $B_m$ 元素 \\
-\sourcefile{blur\_diameter\_mm} & 边缘瞳孔光线形成的几何离焦模糊直径 \\
-{\footnotesize\nolinkurl{uniform_conservative_angular_diameter_deg}} & 离焦卷积后仍完整覆盖目标圆盘所需的保守完整角 \\
-\sourcefile{captured\_ray\_fraction} & 落入目标后极部圆盘的光线数除以发射光线总数 \\
-\sourcefile{p10\_to\_mean\_uniformity} & 目标圆盘像素计数第10百分位数与均值之比 \\
-\sourcefile{rms\_spread\_um} & ZOS 验证光线像高相对均值的 RMS 展宽 \\
+\sourcefile{fixed\_focal\_length\_mm} & 当前工况指定的固定等效焦距；只能取配置中的三个值\\
+\sourcefile{source\_demand\_D} & 物距倒数的幅值 $1/s$，不是调节量\\
+\sourcefile{reduced\_retina\_distance\_mm} & 报告眼轴除以像方折射率 1.336\\
+\sourcefile{source\_mapping\_coefficient} & 源面高度到后极高度的线性系数 $m_s$\\
+\sourcefile{pupil\_mapping\_coefficient} & 瞳孔高度到后极高度的线性系数 $m_p$\\
+\sourcefile{pupil\_blur\_diameter\_mm} & $2|m_p|R_p$，固定焦距下的瞳孔 footprint 直径\\
+\sourcefile{geometric\_min\_source\_diameter\_mm} & 外支持域刚好覆盖后极目标的理论最小源直径\\
+\sourcefile{conservative\_source\_diameter\_mm} & 全重叠平台覆盖整个后极目标的推荐源直径\\
+\sourcefile{geometric\_coverage\_margin\_um} & 几何外支持域相对目标边缘的裕量\\
+\sourcefile{conservative\_plateau\_margin\_um} & 全重叠平台相对目标边缘的裕量；应接近零\\
 \bottomrule
 \end{longtable}
 
-\chapter{PDF 自检清单}
-构建脚本在报告交付前执行以下机器检查：
-\begin{itemize}[leftmargin=2.2em]
-  \item PDF 至少 15 页，所有页面宽高比符合 A4；
-  \item 至少包含五个栅格图像实例，且能提取到技术摘要、ABCD、OpticStudio、蒙特卡洛、可复现工作流、限制和附录等关键文本；
-  \item PDF 字体清单中存在 SimSun/宋体子集；
-  \item XeLaTeX 日志中不存在未解析引用或 Overfull \verb|\hbox|；
-  \item 生成首页、四分之一页、中间页、四分之三页和末页的联系表，并由人工检查标题、表格、图片、示意图和页脚；
-  \item 重新运行 23 项 Python 测试，检查 Git 差异和敏感信息，再提交并推送 GitHub。
-\end{itemize}
-
-\begin{thebibliography}{9}
-\bibitem{ppt} 用户提供文稿：《小鸡和人眼光学仿真参数》，原始 PPTX，2026。
-\bibitem{config} 本项目：\sourcefile{experiments/eye\_illumination/config/experiment.json}，结构化实验参数与假设。
-\bibitem{model} 本项目：\sourcefile{experiments/eye\_illumination/eye\_model.py}，ABCD 等效眼与蒙特卡洛模型。
-\bibitem{zos} 本项目：\sourcefile{results/zemax/zosapi\_validation.csv} 与六个 \sourcefile{.zos} 系统，OpticStudio 24.1 ZOS-API 验证。
-\bibitem{notebook} 本项目：\sourcefile{notebooks/eye\_illumination\_analysis.ipynb}，已执行分析 Notebook。
-\end{thebibliography}
+\chapter{审计清单}
+\begin{enumerate}[leftmargin=2.2em]
+  \item 配置中每种眼恰有三个固定焦距；
+  \item 60--120 D 七个物距未被当作调节力；
+  \item 后极约化距离来自眼轴与折射率，而非由当前焦距反推；
+  \item 252 行主扫描全部生成；
+  \item 两种覆盖定义均有明确公式与非负裕量；
+  \item 六个 OpticStudio 固定焦距系统已保存并交叉验证；
+  \item Notebook、HTML、LaTeX、PDF 和结果表来自同一份配置；
+  \item PDF 使用 A4 页面，中文宋体嵌入，图表与表格经过最终版面检查。
+\end{enumerate}
 
 \end{document}

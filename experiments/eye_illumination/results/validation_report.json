@@ -1,12 +1,7 @@
 {
-  "focused_zos_edge_max_error_um": 4.440892098500626e-13,
-  "focused_zos_rms_max_um": 5.659306737752698e-12,
-  "unaccommodated_expected_spread_mm": 0.82665,
-  "unaccommodated_observed_spread_mm": 0.8266499999999999,
-  "unaccommodated_spread_error_um": 1.1102230246251565e-13,
-  "headline_rows": 21,
-  "full_focused_sweep_rows": 21,
-  "external_lens_reference_rows": 21,
+  "fixed_focal_sweep_rows": 252,
+  "expected_fixed_focal_sweep_rows": 252,
+  "headline_rows": 63,
   "source_demand_levels_D": [
     60.0,
     70.0,
@@ -17,8 +12,47 @@
     120.0
   ],
   "source_demand_step_D": 10.0,
-  "all_requested_cases_exceed_accommodation_limits": true,
-  "all_imaging_residuals_below_1e_12_m": true,
+  "fixed_focal_lengths_mm": {
+    "chick_30_45d": [
+      7.5,
+      8.0,
+      8.5
+    ],
+    "child_6y": [
+      13.5,
+      15.1,
+      16.7
+    ],
+    "adult_18y": [
+      12.8,
+      14.75,
+      16.7
+    ]
+  },
+  "expected_fixed_focal_lengths_mm": {
+    "chick_30_45d": [
+      7.5,
+      8.0,
+      8.5
+    ],
+    "child_6y": [
+      13.5,
+      15.1,
+      16.7
+    ],
+    "adult_18y": [
+      12.8,
+      14.75,
+      16.7
+    ]
+  },
+  "contains_accommodation_output": false,
+  "all_conservative_sizes_at_least_geometric": true,
+  "max_conservative_plateau_residual_um": 1.301042607e-12,
+  "min_geometric_coverage_margin_um": 0.0,
+  "zos_case_count": 6,
+  "zos_system_file_count": 6,
+  "zos_bound_max_error_um": 2.5757174171303632e-11,
   "opticstudio_version": "24.1.0",
   "api_license_valid": true,
   "overall_status": "passed"
