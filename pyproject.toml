@@ -1,0 +1,26 @@
+[project]
+name = "zemax-mcp"
+version = "0.1.0"
+description = "Safe stdio MCP server for Ansys Zemax OpticStudio simulations"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "mcp>=1.2,<2",
+  "pydantic>=2.8,<3",
+]
+
+[project.optional-dependencies]
+zosapi = ["pythonnet>=3,<4"]
+dev = ["pytest>=8,<9"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+include = ["*.py", "backend/*.py", "scripts/*.py"]

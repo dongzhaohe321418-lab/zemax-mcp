@@ -1,0 +1,19 @@
+{
+  "objective": "Describe the optical question this run answers",
+  "hypothesis": "State the expected result before running",
+  "application": "Ansys Zemax OpticStudio",
+  "application_version": "REPLACE_WITH_INSTALLED_VERSION",
+  "backend": "mock_or_zosapi",
+  "inputs": {
+    "lens": {},
+    "system": {}
+  },
+  "results": {
+    "paraxial": {},
+    "spot_diagram": {},
+    "mtf": {}
+  },
+  "artifacts": [],
+  "observations": "",
+  "next_step": ""
+}

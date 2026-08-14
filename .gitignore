@@ -1,0 +1,16 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.log
+logs/
+outputs/
+scratch/
+*.tmp
+*.bak
+
+# Experiment records in experiments/ are intentionally versioned.
+# Zemax and large binary files there are handled by Git LFS.
