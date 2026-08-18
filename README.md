@@ -8,6 +8,16 @@ A safety-first, stdio-only MCP server that lets Codex, Claude Code, or another M
 
 The repository also contains a fully executed 650 nm posterior-pole illumination study for chick, child, and adult effective-eye models. The corrected experiment holds the posterior-pole plane fixed, assigns exactly three discrete focal lengths to each eye, and evaluates 60–120 D object-side requirements without continuously fitting focal length or treating object vergence as accommodation. Its 252-row matrix includes four pupils per eye, conservative and geometric source-size bounds, 600,000-ray Monte Carlo cases, six independently created OpticStudio 24.1 ZOS-API systems, an executed Notebook, CSV/JSON outputs, and a 21-page Chinese LaTeX/PDF report with embedded SimSun text. See [`experiments/eye_illumination/`](experiments/eye_illumination/) and build the report with [`report/latex/build_report.ps1`](experiments/eye_illumination/report/latex/build_report.ps1).
 
+### Dedicated experiment application
+
+The experiment now includes a local, purpose-built graphical application. It exposes only the validated fixed-focal grid, calculates individual cases or the full 252-case matrix, draws the paraxial footprint, compares the three focal lengths, and exports JSON/CSV without sending data to a cloud service. On Windows, double-click [`experiments/eye_illumination/app/launch_app.cmd`](experiments/eye_illumination/app/launch_app.cmd), or run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1
+```
+
+Then open `http://127.0.0.1:8765/`. Python 3.11 and the project analysis dependencies are required; OpticStudio is not needed for interactive ABCD calculations.
+
 ```text
 MCP host (Codex / Claude Code)
              | stdio
