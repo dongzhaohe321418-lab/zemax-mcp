@@ -1,0 +1,105 @@
+{
+  "application": "Ansys Zemax OpticStudio",
+  "application_version": "24.1.0",
+  "artifacts": [
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/README.md",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/manifest.json",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/run_metadata.json",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/verification_report.json",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/zos_results.csv",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/web_gui_zemax_21_case_evidence.zip"
+  ],
+  "backend": "zosapi",
+  "experiment_id": "eye-illumination-web-zemax-console-v1",
+  "hypothesis": "A three-step Web workflow can preserve the deterministic fixed-focal model contract while letting a non-command-line user obtain an unambiguous licensed OpticStudio PASS and a sanitized evidence package.",
+  "inputs": {
+    "connection_test": {
+      "case_count": 1,
+      "effective_focal_length_mm": 7.5,
+      "eye_id": "chick_30_45d",
+      "mode": "baseline",
+      "pupil_diameter_mm": 2.0,
+      "source_demand_D": 60.0
+    },
+    "table_batch": {
+      "case_count": 21,
+      "effective_focal_lengths_mm": [
+        7.5,
+        8.0,
+        8.5
+      ],
+      "eye_id": "chick_30_45d",
+      "mode": "baseline",
+      "pupil_diameter_mm": 2.0,
+      "source_demands_D": [
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120
+      ]
+    },
+    "web_server": {
+      "bind_address": "127.0.0.1",
+      "explicit_start_required": true,
+      "interface": "local Web GUI",
+      "maximum_concurrent_zemax_jobs": 1
+    }
+  },
+  "next_step": "For a future anatomical model schema, obtain complete surface spacing, refractive-index, curvature, and principal-plane data before adding real-ray aberration or energy criteria.",
+  "objective": "Deliver and strictly validate an easy local Web GUI that discovers OpticStudio, requires explicit license consent, runs a one-case connection test, gates table execution on that PASS, and exports portable audit evidence.",
+  "observations": "The simplest safe workflow is read-only discovery, explicit consent, one-case licensed validation, and only then table execution. The final transferable ZIP contains model and input snapshots, CSV results, verification report, and 21 saved systems while excluding build directories and raw logs.",
+  "payload_sha256": "5b0e6cf203099abff8929ed7cdf416dbdd783a31a2345ef0d2457baefc1db5ed",
+  "recorded_at_utc": "2026-08-18T07:01:16.574563+00:00",
+  "results": {
+    "automated_tests": {
+      "powershell_parse": "PASS",
+      "pytest_passed": 39,
+      "python_compileall": "PASS",
+      "status": "PASS"
+    },
+    "browser_validation": {
+      "application_console_errors": 0,
+      "connection_button_disabled_without_consent": true,
+      "error_overlay": false,
+      "meaningful_content": true,
+      "preflight_kept_license_unverified": true,
+      "responsive_document_width_px": 341,
+      "responsive_inner_width_px": 355,
+      "status": "PASS",
+      "table_button_disabled_before_connection_pass": true
+    },
+    "connection_test": {
+      "api_license_valid": true,
+      "failed_case_count": 0,
+      "maximum_boundary_error_um": 1.3322676295501878e-12,
+      "passed_case_count": 1,
+      "verification_status": "PASS"
+    },
+    "portable_deployment": {
+      "fresh_virtual_environment_created": true,
+      "health_endpoint": "PASS",
+      "home_page_http_status": 200,
+      "package_filename": "eye_illumination_web_gui_v4.zip",
+      "package_sha256": "f8acf20165781811f9780df89a3f0b6fdf94f9ab320c4149d8f95dc5906a5fb1",
+      "status": "PASS"
+    },
+    "sanitization": {
+      "credential_and_machine_path_scan": "PASS",
+      "evidence_build_entries": 0,
+      "evidence_log_entries": 0
+    },
+    "table_batch": {
+      "api_license_valid": true,
+      "batch_id": "eye-zemax-2a8b5f0189c5e6e8",
+      "evidence_zip_sha256": "68df9f3ff53b06e03e2446a65887fae53119f8835274dd72b7f8f2d924a8eabd",
+      "failed_case_count": 0,
+      "maximum_boundary_error_um": 1.7763568394002505e-12,
+      "passed_case_count": 21,
+      "verification_status": "PASS"
+    }
+  },
+  "schema_version": 1
+}

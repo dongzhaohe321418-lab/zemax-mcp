@@ -8,7 +8,7 @@
 
 范围文件 `app/range_parameters.json` 同时记录数值来源。小鸡眼轴 10.5–12.5 mm 来自 PPT；儿童与成人眼轴的 ±0.5 mm 是既有灵敏度假设，因为 PPT 只给出约 23.0 mm 和 23.6 mm。角膜和晶状体部件参数仅作为来源参考显示；缺少面间距和折射率时不将其伪装成可独立追迹变量。
 
-Windows 下双击 `app/launch_app.cmd`，或在仓库根目录执行：
+第一次使用双击本目录的 `setup_web_gui.cmd`，它会建立私有 `.venv` 并自动启动；以后双击 `launch_web_gui.cmd`。也可以在仓库根目录执行：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1
@@ -16,7 +16,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 
 程序默认打开 `http://127.0.0.1:8765/`，只监听本机地址，不上传实验数据。交互计算不需要启动 OpticStudio；ZOS-API 仍用于版本化结果的独立交叉验证。
 
-结果表新增“生成 Zemax 审计批次”：相同输入会得到相同 batch ID 和 ZIP 哈希。批次内含服务器重新计算的输入、解析预期值、模型快照、通用 C# ZOS-API 执行器、独立校验器及一键 PowerShell 入口。它会为每个工况保存 `.zos`，记录 OpticStudio 版本、许可证状态、光线错误/渐晕和数值误差，最终生成 `verification_report.json`。详细安装、运行、人工抽查和故障排查见 [`ZEMAX_CONNECTION_GUIDE.md`](ZEMAX_CONNECTION_GUIDE.md)。
+Web GUI 新增三步 Zemax 验证向导：只读自动发现安装、显式确认的 1 工况真实连接测试、清晰 PASS/FAIL 判定；测试通过后才解锁当前结果表的批量运行。结果表仍可生成确定性 Zemax 审计批次：相同输入会得到相同 batch ID 和 ZIP 哈希。批次内含服务器重新计算的输入、解析预期值、模型快照、通用 C# ZOS-API 执行器、独立校验器及一键 PowerShell 入口。它会为每个工况保存 `.zos`，记录 OpticStudio 版本、许可证状态、光线错误/渐晕和数值误差，最终生成 `verification_report.json`。详细安装、运行、人工抽查和故障排查见 [`ZEMAX_CONNECTION_GUIDE.md`](ZEMAX_CONNECTION_GUIDE.md)。
 
 ## 当前固定焦距
 

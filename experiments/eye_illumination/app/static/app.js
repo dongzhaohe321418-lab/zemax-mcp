@@ -8,6 +8,10 @@ const state = {
   fullMatrix: false,
   chartSeriesKey: "fixed_focal_length_mm",
   chartSeriesParameter: "focal_length_mm",
+  zemaxReady: false,
+  zemaxConnectionPassed: false,
+  zemaxRunning: false,
+  zemaxJobId: null,
 };
 const palette = ["#0f6d70", "#e56b3f", "#d7a22a"];
 const $ = (id) => document.getElementById(id);
@@ -327,6 +331,7 @@ function renderTable(rows) {
   body.append(fragment);
   $("download-zemax-batch").disabled = rows.length === 0;
   $("zemax-batch-status").textContent = rows.length ? `当前将导出 ${rows.length} 个工况。` : "等待结果表。";
+  updateZemaxButtons();
 }
 
 function downloadUrl(path) {
@@ -384,6 +389,153 @@ async function downloadZemaxBatch() {
   } finally {
     button.disabled = false;
     button.textContent = "生成 Zemax 审计批次";
+  }
+}
+
+function checkLabel(element, ok, okText, badText) {
+  element.textContent = ok ? okText : badText;
+  element.classList.toggle("pass-text", ok);
+  element.classList.toggle("fail-text", !ok);
+}
+
+function updateZemaxButtons() {
+  const confirmed = $("zemax-confirm").checked;
+  $("zemax-test").disabled = !state.zemaxReady || !confirmed || !state.current || state.zemaxRunning;
+  $("zemax-run-table").disabled = !state.zemaxReady || !confirmed || !state.zemaxConnectionPassed
+    || state.rows.length === 0 || state.zemaxRunning;
+  $("zemax-step-test").classList.toggle("locked", !state.zemaxReady);
+  $("zemax-step-result").classList.toggle("locked", !state.zemaxConnectionPassed && !state.zemaxRunning);
+}
+
+async function detectZemax() {
+  const button = $("zemax-detect");
+  try {
+    button.disabled = true;
+    button.textContent = "正在检测…";
+    const path = $("zemax-install-path").value.trim();
+    const query = path ? `?${new URLSearchParams({ opticstudio_dir: path })}` : "";
+    const result = await api(`/api/zemax/preflight${query}`);
+    state.zemaxReady = result.ready;
+    state.zemaxConnectionPassed = false;
+    if (!path && result.selected_installation) $("zemax-install-path").value = result.selected_installation;
+    checkLabel(
+      $("zemax-runtime-check"),
+      result.platform_supported && result.python_64bit && result.compiler_found && result.powershell_found,
+      `就绪 · Python ${result.python_version}`,
+      "不满足要求",
+    );
+    checkLabel(
+      $("zemax-api-check"),
+      result.installation_exists && Object.values(result.api_dlls).every(Boolean),
+      "3 / 3 已找到",
+      `${Object.values(result.api_dlls).filter(Boolean).length} / 3 已找到`,
+    );
+    $("zemax-license-check").textContent = "未测试";
+    $("zemax-license-check").className = "";
+    $("zemax-preflight-message").textContent = result.next_action;
+    $("zemax-step-detect").classList.toggle("complete", result.ready);
+    $("zemax-verification-label").textContent = "等待连接测试";
+    $("zemax-verification-detail").textContent = "环境检测不会启动或验证 OpticStudio 许可证。";
+    $("zemax-verification-state").className = "verification-state pending";
+    updateZemaxButtons();
+    showToast(result.ready ? "本机环境检测通过，可以运行 1 工况连接测试。" : result.next_action, !result.ready);
+  } catch (error) {
+    state.zemaxReady = false;
+    $("zemax-preflight-message").textContent = `检测失败：${error.message}`;
+    updateZemaxButtons();
+    showToast(`Zemax 检测失败：${error.message}`, true);
+  } finally {
+    button.disabled = false;
+    button.textContent = "重新检测 OpticStudio";
+  }
+}
+
+function renderZemaxJob(job) {
+  state.zemaxRunning = ["queued", "running"].includes(job.status);
+  const panel = $("zemax-verification-state");
+  const verification = job.verification;
+  if (state.zemaxRunning) {
+    panel.className = "verification-state running";
+    $("zemax-verification-label").textContent = job.stage === "OPTICSTUDIO" ? "Zemax 正在运行" : "正在准备批次";
+    $("zemax-verification-detail").textContent = job.message;
+    $("zemax-job-message").textContent = `${job.batch_id} · ${job.case_count} 个工况，请勿关闭启动窗口。`;
+  } else if (job.status === "pass") {
+    panel.className = "verification-state pass";
+    $("zemax-verification-label").textContent = "PASS · 验证通过";
+    $("zemax-verification-detail").textContent = job.message;
+    $("zemax-license-check").textContent = verification.api_license_valid ? "有效 · 已实测" : "未确认";
+    $("zemax-license-check").className = verification.api_license_valid ? "pass-text" : "fail-text";
+    $("zemax-step-result").classList.add("complete");
+    if (job.mode === "connection_test") state.zemaxConnectionPassed = true;
+    $("zemax-job-message").textContent = `${job.batch_id} · ${job.case_count} 个工况已验证，可下载审计证据包。`;
+    showToast(`Zemax ${job.case_count} 工况验证通过。`);
+  } else {
+    panel.className = "verification-state fail";
+    $("zemax-verification-label").textContent = "FAIL · 未通过";
+    $("zemax-verification-detail").textContent = job.message;
+    $("zemax-license-check").textContent = verification?.api_license_valid ? "有效 · 结果未通过" : "未确认";
+    $("zemax-license-check").className = "fail-text";
+    $("zemax-job-message").textContent = `${job.batch_id} · 未通过；如有证据包，请下载后查看详细报告。`;
+    showToast("Zemax 验证未通过；本次结果不会标记为已验证。", true);
+  }
+  if (verification) {
+    $("zemax-passed-count").textContent = `${verification.passed_case_count} / ${verification.expected_case_count}`;
+    $("zemax-max-error").textContent = verification.maximum_boundary_error_um == null
+      ? "—" : `${Number(verification.maximum_boundary_error_um).toExponential(3)} µm`;
+    $("zemax-version").textContent = verification.opticstudio_versions.join(", ") || "—";
+  }
+  const evidence = $("zemax-evidence");
+  if (job.result_available) {
+    evidence.href = `/api/zemax/jobs/${job.job_id}/evidence.zip`;
+    evidence.setAttribute("aria-disabled", "false");
+    evidence.classList.remove("disabled-link");
+  }
+  updateZemaxButtons();
+}
+
+async function pollZemaxJob(jobId) {
+  try {
+    const job = await api(`/api/zemax/jobs/${jobId}`);
+    renderZemaxJob(job);
+    if (["queued", "running"].includes(job.status)) {
+      setTimeout(() => pollZemaxJob(jobId), 1000);
+    }
+  } catch (error) {
+    state.zemaxRunning = false;
+    $("zemax-verification-state").className = "verification-state fail";
+    $("zemax-verification-label").textContent = "状态读取失败";
+    $("zemax-verification-detail").textContent = error.message;
+    updateZemaxButtons();
+  }
+}
+
+async function startZemaxJob(mode) {
+  const sourceRows = mode === "connection_test" ? [state.current] : state.rows;
+  if (!sourceRows.length || !$("zemax-confirm").checked) return;
+  try {
+    state.zemaxRunning = true;
+    updateZemaxButtons();
+    $("zemax-evidence").classList.add("disabled-link");
+    $("zemax-evidence").setAttribute("aria-disabled", "true");
+    const job = await api("/api/zemax/jobs", {
+      method: "POST",
+      body: JSON.stringify({
+        confirm: true,
+        mode,
+        opticstudio_dir: $("zemax-install-path").value.trim(),
+        cases: sourceRows.map(zemaxCaseInput),
+      }),
+    });
+    state.zemaxJobId = job.job_id;
+    renderZemaxJob(job);
+    setTimeout(() => pollZemaxJob(job.job_id), 500);
+  } catch (error) {
+    state.zemaxRunning = false;
+    $("zemax-verification-state").className = "verification-state fail";
+    $("zemax-verification-label").textContent = "无法启动";
+    $("zemax-verification-detail").textContent = error.message;
+    updateZemaxButtons();
+    showToast(`无法启动 Zemax：${error.message}`, true);
   }
 }
 
@@ -448,6 +600,16 @@ $("metric-select").addEventListener("change", renderChart);
 $("sensitivity-select").addEventListener("change", loadChartRows);
 $("full-sweep").addEventListener("click", fullSweep);
 $("download-zemax-batch").addEventListener("click", downloadZemaxBatch);
+$("zemax-detect").addEventListener("click", detectZemax);
+$("zemax-confirm").addEventListener("change", updateZemaxButtons);
+$("zemax-install-path").addEventListener("input", () => {
+  state.zemaxReady = false;
+  state.zemaxConnectionPassed = false;
+  $("zemax-preflight-message").textContent = "路径已更改，请重新检测。";
+  updateZemaxButtons();
+});
+$("zemax-test").addEventListener("click", () => startZemaxJob("connection_test"));
+$("zemax-run-table").addEventListener("click", () => startZemaxJob("table"));
 
 [["focal", "mm", 2], ["axial", "mm", 2], ["pupil", "mm", 2], ["demand", "D", 0]].forEach(([id, unit, digits]) => {
   $(`range-${id}`).addEventListener("input", () => updateRangeOutput(id, unit, digits));

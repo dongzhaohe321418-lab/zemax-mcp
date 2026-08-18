@@ -18,9 +18,11 @@ import webbrowser
 try:
     from .service import ExperimentService, RequestError
     from .zemax_batch import build_batch_package
+    from .zemax_local import ZemaxJobManager, ZemaxLocalError, zemax_preflight
 except ImportError:  # Direct execution from launch_app.ps1.
     from service import ExperimentService, RequestError
     from zemax_batch import build_batch_package
+    from zemax_local import ZemaxJobManager, ZemaxLocalError, zemax_preflight
 
 APP_DIR = Path(__file__).resolve().parent
 STATIC_DIR = APP_DIR / "static"
@@ -42,7 +44,8 @@ STATIC_FILES = {
 
 class ExperimentHandler(BaseHTTPRequestHandler):
     service: ExperimentService
-    server_version = "EyeIlluminationLab/1.0"
+    zemax_manager: ZemaxJobManager
+    server_version = "EyeIlluminationLab/2.0"
 
     def _headers(
         self,
@@ -140,6 +143,21 @@ class ExperimentHandler(BaseHTTPRequestHandler):
             self._json({"status": "ok", "experiment_id": self.service.config["experiment_id"]})
         elif path == "/api/config":
             self._json(self.service.public_config())
+        elif path == "/api/zemax/preflight":
+            self._json(zemax_preflight(query.get("opticstudio_dir")))
+        elif path.startswith("/api/zemax/jobs/"):
+            parts = path.strip("/").split("/")
+            try:
+                if len(parts) == 4:
+                    self._json(self.zemax_manager.get(parts[3]))
+                elif len(parts) == 5 and parts[4] == "evidence.zip":
+                    evidence_path = self.zemax_manager.result_path(parts[3])
+                    body = evidence_path.read_bytes()
+                    self._download_bytes(body, evidence_path.name, "application/zip")
+                else:
+                    self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
+            except ZemaxLocalError as exc:
+                self._json({"error": str(exc)}, HTTPStatus.NOT_FOUND)
         elif path == "/api/case.json":
             try:
                 result = self.service.calculate(query)
@@ -200,6 +218,20 @@ class ExperimentHandler(BaseHTTPRequestHandler):
                         "X-Zemax-Case-Count": str(package.case_count),
                     },
                 )
+            elif path == "/api/zemax/jobs":
+                if payload.get("confirm") is not True:
+                    raise RequestError("必须明确确认后才能启动本机 OpticStudio。")
+                mode = str(payload.get("mode", "connection_test"))
+                rows = self.service.zemax_batch_rows(payload)
+                opticstudio_dir = str(payload.get("opticstudio_dir", "")).strip()
+                if not opticstudio_dir:
+                    preflight = zemax_preflight()
+                    opticstudio_dir = preflight["selected_installation"]
+                try:
+                    job = self.zemax_manager.submit(rows, opticstudio_dir, mode)
+                except ZemaxLocalError as exc:
+                    raise RequestError(str(exc)) from exc
+                self._json(job, HTTPStatus.ACCEPTED)
             else:
                 self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
         except RequestError as exc:
@@ -209,13 +241,19 @@ class ExperimentHandler(BaseHTTPRequestHandler):
         print(f"[{self.log_date_time_string()}] {format % args}")
 
 
-def create_server(host: str = "127.0.0.1", port: int = 8765) -> ThreadingHTTPServer:
+def create_server(
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    zemax_manager: ZemaxJobManager | None = None,
+) -> ThreadingHTTPServer:
     service = ExperimentService()
+    manager = zemax_manager or ZemaxJobManager()
 
     class BoundHandler(ExperimentHandler):
         pass
 
     BoundHandler.service = service
+    BoundHandler.zemax_manager = manager
     return ThreadingHTTPServer((host, port), BoundHandler)
 
 

@@ -183,6 +183,28 @@ def test_http_server_serves_app_and_calculation() -> None:
             assert "manifest.json" in archive.namelist()
             assert "scripts/ZosApiEyeBatch.cs" in archive.namelist()
 
+        with urlopen(f"{base}/api/zemax/preflight", timeout=5) as response:
+            preflight = json.load(response)
+        assert preflight["license_status"] == "NOT_TESTED"
+        assert "api_dlls" in preflight
+
+        unconfirmed_job = Request(
+            f"{base}/api/zemax/jobs",
+            data=json.dumps({
+                "mode": "connection_test",
+                "cases": [{
+                    "mode": "baseline", "eye_id": "chick_30_45d", "focal_length_mm": 8.5,
+                    "pupil_diameter_mm": 3.5, "source_demand_D": 120,
+                }],
+            }).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with pytest.raises(HTTPError) as error:
+            urlopen(unconfirmed_job, timeout=5)
+        assert error.value.code == 400
+        assert "明确确认" in error.value.read().decode("utf-8")
+
         invalid = Request(
             f"{base}/api/calculate",
             data=b"{}",

@@ -5,7 +5,18 @@
 - **固定三焦距基准**：严格复现已验证的 252 工况矩阵。
 - **PPT 参数范围探索**：允许用户手动调整 PPT 声明的有效焦距、眼轴和瞳孔范围，但不会根据物距自动反求焦距。
 
-## 启动
+## 第一次使用：双击安装并启动
+
+在 Windows 中双击 `setup_local.cmd`。它只在当前程序目录建立私有 `.venv`、安装固定范围的 NumPy 依赖，然后自动打开 Web GUI。以后只需双击 `launch_app.cmd`，无需重复安装。
+
+等价的 PowerShell 命令：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\setup_local.ps1
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1
+```
+
+## 日常启动
 
 Windows 下双击 `launch_app.cmd`。也可以从仓库根目录运行：
 
@@ -22,7 +33,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
   -PythonPath "C:\path\to\python.exe"
 ```
 
-程序要求 Python 3.11+ 和 NumPy；仓库开发环境可以通过 `python -m pip install -e ".[dev,analysis]"` 安装完整依赖。
+程序要求 64 位 Python 3.11+ 和 NumPy。`setup_local.cmd` 会自动完成应用运行环境；仓库开发环境也可通过 `python -m pip install -e ".[dev,analysis]"` 安装完整依赖。
 
 ## 功能
 
@@ -41,9 +52,23 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 - 生成当前眼模型的最小值/默认值/最大值三水平范围网格，并报告因外镜机械顺序而跳过的组合。
 - 将当前工况导出为 JSON，将结果矩阵导出为带 UTF-8 BOM 的 CSV。
 - 将当前结果表导出为确定性的 Zemax 审计 ZIP，内含模型快照、哈希、通用 ZOS-API runner 和独立 verifier。
+- 在网页内自动发现 OpticStudio，检查 Windows、Python、C# 编译器和三个 ZOS-API DLL；只读预检不会启动 Zemax。
+- 通过“三步验证向导”显式运行 1 个工况连接测试，只有许可证、四条光线、误差、`.zos` 与 SHA-256 全部通过才显示 PASS。
+- 连接测试通过后，一键在真实 OpticStudio 中运行当前结果表；任务在后台串行执行，避免同时占用多个许可证。
+- 下载包含批次快照、验证报告、结果 CSV 和 `.zos` 的可移交证据包；机器编译目录和原始日志不进入证据包或仓库。
 - 直接打开版本化 PDF 报告、验证 JSON 和基准矩阵。
 
-## 导出并用 OpticStudio 验证
+## 最简单的 OpticStudio 验证方式
+
+1. 滚动到“04 Zemax 验证向导”。
+2. 点击“自动检测 OpticStudio”。这一步不会启动 Zemax，许可证仍应显示“未测试”。
+3. 检测通过后，勾选显式确认框，点击“运行 1 工况连接测试”。
+4. 等待明确的 `PASS · 验证通过`。界面同时显示 OpticStudio 版本、通过工况数和最大边界误差。
+5. PASS 后可点击“在 Zemax 运行当前结果表”；结束后下载可移交审计证据包。
+
+网页不会在载入或只读检测时启动 OpticStudio。许可证状态只有真实 ZOS-API 运行返回有效时才显示“有效 · 已实测”。服务器仅监听 `127.0.0.1`，不向云端发送参数。
+
+## 离线批次与命令行备用方式
 
 结果表加载后，点击“生成 Zemax 审计批次”。解压下载的 ZIP 后执行：
 
@@ -63,6 +88,10 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run_zemax_batch.ps1 `
 - `POST /api/range-sensitivity`：计算有效焦距、眼轴或瞳孔的三水平灵敏度。
 - `POST /api/range-grid`：计算当前眼模型的三水平范围网格。
 - `POST /api/zemax-batch`：重新计算传入工况并下载确定性的可审计 Zemax ZIP。
+- `GET /api/zemax/preflight`：只读检测本机 Zemax 前置条件，不启动 OpticStudio。
+- `POST /api/zemax/jobs`：在 `confirm=true` 时显式提交 1 工况连接测试或当前表格任务。
+- `GET /api/zemax/jobs/<job-id>`：读取后台任务状态与脱敏验证摘要。
+- `GET /api/zemax/jobs/<job-id>/evidence.zip`：下载不含构建目录和机器日志的可移交证据包。
 - `GET /api/case.json?...`：下载一个工况。
 - `GET /api/sweep.csv?...`：下载筛选矩阵或完整矩阵。
 - `GET /api/range-sensitivity.csv?...` 与 `GET /api/range-grid.csv?...`：下载范围探索结果。

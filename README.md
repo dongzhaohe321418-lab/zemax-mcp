@@ -10,7 +10,7 @@ The repository also contains a fully executed 650 nm posterior-pole illumination
 
 ### Dedicated experiment application
 
-The experiment now includes a local, purpose-built graphical application. Its baseline mode reproduces the validated fixed-focal grid, while a separate PPT-range explorer allows independent manual adjustment of declared focal-length, axial-length, pupil, object-demand, and concave-lens values without fitting focal length to object distance. It calculates individual cases, sensitivity sweeps, the full 252-case baseline, and three-level range grids; it also draws the paraxial footprint and exports JSON/CSV without sending data to a cloud service. On Windows, double-click [`experiments/eye_illumination/app/launch_app.cmd`](experiments/eye_illumination/app/launch_app.cmd), or run:
+The experiment now includes a local, purpose-built Web GUI. Its baseline mode reproduces the validated fixed-focal grid, while a separate PPT-range explorer allows independent manual adjustment of declared focal-length, axial-length, pupil, object-demand, and concave-lens values without fitting focal length to object distance. It calculates individual cases, sensitivity sweeps, the full 252-case baseline, and three-level range grids; it also draws the paraxial footprint and exports JSON/CSV without sending data to a cloud service. First-time Windows users can double-click [`experiments/eye_illumination/app/setup_local.cmd`](experiments/eye_illumination/app/setup_local.cmd); subsequent runs use [`launch_app.cmd`](experiments/eye_illumination/app/launch_app.cmd), or:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1
@@ -18,7 +18,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 
 Then open `http://127.0.0.1:8765/`. Python 3.11 and the project analysis dependencies are required; OpticStudio is not needed for interactive ABCD calculations.
 
-The results table can also be frozen as a deterministic, auditable Zemax batch ZIP. Each package includes validated `cases.csv`, expected ray boundaries, model/configuration snapshots, SHA-256 hashes, a generic C# ZOS-API standalone runner, immutable run-directory logic, saved `.zos` systems, and an independent Python verifier that emits an explicit `PASS` or `FAIL`. Generating a package is not represented as a Zemax result: the package manifest remains `NOT_RUN_IN_ZEMAX` until a licensed OpticStudio run produces a passing verification report. See the detailed Chinese [`Zemax connection and audit guide`](experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md).
+The Web GUI includes a three-step Zemax verification wizard: read-only local discovery, an explicitly confirmed one-case licensed connection test, and a clear PASS/FAIL summary before table-scale execution is unlocked. The results table can also be frozen as a deterministic, auditable Zemax batch ZIP. Each package includes validated `cases.csv`, expected ray boundaries, model/configuration snapshots, SHA-256 hashes, a generic C# ZOS-API standalone runner, immutable run-directory logic, saved `.zos` systems, and an independent Python verifier. Generating a package is not represented as a Zemax result: the package manifest remains `NOT_RUN_IN_ZEMAX` until a licensed OpticStudio run produces a passing verification report. See the detailed Chinese [`Zemax connection and audit guide`](experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md).
 
 ```text
 MCP host (Codex / Claude Code)
