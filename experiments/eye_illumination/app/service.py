@@ -108,6 +108,16 @@ class ExperimentService:
             "source_demands_D": demands,
             "case_count": case_count,
             "model": "independent-parameter reduced-angle ABCD",
+            "validation_scope": {
+                "calculation": "verified within the first-order paraxial model",
+                "real_experiment": "NOT_READY",
+                "required_before_use": [
+                    "anatomical real-ray model",
+                    "calibrated radiometry",
+                    "optical-safety assessment",
+                    "institutional ethics approval",
+                ],
+            },
             "modes": ["baseline", "range"],
             "range_explorer": {
                 "mode_id": self.range_config["mode_id"],

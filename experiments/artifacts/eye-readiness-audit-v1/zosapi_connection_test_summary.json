@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "tested_at_utc": "2026-08-18T07:54:15.567654+00:00",
+  "batch_id": "eye-zemax-9574a22ef3221bac",
+  "application": "Ansys Zemax OpticStudio",
+  "application_version": "24.1.0",
+  "api_license_valid": true,
+  "model_scope": "Paraxial equivalent-eye boundary agreement only",
+  "input_case": {
+    "eye_id": "chick_30_45d",
+    "mode": "baseline",
+    "fixed_focal_length_mm": 7.5,
+    "reported_axial_length_mm": 11.7,
+    "pupil_diameter_mm": 2.0,
+    "source_demand_D": 60.0,
+    "external_lens_power_D": 0.0
+  },
+  "verification": {
+    "status": "PASS",
+    "expected_case_count": 1,
+    "passed_case_count": 1,
+    "failed_case_count": 0,
+    "maximum_boundary_error_um": 1.3322676295501878e-12,
+    "issues": []
+  },
+  "does_not_establish": [
+    "real-ray anatomical accuracy",
+    "absolute retinal irradiance",
+    "photobiological safety",
+    "biological efficacy"
+  ]
+}

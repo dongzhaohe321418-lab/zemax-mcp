@@ -34,6 +34,7 @@ def main() -> int:
     demand_levels = sorted(float(value) for value in fixed.source_demand_D.unique())
     expected_rows = 3 * 3 * 4 * 7
     zos_files = list((RESULTS / "zemax").glob("*_fixed_*.zos"))
+    case_key = ["eye_id", "fixed_focal_length_mm", "pupil_diameter_mm", "source_demand_D"]
     checks = {
         "fixed_focal_sweep_rows": int(len(fixed)),
         "expected_fixed_focal_sweep_rows": expected_rows,
@@ -53,6 +54,16 @@ def main() -> int:
         "zos_bound_max_error_um": float(zos.bound_error_um.max()),
         "opticstudio_version": str(zos.opticstudio_version.iloc[0]),
         "api_license_valid": bool(zos.api_license_valid.iloc[0]),
+        "duplicate_case_count": int(fixed.duplicated(case_key).sum()),
+        "missing_value_count": int(fixed.isna().sum().sum()),
+        "minimum_maximum_source_pupil_ray_angle_deg": float(fixed.maximum_source_pupil_ray_angle_deg.min()),
+        "maximum_maximum_source_pupil_ray_angle_deg": float(fixed.maximum_source_pupil_ray_angle_deg.max()),
+        "cases_above_paraxial_angle_screen": int(
+            (fixed.maximum_source_pupil_ray_angle_deg > fixed.paraxial_screening_angle_limit_deg).sum()
+        ),
+        "cases_below_f_number_4": int((fixed.working_f_number < 4.0).sum()),
+        "validation_scope": "first-order paraxial calculation and equivalent OpticStudio Paraxial boundary only",
+        "real_experiment_readiness": "NOT_READY_CALIBRATION_AND_SAFETY_REQUIRED",
     }
     checks["overall_status"] = "passed" if (
         checks["fixed_focal_sweep_rows"] == expected_rows
@@ -68,6 +79,8 @@ def main() -> int:
         and checks["zos_system_file_count"] == 6
         and checks["zos_bound_max_error_um"] < 1e-6
         and checks["api_license_valid"]
+        and checks["duplicate_case_count"] == 0
+        and checks["missing_value_count"] == 0
     ) else "failed"
     (RESULTS / "validation_report.json").write_text(json.dumps(checks, indent=2), encoding="utf-8")
 

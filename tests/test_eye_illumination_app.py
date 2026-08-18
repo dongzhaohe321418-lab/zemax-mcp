@@ -31,6 +31,7 @@ def test_public_config_exposes_only_fixed_grid(service: ExperimentService) -> No
     assert config["eyes"][0]["fixed_focal_lengths_mm"] == [7.5, 8.0, 8.5]
     assert config["eyes"][1]["fixed_focal_lengths_mm"] == [13.5, 15.1, 16.7]
     assert config["eyes"][2]["fixed_focal_lengths_mm"] == [12.8, 14.75, 16.7]
+    assert config["validation_scope"]["real_experiment"] == "NOT_READY"
 
 
 def test_public_config_distinguishes_ppt_ranges_from_model_assumptions(service: ExperimentService) -> None:
@@ -53,6 +54,10 @@ def test_calculate_matches_validated_adult_case(service: ExperimentService) -> N
     assert result["source_distance_mm"] == pytest.approx(16.6666666667)
     assert result["conservative_source_diameter_mm"] == pytest.approx(10.3885111134)
     assert result["geometric_min_source_diameter_mm"] == pytest.approx(0.9335227095)
+    assert result["maximum_source_pupil_ray_angle_deg"] > 10.0
+    assert result["working_f_number"] == pytest.approx(16.7 / 5.0)
+    assert result["paraxial_screening_pass"] is False
+    assert result["real_experiment_readiness"] == "BLOCKED_CALIBRATION_REQUIRED"
     assert "accommodation_D" not in result
 
 
@@ -140,6 +145,18 @@ def test_http_server_serves_app_and_calculation() -> None:
     try:
         with urlopen(f"{base}/api/health", timeout=5) as response:
             assert json.load(response)["status"] == "ok"
+        with urlopen(f"{base}/readiness.json", timeout=5) as response:
+            assert json.load(response)["real_experiment_readiness_status"] == "NOT_READY"
+        with urlopen(f"{base}/readiness.md", timeout=5) as response:
+            readiness_markdown = response.read().decode("utf-8")
+            assert response.headers["Content-Type"] == "text/markdown; charset=utf-8"
+            assert "真实实验适用性验证报告" in readiness_markdown
+        with urlopen(f"{base}/report.html", timeout=5) as response:
+            report_html = response.read().decode("utf-8")
+            assert response.headers["Content-Type"] == "text/html"
+            assert "'unsafe-inline'" in response.headers["Content-Security-Policy"]
+            assert "真实实验状态为" in report_html
+            assert "NOT READY" in report_html
         with urlopen(f"{base}/api/sweep.csv", timeout=5) as response:
             csv_body = response.read().decode("utf-8-sig")
             assert response.headers["Content-Disposition"] == 'attachment; filename="eye_illumination_252_cases.csv"'

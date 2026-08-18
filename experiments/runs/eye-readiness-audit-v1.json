@@ -1,0 +1,89 @@
+{
+  "application": "Ansys Zemax OpticStudio and independent Python audit",
+  "application_version": "24.1.0",
+  "artifacts": [
+    "experiments/eye_illumination/results/real_experiment_readiness.json",
+    "experiments/eye_illumination/results/real_experiment_readiness.md",
+    "experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf",
+    "experiments/eye_illumination/notebooks/eye_illumination_analysis.ipynb",
+    "experiments/artifacts/eye-readiness-audit-v1/model_applicability_cn.png",
+    "experiments/artifacts/eye-readiness-audit-v1/zosapi_connection_test_summary.json",
+    "experiments/artifacts/eye-readiness-audit-v1/zemax_connection_test_evidence.zip"
+  ],
+  "backend": "licensed_zosapi_plus_independent_closed_form_recalculation",
+  "experiment_id": "eye-readiness-audit-v1",
+  "hypothesis": "The 252 stored rows will reproduce to rounding tolerance and the licensed OpticStudio paraxial boundary test will pass, but the current anatomical and radiometric evidence will be insufficient for direct live-experiment release.",
+  "inputs": {
+    "lens": {
+      "eye_models": [
+        "chick_30_45d",
+        "child_6y",
+        "adult_18y"
+      ],
+      "fixed_equivalent_focal_lengths_per_eye": 3,
+      "pupil_diameters_mm": [
+        2.0,
+        2.5,
+        3.0,
+        3.5
+      ]
+    },
+    "system": {
+      "licensed_zosapi_connection_case": {
+        "external_lens_power_D": 0.0,
+        "eye_id": "chick_30_45d",
+        "fixed_focal_length_mm": 7.5,
+        "pupil_diameter_mm": 2.0,
+        "reported_axial_length_mm": 11.7,
+        "source_demand_D": 60.0
+      },
+      "matrix_case_count": 252,
+      "project_paraxial_angle_screen_deg": 10.0,
+      "project_working_f_number_screen": 4.0,
+      "source_demands_D": [
+        60,
+        70,
+        80,
+        90,
+        100,
+        110,
+        120
+      ],
+      "wavelength_nm": 650
+    }
+  },
+  "next_step": "Obtain traceable anatomical prescriptions and measured source radiometry, build and cross-check sequential real-ray plus non-sequential illumination models, calibrate on a detector or phantom eye with uncertainty, complete optical-safety evaluation and institutional ethics approvals, then create a new immutable release-readiness record.",
+  "objective": "Audit every calculated eye-illumination result independently, quantify whether the first-order model remains inside its intended approximation domain, and determine whether the outputs can be released as real-experiment settings.",
+  "observations": "All stored arithmetic reproduces within 1e-7, with the residual explained by decimal CSV rounding. A licensed OpticStudio 24.1.0 ZOS-API connection test passed 1/1 cases. However, every matrix case exceeds the project 10-degree paraxial angle screen, 140/252 cases are faster than F/4, and the source data do not define full anatomy, absolute radiometry, exposure, safety, calibration, or ethics evidence. The calculation is internally reliable only within its declared first-order model and is not released for direct live use.",
+  "payload_sha256": "b392901493fe1505032ad48b11a111e0456dd02abf8de1550ee4fb999dfe594f",
+  "recorded_at_utc": "2026-08-18T07:56:34.783415+00:00",
+  "results": {
+    "mtf": {
+      "reason": "MTF is not the release criterion for this posterior-pole illumination coverage and safety problem.",
+      "status": "NOT_RUN"
+    },
+    "paraxial": {
+      "calculation_validation_status": "VERIFIED_WITHIN_FIRST_ORDER_MODEL",
+      "cases_above_10_deg_screen": 252,
+      "cases_below_f_number_4": 140,
+      "cases_passing_both_project_screens": 0,
+      "decision": "DO_NOT_USE_AS_FINAL_EXPOSURE_OR_SAFETY_SETTINGS",
+      "duplicate_case_count": 0,
+      "licensed_zosapi_case_count": 1,
+      "licensed_zosapi_maximum_boundary_error_um": 1.3322676295501878e-12,
+      "licensed_zosapi_passed_case_count": 1,
+      "maximum_conservative_diameter_error_mm": 4.590651414559943e-09,
+      "maximum_eye_power_error_D": 3.3333350302200415e-08,
+      "maximum_maximum_ray_angle_deg": 37.588272908531465,
+      "minimum_maximum_ray_angle_deg": 15.019589674540413,
+      "missing_numeric_value_count": 0,
+      "real_experiment_readiness_status": "NOT_READY",
+      "row_count": 252
+    },
+    "spot_diagram": {
+      "reason": "The current model uses ideal Paraxial surfaces and lacks a traceable anatomical real-ray prescription.",
+      "status": "NOT_RUN"
+    }
+  },
+  "schema_version": 1
+}

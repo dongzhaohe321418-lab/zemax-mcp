@@ -2,6 +2,8 @@
 
 本目录把用户提供的《小鸡和人眼光学仿真参数》转换为可重复执行、可审计的光学实验。当前版本修正了旧模型“连续改变等效焦距以强制调焦”的假设：后极平面由已知眼轴固定，每种眼只取三个离散固定焦距，物距、瞳孔和焦距均作为独立输入。
 
+**严格适用范围：**现有计算已经通过独立闭式复算和真实 OpticStudio Paraxial 一致性检查，但不能直接作为活体实验处方。252 个主工况的最大源边缘—瞳孔边缘角均超过项目设置的 10° 近轴筛查线，140 个工况的工作 F 数低于 4；程序因此把真实实验状态固定显示为 `NOT_READY`。必须完成真实曲面眼模型、real-ray/非序列辐射度验证、台架标定、ISO/IEC 光安全评价和伦理审批后才能放行。完整证据见 [`results/real_experiment_readiness.md`](results/real_experiment_readiness.md)。
+
 ## 专用实验程序
 
 `app/` 是为本实验制作的本地交互程序。它不是静态报告：界面直接调用版本化的 `eye_model.py`。固定基准模式严格复现三个焦距和 252 工况；独立的 PPT 范围探索模式允许手动改变有效焦距、眼轴、瞳孔、60–120 D 物方需求及外置凹透镜，并生成三水平灵敏度曲线和范围网格。程序不会为了满足物距而自动改变焦距。
@@ -39,7 +41,8 @@ y_retina = m_source * y_source + m_pupil * y_pupil
 每行输出两种尺寸：
 
 - `geometric_min_source_diameter_mm`：外部光线 footprint 刚好达到目标边缘的理论最小值。
-- `conservative_source_diameter_mm`：整个后极目标位于源像与瞳孔 footprint 全重叠平台内的推荐值。
+- `conservative_source_diameter_mm`：整个后极目标位于源像与瞳孔 footprint 全重叠平台内的近轴候选值，不是活体实验放行值。
+- `maximum_source_pupil_ray_angle_deg`、`working_f_number`：近轴适用性筛查指标。
 
 几何最小值可能为零，仅表示瞳孔离焦 footprint 已经达到目标边缘，不表示实际可以使用零面积光源。
 
@@ -97,3 +100,5 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 ## 限制
 
 当前结果是近轴几何覆盖和相对光线计数，不是绝对视网膜辐照度或眼组织安全结论。等效主平面、三个实际焦距、光源辐亮度、组织透射、像差和覆盖验收阈值仍需实测确认。范围模式可以加入外置近轴负镜，但这仍是等效面，不应冒充具有厚度、材料和像差的真实镜片。
+
+真实实验还必须由本机构的光安全和伦理体系审核：眼科照明核对 ISO 15004-2:2024，非相干 LED/灯源核对 IEC 62471，激光核对 IEC 60825-1；小鸡实验取得动物伦理/IACUC 等效审批，人体实验取得 IRB/伦理审批与知情同意。仓库只提供可审计的计算和放行清单，不代替这些正式审批。

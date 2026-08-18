@@ -2,6 +2,8 @@
 
 **The main product in this repository is a local Web GUI for chick and human-eye posterior-pole illumination experiments.** It lets a user adjust the declared optical ranges, calculate reproducible source parameters, generate complete case tables, run guided OpticStudio verification, and download auditable evidence without working at a command line.
 
+> **Real-experiment safety gate:** the current outputs are verified only within a first-order paraxial equivalent-eye model. They are not final source, power, or exposure settings for an animal or human eye. The application now reports edge-ray angle and working F-number diagnostics and keeps real-experiment status at `NOT_READY` until an anatomical real-ray model, calibrated radiometry, optical-safety assessment, and institutional ethics approval are supplied.
+
 **MCP is a secondary, optional automation interface.** It remains available for constrained Codex or Claude Code workflows, but it is not required to use the experiment program.
 
 ## Start the program
@@ -48,6 +50,7 @@ The completed 650 nm study includes a 252-row matrix, four pupils per eye, conse
 - [Experiment overview](experiments/eye_illumination/README.md)
 - [Web application guide](experiments/eye_illumination/app/README.md)
 - [Zemax connection and audit guide](experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md)
+- [Real-experiment readiness audit](experiments/eye_illumination/results/real_experiment_readiness.md)
 - [Chinese PDF report](experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf)
 - [Immutable experiment records](experiments/runs/)
 - [Auditable binary artifacts](experiments/artifacts/)

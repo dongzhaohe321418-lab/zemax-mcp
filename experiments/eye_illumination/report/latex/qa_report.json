@@ -1,7 +1,7 @@
 {
   "pdf": "eye_illumination_experiment_report.pdf",
-  "page_count": 21,
-  "embedded_raster_image_instances": 5,
+  "page_count": 25,
+  "embedded_raster_image_instances": 6,
   "font_names": [
     "BYANTN+CMR8",
     "DPKYKM+SimSun",
@@ -9,6 +9,7 @@
     "GGIGJT+CMMI10",
     "HGULVP+SimSun",
     "ICVCHA+TimesNewRomanPS-BoldMT",
+    "IYJQCM+CMSY7",
     "JQUVPC+CMR10",
     "KMVWNC+CMR12",
     "LIKDDX+SimSun",
@@ -38,9 +39,9 @@
   "status": "passed",
   "preview_pages": [
     0,
-    5,
-    10,
-    15,
-    20
+    6,
+    12,
+    18,
+    24
   ]
 }

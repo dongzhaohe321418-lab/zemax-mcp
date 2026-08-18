@@ -47,6 +47,8 @@ try {
 
     & $PythonPath "experiments\eye_illumination\validate_results.py"
     if ($LASTEXITCODE -ne 0) { throw "Result validation failed." }
+    & $PythonPath "experiments\eye_illumination\validate_real_experiment_readiness.py"
+    if ($LASTEXITCODE -ne 0) { throw "Real-experiment readiness audit failed to reproduce the model." }
     & $PythonPath "experiments\eye_illumination\make_notebook.py"
     if ($LASTEXITCODE -ne 0) { throw "Notebook generation failed." }
     & $PythonPath -m jupyter execute "experiments\eye_illumination\notebooks\eye_illumination_analysis.ipynb" --inplace

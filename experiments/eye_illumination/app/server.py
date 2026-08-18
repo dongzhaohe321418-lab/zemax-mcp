@@ -28,9 +28,12 @@ APP_DIR = Path(__file__).resolve().parent
 STATIC_DIR = APP_DIR / "static"
 EXPERIMENT_DIR = APP_DIR.parent
 ARTIFACTS = {
+    "/report.html": EXPERIMENT_DIR / "report" / "eye_illumination_report.html",
     "/report.pdf": EXPERIMENT_DIR / "report" / "latex" / "eye_illumination_experiment_report.pdf",
     "/results.csv": EXPERIMENT_DIR / "results" / "fixed_focal_source_sweep.csv",
     "/validation.json": EXPERIMENT_DIR / "results" / "validation_report.json",
+    "/readiness.json": EXPERIMENT_DIR / "results" / "real_experiment_readiness.json",
+    "/readiness.md": EXPERIMENT_DIR / "results" / "real_experiment_readiness.md",
     "/zemax-guide.md": EXPERIMENT_DIR / "ZEMAX_CONNECTION_GUIDE.md",
 }
 STATIC_FILES = {
@@ -53,6 +56,7 @@ class ExperimentHandler(BaseHTTPRequestHandler):
         length: int,
         status: HTTPStatus = HTTPStatus.OK,
         extra_headers: dict[str, str] | None = None,
+        content_security_policy: str | None = None,
     ) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
@@ -62,7 +66,8 @@ class ExperimentHandler(BaseHTTPRequestHandler):
         self.send_header("X-Frame-Options", "DENY")
         self.send_header(
             "Content-Security-Policy",
-            "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'",
+            content_security_policy
+            or "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'",
         )
         for name, value in (extra_headers or {}).items():
             self.send_header(name, value)
@@ -79,9 +84,19 @@ class ExperimentHandler(BaseHTTPRequestHandler):
             return
         body = path.read_bytes()
         content_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
-        if path.suffix.lower() in {".csv", ".json"}:
+        if path.suffix.lower() == ".md":
+            content_type = "text/markdown"
+        if path.suffix.lower() in {".csv", ".json", ".md"}:
             content_type += "; charset=utf-8"
-        self._headers(content_type, len(body))
+        report_csp = None
+        if path.name == "eye_illumination_report.html":
+            # The validated portable report intentionally embeds its own CSS
+            # and JavaScript so it remains a single offline-auditable file.
+            report_csp = (
+                "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; "
+                "style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'"
+            )
+        self._headers(content_type, len(body), content_security_policy=report_csp)
         self.wfile.write(body)
 
     def _download_json(self, payload: dict[str, Any], filename: str) -> None:

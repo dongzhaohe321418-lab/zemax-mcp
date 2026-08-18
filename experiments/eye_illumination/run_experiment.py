@@ -245,7 +245,7 @@ def run() -> None:
         "main_sweep_rows": int(len(fixed)),
         "headline_rows": int(len(headline)),
         "outputs": sorted(path.name for path in RESULTS.iterdir()) + sorted(path.name for path in FIGURES.iterdir()),
-        "model_status": "executed fixed-focal reduced-eye model; selected footprint bounds cross-validated by ZOS-API",
+        "model_status": "executed first-order fixed-focal reduced-eye model; selected footprint bounds cross-validated only against an equivalent OpticStudio Paraxial model",
     }
     (RESULTS / "run_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 

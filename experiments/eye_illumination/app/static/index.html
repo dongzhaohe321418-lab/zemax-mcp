@@ -27,6 +27,7 @@
       <div class="hero-actions">
         <a class="button primary" href="#zemax-console">打开 Zemax 验证向导</a>
         <a class="button secondary" href="/report.pdf" target="_blank">打开完整 PDF 报告</a>
+        <a class="text-link" href="/report.html" target="_blank">真实实验适用性报告 <span>↗</span></a>
         <a class="text-link" href="/zemax-guide.md" target="_blank">Zemax 接入与审计指南 <span>↗</span></a>
         <a class="text-link" href="/validation.json" target="_blank">查看验证记录 <span>↗</span></a>
       </div>
@@ -35,6 +36,12 @@
         <div><span>完整矩阵</span><strong><b id="case-count">—</b> cases</strong></div>
         <div><span>计算模型</span><strong>Reduced-angle ABCD</strong></div>
       </div>
+    </section>
+
+    <section class="readiness-gate" aria-labelledby="readiness-title">
+      <div><p class="eyebrow">REAL-EXPERIMENT SAFETY GATE</p><h2 id="readiness-title">真实实验状态：未就绪</h2></div>
+      <p>当前数值仅通过近轴等效模型内部复算和 OpticStudio Paraxial 一致性验证。它不能直接作为人体或动物眼部照明的最终尺寸、功率或曝光处方；必须先完成真实曲面光线追迹、辐射度标定、光安全评价和伦理审批。</p>
+      <a class="button secondary" href="/readiness.json" target="_blank">查看机器可读审计</a>
     </section>
 
     <section class="workspace" aria-label="实验控制台">
@@ -120,9 +127,9 @@
 
         <div class="kpi-grid">
           <article class="kpi featured">
-            <span>推荐全重叠光源直径</span>
+            <span>近轴全重叠候选直径</span>
             <strong id="conservative-value">—</strong>
-            <small>mm · 工程推荐值</small>
+            <small>mm · 仅用于一阶机械预估</small>
           </article>
           <article class="kpi">
             <span>几何最小光源直径</span>
@@ -143,6 +150,12 @@
 
         <div id="interpretation" class="interpretation" role="status">
           <span class="status-dot"></span><p>选择工况并运行计算。</p>
+        </div>
+
+        <div class="model-scope-grid" aria-label="模型适用性诊断">
+          <div><span>最大源边缘—瞳孔边缘角</span><strong id="edge-angle-value">—</strong></div>
+          <div><span>工作 F 数</span><strong id="f-number-value">—</strong></div>
+          <div><span>真实实验放行</span><strong id="readiness-value" class="fail-text">未就绪</strong></div>
         </div>
 
         <div class="diagram-card">
@@ -184,7 +197,7 @@
           </select>
           <label for="metric-select">纵轴</label>
           <select id="metric-select">
-            <option value="conservative_source_diameter_mm">推荐全重叠直径</option>
+            <option value="conservative_source_diameter_mm">近轴全重叠候选直径</option>
             <option value="geometric_min_source_diameter_mm">几何最小直径</option>
             <option value="pupil_blur_diameter_mm">瞳孔 footprint</option>
           </select>
@@ -233,7 +246,7 @@
       </div>
       <div class="table-shell">
         <table>
-          <thead><tr><th>眼模型</th><th>有效焦距 / mm</th><th>眼轴 / mm</th><th>瞳孔 / mm</th><th>外镜 / D</th><th>需求 / D</th><th>物距 / mm</th><th>几何最小 / mm</th><th>推荐全重叠 / mm</th><th>后极失焦 / D</th></tr></thead>
+          <thead><tr><th>眼模型</th><th>有效焦距 / mm</th><th>眼轴 / mm</th><th>瞳孔 / mm</th><th>外镜 / D</th><th>需求 / D</th><th>物距 / mm</th><th>几何最小 / mm</th><th>近轴候选 / mm</th><th>后极失焦 / D</th></tr></thead>
           <tbody id="results-body"><tr><td colspan="10" class="empty">正在载入实验配置…</td></tr></tbody>
         </table>
       </div>
@@ -246,7 +259,7 @@
           <span class="step">04</span>
           <div><p>ONE-CLICK ZEMAX VERIFICATION</p><h2 id="zemax-console-title">Zemax 验证向导</h2></div>
         </div>
-        <p>无需命令行。按 1 → 2 → 3 操作；只有真实 OpticStudio 与独立校验同时通过时，界面才显示 PASS。</p>
+        <p>无需命令行。按 1 → 2 → 3 操作；这里的 PASS 只表示 OpticStudio Paraxial 与解析模型一致，不代表真实眼、安全剂量或生物学结果通过。</p>
       </div>
 
       <div class="zemax-wizard">

@@ -4,6 +4,8 @@
 
 本实验程序采用“两阶段”连接方式：网页程序负责参数选择、范围约束、批次冻结和解析预期值；ZOS-API Standalone Application 负责在真实 OpticStudio 中建立顺序系统、批量追迹、保存 `.zos`；独立 Python 校验器负责把输入、Zemax 输出和文件哈希逐项核对。
 
+> 本指南中的 `PASS` 只表示理想 **Paraxial 等效眼**与解析 ABCD 边界一致。它不验证真实角膜/晶状体曲面、像差、绝对视网膜辐照度、光安全或生物学结果，也不能单独放行动物或人体实验。真实实验阻断条件见 [`results/real_experiment_readiness.md`](results/real_experiment_readiness.md)。
+
 ```text
 浏览器实验台
   └─ 经过范围校验的结果表

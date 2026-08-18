@@ -17,6 +17,9 @@ from service import ExperimentService  # noqa: E402
 
 
 def fake_ready_environment(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+    # Keep the fixture independent from run_all.ps1, which intentionally sets
+    # this variable before exercising the licensed OpticStudio validation.
+    monkeypatch.delenv("ZEMAX_OPTICSTUDIO_DIR", raising=False)
     install = tmp_path / "Ansys Zemax OpticStudio Test"
     install.mkdir()
     for name in zemax_local.REQUIRED_ASSEMBLIES:

@@ -21,7 +21,7 @@ def main() -> None:
         sys.stdout.reconfigure(encoding="utf-8")
     doc = fitz.open(PDF)
     text = "\n".join(page.get_text() for page in doc)
-    required = ["技术摘要", "ABCD", "OpticStudio", "蒙特卡洛", "可复现工作流", "限制、不确定性", "附录"]
+    required = ["技术摘要", "ABCD", "OpticStudio", "蒙特卡洛", "可复现工作流", "限制、不确定性", "真实实验状态", "附录"]
     missing = [item for item in required if item not in text]
     image_count = sum(len(page.get_images(full=True)) for page in doc)
     fonts = sorted({font[3] for page in doc for font in page.get_fonts(full=True)})
