@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "mode_id": "ppt-range-explorer-v1",
+  "source_presentation": "experiments/eye_illumination/source/小鸡和人眼光学仿真参数.pptx",
+  "source_demand_D": {
+    "minimum": 60.0,
+    "maximum": 120.0,
+    "default": 60.0,
+    "step": 1.0,
+    "sweep_values": [60, 70, 80, 90, 100, 110, 120],
+    "provenance": "当前实验要求；物方需求只决定光源距离，绝不解释为眼调节量"
+  },
+  "external_lens_powers_D": {
+    "values": [0, -1, -3, -5, -10, -15, -20],
+    "default": 0,
+    "provenance": "PPT 第 5 页；其中列出的 +15 D 因页面明确说明为凹透镜而解释为 -15 D",
+    "note": "非零屈光力采用基准配置中的暂定顶点距；光学元件机械顺序无效时拒绝计算"
+  },
+  "eyes": {
+    "chick_30_45d": {
+      "effective_focal_length_mm": {"minimum": 7.5, "maximum": 8.5, "default": 8.0, "step": 0.01, "provenance": "PPT 第 1 页叙述区间（PPT slide 1 narrative range）"},
+      "axial_length_mm": {"minimum": 10.5, "maximum": 12.5, "default": 11.7, "step": 0.1, "provenance": "PPT 第 1 页叙述区间（PPT slide 1 narrative range）"},
+      "pupil_diameter_mm": {"minimum": 2.0, "maximum": 3.5, "default": 3.5, "step": 0.1, "provenance": "PPT 第 1 页叙述区间（PPT slide 1 narrative range）"},
+      "fixed_parameters": {"posterior_pole_diameter_mm": 3.0, "wavelength_nm": 650.0, "image_medium_refractive_index": 1.336},
+      "reference_component_parameters": [
+        {"name": "corneal_curvature_radius_mm", "minimum": 3.84, "maximum": 4.0, "provenance": "PPT slide 1"},
+        {"name": "corneal_equivalent_power_D", "minimum": 85.0, "maximum": 90.0, "provenance": "PPT slide 1"},
+        {"name": "crystalline_lens_thickness_mm", "minimum": 2.7, "maximum": 2.9, "provenance": "PPT slide 1"},
+        {"name": "crystalline_lens_equivalent_power_D", "minimum": 65.0, "maximum": 70.0, "provenance": "PPT slide 1"}
+      ]
+    },
+    "child_6y": {
+      "effective_focal_length_mm": {"minimum": 13.5, "maximum": 16.7, "default": 15.1, "step": 0.01, "provenance": "PPT 第 2 页叙述区间（PPT slide 2 narrative range）"},
+      "axial_length_mm": {"minimum": 22.5, "maximum": 23.5, "default": 23.0, "step": 0.1, "provenance": "模型灵敏度假设（Model sensitivity assumption）；PPT 第 2 页仅给出约 23.0 mm，未给区间"},
+      "pupil_diameter_mm": {"minimum": 2.0, "maximum": 5.0, "default": 5.0, "step": 0.1, "provenance": "PPT 第 2 页叙述区间（PPT slide 2 narrative range）"},
+      "fixed_parameters": {"posterior_pole_diameter_mm": 6.0, "wavelength_nm": 650.0, "image_medium_refractive_index": 1.336},
+      "reference_component_parameters": [
+        {"name": "corneal_equivalent_focal_length_mm", "value": 23.1, "provenance": "PPT slide 2 approximate value"},
+        {"name": "crystalline_lens_equivalent_focal_length_mm", "value": 40.8, "provenance": "PPT slide 2 approximate value"}
+      ]
+    },
+    "adult_18y": {
+      "effective_focal_length_mm": {"minimum": 12.8, "maximum": 16.7, "default": 14.75, "step": 0.01, "provenance": "PPT 第 3 页叙述区间（PPT slide 3 narrative range）"},
+      "axial_length_mm": {"minimum": 23.1, "maximum": 24.1, "default": 23.6, "step": 0.1, "provenance": "模型灵敏度假设（Model sensitivity assumption）；PPT 第 3 页仅给出约 23.6 mm，未给区间"},
+      "pupil_diameter_mm": {"minimum": 2.0, "maximum": 5.0, "default": 5.0, "step": 0.1, "provenance": "PPT 第 3 页叙述区间（PPT slide 3 narrative range）"},
+      "fixed_parameters": {"posterior_pole_diameter_mm": 6.0, "wavelength_nm": 650.0, "image_medium_refractive_index": 1.336},
+      "reference_component_parameters": [
+        {"name": "corneal_equivalent_focal_length_mm", "value": 23.3, "provenance": "PPT slide 3 approximate value"},
+        {"name": "crystalline_lens_equivalent_focal_length_mm", "value": 43.7, "provenance": "PPT slide 3 approximate value"}
+      ]
+    }
+  },
+  "identifiability_note": "角膜和晶状体部件值只作为来源参考。PPT 未提供在校准解剖 ABCD 模型中独立改变这些参数所需的面间距、折射率、完整曲率和主平面数据。"
+}

@@ -20,7 +20,7 @@ if (-not $NoBrowser) {
     $arguments += "--open"
 }
 
-Write-Host "Starting the fixed-focal eye experiment application..."
+Write-Host "Starting the posterior-pole eye parameter experiment application..."
 Write-Host "Python: $version"
 Write-Host "Local address: http://127.0.0.1:$Port/"
 & $PythonPath @arguments

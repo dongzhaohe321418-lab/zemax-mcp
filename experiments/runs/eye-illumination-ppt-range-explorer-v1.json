@@ -1,0 +1,112 @@
+{
+  "application": {
+    "local_only": true,
+    "name": "OpticBench posterior-pole eye parameter experiment app",
+    "version": "range-explorer-v1"
+  },
+  "artifacts": [
+    "experiments/eye_illumination/app/range_parameters.json",
+    "experiments/eye_illumination/app/service.py",
+    "experiments/eye_illumination/app/server.py",
+    "experiments/eye_illumination/app/static/index.html",
+    "experiments/eye_illumination/app/static/app.js",
+    "experiments/eye_illumination/app/static/styles.css",
+    "experiments/eye_illumination/eye_model.py",
+    "tests/test_eye_illumination_app.py"
+  ],
+  "experiment_id": "eye-illumination-ppt-range-explorer-v1",
+  "hypothesis": "PPT-declared focal-length, axial-length and pupil ranges can be explored as independent manual inputs while preserving the corrected model contract that object demand sets source distance and never drives automatic focal-length fitting.",
+  "inputs": {
+    "external_lens_powers_D": [
+      0,
+      -1,
+      -3,
+      -5,
+      -10,
+      -15,
+      -20
+    ],
+    "eye_ranges": {
+      "adult_18y": {
+        "axial_length_mm": [
+          23.1,
+          24.1
+        ],
+        "effective_focal_length_mm": [
+          12.8,
+          16.7
+        ],
+        "pupil_diameter_mm": [
+          2.0,
+          5.0
+        ]
+      },
+      "chick_30_45d": {
+        "axial_length_mm": [
+          10.5,
+          12.5
+        ],
+        "effective_focal_length_mm": [
+          7.5,
+          8.5
+        ],
+        "pupil_diameter_mm": [
+          2.0,
+          3.5
+        ]
+      },
+      "child_6y": {
+        "axial_length_mm": [
+          22.5,
+          23.5
+        ],
+        "effective_focal_length_mm": [
+          13.5,
+          16.7
+        ],
+        "pupil_diameter_mm": [
+          2.0,
+          5.0
+        ]
+      }
+    },
+    "presentation": "experiments/eye_illumination/source/\u5c0f\u9e21\u548c\u4eba\u773c\u5149\u5b66\u4eff\u771f\u53c2\u6570.pptx",
+    "presentation_sha256": "b8bcfe66c559081daecc29fa6426de1c297667848a2c1f7e60a5a3f198640e39",
+    "range_configuration": "experiments/eye_illumination/app/range_parameters.json",
+    "range_configuration_sha256": "1a0e37c26b4f5ca268f0b3e42179dbbc1172b838d871813b1088b264a84963fa",
+    "source_demand_interactive_step_D": 1,
+    "source_demand_range_D": [
+      60,
+      120
+    ],
+    "source_demand_sweep_step_D": 10
+  },
+  "limitations": [
+    "The chick axial-length range is explicitly reported by the PPT; the child and adult plus/minus 0.5 mm axial ranges are existing sensitivity assumptions because the PPT supplies only approximate central values.",
+    "Corneal and crystalline-lens component ranges are shown as provenance references but are not varied independently because the PPT lacks the spacing, indices, complete radii and principal-plane data required for an identifiable anatomical model.",
+    "Non-zero external-lens cases use provisional vertex distances and are rejected when the source distance would place the source on the wrong side of the lens.",
+    "Range exploration is paraxial geometric analysis and does not establish absolute irradiance or biological safety."
+  ],
+  "objective": "Extend the dedicated experiment application with a transparent PPT-range exploration mode without weakening the validated three-fixed-focal baseline.",
+  "observations": [
+    "The original 252-case fixed-focal baseline remains unchanged and passes the existing result validator.",
+    "A chick case at 7.83 mm focal length, 12.2 mm axial length, 2.7 mm pupil and 85 D demand gives a conservative source diameter of 5.9866957071 mm.",
+    "The chick axial-length sensitivity view produces 21 valid points across three axial levels and seven demand levels.",
+    "The chick three-level range grid contains 126 valid combinations because the pupil default equals its maximum and duplicate levels are removed.",
+    "Desktop and 390 px mobile browser layouts, range sliders, sensitivity selection, range-grid generation, JSON export and CSV export were exercised without browser console errors."
+  ],
+  "outputs": {
+    "automated_tests_passed": 31,
+    "baseline_validation_status": "passed",
+    "browser_console_errors": 0,
+    "chick_custom_case_conservative_source_diameter_mm": 5.9866957071,
+    "chick_range_grid_rows": 126,
+    "chick_sensitivity_rows": 21,
+    "deliverable_zip_sha256": "06438491f2bce8d44155931ebd1fb098510303bd6e1c7184af2bac37ac4f5d26",
+    "frontend_sha256": "8629055d13feebf427d9b545fff6b093fa5b2e12592c63e34690b73fe59ba637",
+    "service_sha256": "eacf578c61d4ad3c4fdc4ce6c92599ba55b486fbec1cb2bcf181881d09c6dfd7"
+  },
+  "payload_sha256": "2a62283498952528f8be74151d25f629dd5512f4010f835d694bb136e3db2f6a",
+  "recorded_at_utc": "2026-08-18T06:07:33.090571+00:00",
+  "schema_version": 1
+}

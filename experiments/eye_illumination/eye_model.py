@@ -98,6 +98,32 @@ def fixed_focal_source_solution(
         raise ValueError("focal_length_mm must be one of the configured fixed values")
     if pupil_diameter_mm not in eye.pupil_diameters_mm:
         raise ValueError("pupil_diameter_mm must be one of the configured values")
+    return adjustable_source_solution(
+        eye,
+        source_distance_m,
+        focal_length_mm,
+        pupil_diameter_mm,
+        external_power_D,
+    )
+
+
+def adjustable_source_solution(
+    eye: Eye,
+    source_distance_m: float,
+    focal_length_mm: float,
+    pupil_diameter_mm: float,
+    external_power_D: float = 0.0,
+) -> dict[str, float | bool]:
+    """Calculate a manually selected in-range case without fitting focal length.
+
+    The caller owns range validation. This function only enforces physical
+    positivity and uses the supplied focal length, axial geometry and pupil as
+    independent inputs.
+    """
+    if not math.isfinite(focal_length_mm) or focal_length_mm <= 0.0:
+        raise ValueError("focal_length_mm must be finite and positive")
+    if not math.isfinite(pupil_diameter_mm) or pupil_diameter_mm <= 0.0:
+        raise ValueError("pupil_diameter_mm must be finite and positive")
     eye_power_D = 1000.0 / focal_length_mm
     m_source, m_pupil = general_mapping(eye, source_distance_m, eye_power_D, external_power_D)
     source_scale = abs(m_source)

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="小鸡与人眼固定焦距后极照明仿真实验程序">
-  <title>固定焦距后极照明实验台</title>
+  <title>后极照明参数实验台</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
 </head>
@@ -12,7 +12,7 @@
   <header class="topbar">
     <a class="brand" href="/" aria-label="返回实验台首页">
       <span class="brand-mark" aria-hidden="true"><span></span></span>
-      <span><strong>OpticBench</strong><small>固定焦距后极照明实验台</small></span>
+      <span><strong>OpticBench</strong><small>眼部后极照明参数实验台</small></span>
     </a>
     <div class="server-state"><span class="pulse"></span><span id="server-label">模型连接中</span></div>
   </header>
@@ -22,7 +22,7 @@
       <div>
         <p class="eyebrow">650 nm · FIXED-FOCAL POSTERIOR-POLE LAB</p>
         <h1>让物距改变光源，<br><em>不让眼球连续调焦。</em></h1>
-        <p class="hero-copy">这是为本实验独立制作的本地程序。后极平面和眼轴保持固定，每种眼模型只能选择三个离散焦距；所有结果直接来自已验证的 ABCD 模型。</p>
+        <p class="hero-copy">这是为本实验独立制作的本地程序。固定基准模式复现三个离散焦距；PPT 范围模式允许手动独立改变焦距、眼轴、瞳孔与物方需求，但绝不为了强制调焦而自动改变焦距。</p>
       </div>
       <div class="hero-actions">
         <a class="button secondary" href="/report.pdf" target="_blank">打开完整 PDF 报告</a>
@@ -43,29 +43,67 @@
         </div>
 
         <form id="experiment-form">
+          <label for="mode-select">实验模式</label>
+          <select id="mode-select" name="mode">
+            <option value="baseline">固定三焦距基准</option>
+            <option value="range">PPT 参数范围探索</option>
+          </select>
+
           <label for="eye-select">眼模型</label>
           <select id="eye-select" name="eye_id"></select>
 
-          <label for="focal-select">固定等效焦距</label>
-          <div class="field-with-unit"><select id="focal-select" name="focal_length_mm"></select><span>mm</span></div>
+          <div id="baseline-fields">
+            <label for="focal-select">固定等效焦距</label>
+            <div class="field-with-unit"><select id="focal-select" name="focal_length_mm"></select><span>mm</span></div>
 
-          <label for="pupil-select">瞳孔直径</label>
-          <div class="field-with-unit"><select id="pupil-select" name="pupil_diameter_mm"></select><span>mm</span></div>
+            <label for="pupil-select">瞳孔直径</label>
+            <div class="field-with-unit"><select id="pupil-select" name="pupil_diameter_mm"></select><span>mm</span></div>
 
-          <label for="demand-select">物方需求</label>
-          <div class="field-with-unit"><select id="demand-select" name="source_demand_D"></select><span>D</span></div>
+            <label for="demand-select">物方需求</label>
+            <div class="field-with-unit"><select id="demand-select" name="source_demand_D"></select><span>D</span></div>
+          </div>
+
+          <div id="range-fields" hidden>
+            <div class="range-control">
+              <label for="range-focal">有效焦距 <output id="range-focal-value">—</output></label>
+              <input id="range-focal" type="range" name="range_focal_length_mm">
+              <small id="range-focal-limits">—</small>
+            </div>
+            <div class="range-control">
+              <label for="range-axial">眼轴长度 <output id="range-axial-value">—</output></label>
+              <input id="range-axial" type="range" name="range_axial_length_mm">
+              <small id="range-axial-limits">—</small>
+            </div>
+            <div class="range-control">
+              <label for="range-pupil">瞳孔直径 <output id="range-pupil-value">—</output></label>
+              <input id="range-pupil" type="range" name="range_pupil_diameter_mm">
+              <small id="range-pupil-limits">—</small>
+            </div>
+            <div class="range-control">
+              <label for="range-demand">物方需求 <output id="range-demand-value">—</output></label>
+              <input id="range-demand" type="range" name="range_source_demand_D">
+              <small id="range-demand-limits">—</small>
+            </div>
+            <label for="external-lens-select">外置凹透镜</label>
+            <div class="field-with-unit"><select id="external-lens-select" name="external_lens_power_D"></select><span>D</span></div>
+          </div>
 
           <button class="button primary full" type="submit"><span>运行当前工况</span><span aria-hidden="true">→</span></button>
         </form>
 
         <div class="locked-parameters">
-          <p class="lock-title"><span aria-hidden="true">◆</span> 已知后极参数 · 只读</p>
+          <p id="parameter-summary-title" class="lock-title"><span aria-hidden="true">◆</span> 已知后极参数 · 只读</p>
           <dl>
             <div><dt>报告眼轴</dt><dd id="axial-value">—</dd></div>
             <div><dt>后极目标直径</dt><dd id="posterior-value">—</dd></div>
             <div><dt>像方折射率</dt><dd id="index-value">—</dd></div>
             <div><dt>波长</dt><dd id="wavelength-value">—</dd></div>
           </dl>
+        </div>
+        <div id="range-provenance" class="range-provenance" hidden>
+          <p class="lock-title"><span aria-hidden="true">◇</span> 参数来源</p>
+          <p id="range-provenance-text">—</p>
+          <details><summary>PPT 中的部件参数</summary><ul id="component-reference-list"></ul></details>
         </div>
       </aside>
 
@@ -133,9 +171,15 @@
       <div class="analysis-header">
         <div class="section-heading">
           <span class="step">03</span>
-          <div><p>Parameter sweep</p><h2>固定焦距对比</h2></div>
+          <div><p>Parameter sweep</p><h2 id="analysis-title">固定焦距对比</h2></div>
         </div>
         <div class="analysis-controls">
+          <label id="sensitivity-label" for="sensitivity-select" hidden>变化参数</label>
+          <select id="sensitivity-select" hidden>
+            <option value="focal_length_mm">有效焦距</option>
+            <option value="axial_length_mm">眼轴长度</option>
+            <option value="pupil_diameter_mm">瞳孔直径</option>
+          </select>
           <label for="metric-select">纵轴</label>
           <select id="metric-select">
             <option value="conservative_source_diameter_mm">推荐全重叠直径</option>
@@ -153,8 +197,8 @@
           <h3>模型约束</h3>
           <ol>
             <li><span>01</span><p>物方需求只改变光源距离：<b>s = 1 / D</b></p></li>
-            <li><span>02</span><p>焦距只能取配置中的三个离散值。</p></li>
-            <li><span>03</span><p>后极平面由报告眼轴和像方折射率固定。</p></li>
+            <li><span>02</span><p id="method-focal">焦距只能取配置中的三个离散值。</p></li>
+            <li><span>03</span><p id="method-axial">后极平面由报告眼轴和像方折射率固定。</p></li>
             <li><span>04</span><p>输出覆盖尺寸，不输出“调节是否超限”。</p></li>
           </ol>
         </aside>
@@ -175,15 +219,15 @@
       </div>
       <div class="table-shell">
         <table>
-          <thead><tr><th>眼模型</th><th>焦距 / mm</th><th>瞳孔 / mm</th><th>需求 / D</th><th>物距 / mm</th><th>几何最小 / mm</th><th>推荐全重叠 / mm</th><th>离焦 / D</th></tr></thead>
-          <tbody id="results-body"><tr><td colspan="8" class="empty">正在载入实验配置…</td></tr></tbody>
+          <thead><tr><th>眼模型</th><th>有效焦距 / mm</th><th>眼轴 / mm</th><th>瞳孔 / mm</th><th>外镜 / D</th><th>需求 / D</th><th>物距 / mm</th><th>几何最小 / mm</th><th>推荐全重叠 / mm</th><th>后极失焦 / D</th></tr></thead>
+          <tbody id="results-body"><tr><td colspan="10" class="empty">正在载入实验配置…</td></tr></tbody>
         </table>
       </div>
       <p class="data-note">数据来源：本地 Python 模型即时计算。<a href="/results.csv">下载仓库中已验证的基准矩阵</a></p>
     </section>
   </main>
 
-  <footer><span>OpticBench · Local experiment application</span><span>无需云服务 · 数据不离开本机</span></footer>
+  <footer><span>OpticBench · Independent-parameter experiment application</span><span>无需云服务 · 数据不离开本机</span></footer>
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
   <script src="/app.js" defer></script>
 </body>

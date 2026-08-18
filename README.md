@@ -10,7 +10,7 @@ The repository also contains a fully executed 650 nm posterior-pole illumination
 
 ### Dedicated experiment application
 
-The experiment now includes a local, purpose-built graphical application. It exposes only the validated fixed-focal grid, calculates individual cases or the full 252-case matrix, draws the paraxial footprint, compares the three focal lengths, and exports JSON/CSV without sending data to a cloud service. On Windows, double-click [`experiments/eye_illumination/app/launch_app.cmd`](experiments/eye_illumination/app/launch_app.cmd), or run:
+The experiment now includes a local, purpose-built graphical application. Its baseline mode reproduces the validated fixed-focal grid, while a separate PPT-range explorer allows independent manual adjustment of declared focal-length, axial-length, pupil, object-demand, and concave-lens values without fitting focal length to object distance. It calculates individual cases, sensitivity sweeps, the full 252-case baseline, and three-level range grids; it also draws the paraxial footprint and exports JSON/CSV without sending data to a cloud service. On Windows, double-click [`experiments/eye_illumination/app/launch_app.cmd`](experiments/eye_illumination/app/launch_app.cmd), or run:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1

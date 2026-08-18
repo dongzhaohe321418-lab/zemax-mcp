@@ -138,6 +138,18 @@ class ExperimentHandler(BaseHTTPRequestHandler):
                 self._download_csv(rows, f"eye_illumination_{len(rows)}_cases.csv")
             except RequestError as exc:
                 self._json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+        elif path == "/api/range-grid.csv":
+            try:
+                result = self.service.range_grid(query)
+                self._download_csv(result["rows"], f"eye_range_grid_{result['row_count']}_cases.csv")
+            except RequestError as exc:
+                self._json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
+        elif path == "/api/range-sensitivity.csv":
+            try:
+                result = self.service.range_sensitivity(query)
+                self._download_csv(result["rows"], f"eye_range_sensitivity_{result['row_count']}_cases.csv")
+            except RequestError as exc:
+                self._json({"error": str(exc)}, HTTPStatus.BAD_REQUEST)
         elif path in STATIC_FILES:
             self._file(STATIC_FILES[path])
         elif path in ARTIFACTS:
@@ -154,6 +166,10 @@ class ExperimentHandler(BaseHTTPRequestHandler):
             elif path == "/api/sweep":
                 rows = self.service.sweep(payload)
                 self._json({"row_count": len(rows), "rows": rows})
+            elif path == "/api/range-sensitivity":
+                self._json(self.service.range_sensitivity(payload))
+            elif path == "/api/range-grid":
+                self._json(self.service.range_grid(payload))
             else:
                 self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
         except RequestError as exc:
@@ -182,7 +198,7 @@ def main() -> int:
     server = create_server(args.host, args.port)
     actual_port = server.server_address[1]
     url = f"http://{args.host}:{actual_port}/"
-    print(f"Fixed-focal eye experiment app: {url}")
+    print(f"Posterior-pole eye parameter experiment app: {url}")
     print("Press Ctrl+C to stop.")
     if args.open:
         threading.Timer(0.6, lambda: webbrowser.open(url)).start()
