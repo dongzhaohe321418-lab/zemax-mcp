@@ -65,7 +65,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 1. 滚动到“04 Zemax 验证向导”。
 2. 点击“自动检测 OpticStudio”。这一步不会启动 Zemax，许可证仍应显示“未测试”。
 3. 检测通过后，勾选显式确认框，点击“运行 1 工况连接测试”。
-4. 等待明确的 `PASS · 验证通过`。界面同时显示 OpticStudio 版本、通过工况数和最大边界误差。
+4. 等待明确的 `PARAXIAL PASS · 一致性通过`。界面同时显示 OpticStudio 版本、通过工况数和最大边界误差；该状态不是安全或活体实验放行。
 5. PASS 后可点击“在 Zemax 运行当前结果表”；结束后下载可移交审计证据包。
 
 网页不会在载入或只读检测时启动 OpticStudio。许可证状态只有真实 ZOS-API 运行返回有效时才显示“有效 · 已实测”。服务器仅监听 `127.0.0.1`，不向云端发送参数。

@@ -1,224 +1,182 @@
-# Eye Illumination Web Lab for Zemax
+# Eye Illumination Web Lab
 
-**The main product in this repository is a local Web GUI for chick and human-eye posterior-pole illumination experiments.** It lets a user adjust the declared optical ranges, calculate reproducible source parameters, generate complete case tables, run guided OpticStudio verification, and download auditable evidence without working at a command line.
+用于小鸡、儿童和成人眼后极照明参数研究的本地 Web 程序，支持参数计算、批量扫描、报告导出和 Ansys Zemax OpticStudio 验证。
 
-> **Real-experiment safety gate:** the current outputs are verified only within a first-order paraxial equivalent-eye model. They are not final source, power, or exposure settings for an animal or human eye. The application now reports edge-ray angle and working F-number diagnostics and keeps real-experiment status at `NOT_READY` until an anatomical real-ray model, calibrated radiometry, optical-safety assessment, and institutional ethics approval are supplied.
+**程序是本仓库的主体；MCP 只是可选的二级自动化接口。**
 
-**MCP is a secondary, optional automation interface.** It remains available for constrained Codex or Claude Code workflows, but it is not required to use the experiment program.
+> [!WARNING]
+> 当前结果只在一阶近轴等效眼模型内通过验证。所有尺寸都是后续建模与台架实验的候选值，不是动物或人体眼部照明的最终功率、尺寸或曝光处方。程序会保持真实实验状态为 `NOT_READY`，直到真实曲面模型、辐射度标定、光安全评价和伦理审批全部完成。
 
-## Start the program
+## 1. Windows 三分钟启动
 
-On Windows, clone the private repository with Git LFS, then run the root launcher:
+### 需要安装
+
+- Windows 10 或 11（64 位）
+- Python 3.11 或更高版本（64 位）
+- Git 和 [Git LFS](https://git-lfs.com/)
+- 有权访问本私有 GitHub 仓库
+
+交互计算不需要 OpticStudio。只有执行 Zemax 验证时才需要已安装并授权的 OpticStudio。
+
+### 第一次使用
+
+在 PowerShell 中运行：
 
 ```powershell
 git lfs install
 git clone https://github.com/dongzhaohe321418-lab/zemax-mcp.git
-cd zemax-mcp\experiments\eye_illumination
-.\setup_web_gui.cmd
+cd zemax-mcp
+git lfs pull
+.\experiments\eye_illumination\setup_web_gui.cmd
 ```
 
-`setup_web_gui.cmd` creates a private local Python environment and opens the application. On later runs, double-click `launch_web_gui.cmd`. The GUI is served only at `http://127.0.0.1:8765/`; interactive ABCD calculations do not require OpticStudio and no experiment data is sent to a cloud service.
+安装脚本会：
 
-## What the program does
+1. 在程序目录创建独立的 `.venv`；
+2. 安装固定范围的 NumPy 依赖；
+3. 检查 Python 与 NumPy；
+4. 启动本地服务器并打开浏览器。
 
-- Models 30–45 day chick, 6-year child, and 18-year adult effective eyes at 650 nm.
-- Keeps posterior-pole geometry, object demand, pupil, and equivalent focal length as independent inputs.
-- Uses three fixed focal lengths per eye in the validated baseline instead of continuously fitting focal length to object distance.
-- Provides a separate PPT-range explorer for focal length, axial length, pupil, 60–120 D object demand, and constrained external concave lenses.
-- Calculates individual cases, sensitivity sweeps, the full 252-case matrix, and three-level range grids.
-- Draws the paraxial optical footprint and exports JSON, CSV, deterministic Zemax input batches, and verification evidence.
-- Guides non-command-line users through **detect OpticStudio → verify one case → run the current table → download evidence**.
+如果私有仓库克隆失败，请先执行 `gh auth login`，或在 Windows Git Credential Manager 中登录有权限的 GitHub 账号。
 
-## Verified and auditable
+### 以后启动
 
-The program distinguishes generated calculations from real OpticStudio results. Installation discovery never claims a valid license; only a completed ZOS-API run and independent verifier can display `PASS`.
-
-| Verification scope | Result |
-|---|---:|
-| Web connection test on licensed OpticStudio 24.1 | 1 / 1 PASS |
-| Web table batch with saved `.zos` systems | 21 / 21 PASS |
-| Complete fixed-focal baseline | 252 / 252 PASS |
-| Cross-model/external-lens smoke batch | 4 / 4 PASS |
-| Repository test suite | 39 PASS |
-
-Each transferable evidence package contains validated inputs, model/configuration snapshots, OpticStudio version and license status, ray/error/vignetting results, independent numeric checks, saved `.zos` systems, and SHA-256 hashes. Raw machine logs, credentials, and build directories are excluded.
-
-## Experiment, report, and documentation
-
-The completed 650 nm study includes a 252-row matrix, four pupils per eye, conservative and geometric source-size bounds, 600,000-ray Monte Carlo checks, an executed Notebook, CSV/JSON outputs, versioned OpticStudio evidence, and a 21-page Chinese LaTeX/PDF report with SimSun text.
-
-- [Experiment overview](experiments/eye_illumination/README.md)
-- [Web application guide](experiments/eye_illumination/app/README.md)
-- [Zemax connection and audit guide](experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md)
-- [Real-experiment readiness audit](experiments/eye_illumination/results/real_experiment_readiness.md)
-- [Chinese PDF report](experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf)
-- [Immutable experiment records](experiments/runs/)
-- [Auditable binary artifacts](experiments/artifacts/)
-
-## Optional MCP automation (secondary)
-
-The repository also includes a safety-first, stdio-only MCP server for bounded sequential-mode operations from Codex, Claude Code, or another MCP host. A deterministic mock backend supports protocol testing without OpticStudio.
-
-> The general-purpose MCP ZOS-API adapter deliberately stops after read-only runtime discovery until its object names and connection sequence are checked against the samples installed with the target OpticStudio release. The dedicated eye-experiment runner is live-verified, but that does not imply that the general MCP adapter is complete.
+双击：
 
 ```text
-MCP host (Codex / Claude Code)
-             | stdio
-             v
-Python FastMCP server
-             | typed, bounded operations
-             v
-Mock backend or guarded Windows ZOS-API adapter
+experiments\eye_illumination\launch_web_gui.cmd
 ```
 
-## MCP safety model
-
-- The server uses stdio and does not listen on a network port.
-- It exposes a small typed tool set—no shell, arbitrary Python, arbitrary ZOS-API, or unrestricted filesystem tool.
-- All file targets are resolved below the existing writable `ZEMAX_WORKSPACE`; absolute paths and traversal are rejected.
-- Focus changes, optimization, saves, and standalone-session closure require an explicit `confirm=true` inside the tool.
-- Save never overwrites an existing file.
-- Tool calls are logged with status and exception type, but paths, tokens, credentials, and file contents are not logged.
-- Simulation records are immutable and versioned. Git LFS stores large Zemax/binary artifacts.
-
-## MCP prerequisites (secondary)
-
-- Windows 10 or 11
-- Python 3.11+
-- Git and Git LFS
-- For live mode: installed and licensed OpticStudio with ZOS-API samples
-- `uv` (recommended) or pip/venv
-
-Do not assume an installation path. In OpticStudio documentation or its installation folders, locate the Programming/ZOS-API Python samples and `ZOSAPI_NetHelper.dll`, then use those exact local paths. Python architecture must match the installed API runtime.
-
-## MCP mock quick start
+也可以在 PowerShell 中运行：
 
 ```powershell
-git lfs install
-New-Item -ItemType Directory C:\zemax-workspace
-Copy-Item .env.example .env
-$env:ZEMAX_WORKSPACE = "C:\zemax-workspace"
-$env:ZEMAX_BACKEND = "mock"
-uv sync --extra dev
-uv run pytest -q
-uv run python server.py
+.\experiments\eye_illumination\launch_web_gui.cmd
 ```
 
-Pip alternative:
+程序地址是 [http://127.0.0.1:8765/](http://127.0.0.1:8765/)。服务器只监听本机回环地址，不把实验参数发送到云端。关闭启动窗口或按 `Ctrl+C` 即可停止。
+
+## 2. 最简单的使用流程
+
+1. 选择“固定三焦距基准”或“PPT 参数范围探索”。
+2. 选择眼模型、固定焦距、瞳孔和 60–120 D 物方需求。
+3. 点击“运行当前工况”，查看候选光源尺寸、边缘角和工作 F 数。
+4. 按需下载当前 JSON、结果 CSV 或全部 252 工况。
+5. 需要 Zemax 复核时，继续使用页面底部的三步验证向导。
+
+程序不会根据物距自动改变眼球等效焦距。固定焦距、眼轴、瞳孔、物距和可选外置负镜始终是相互独立的输入。
+
+## 3. 在 OpticStudio 中验证
+
+### 前置条件
+
+- Windows 64 位 Python 3.11+
+- 已安装并授权的 Ansys Zemax OpticStudio
+- 安装目录中存在 `ZOSAPI.dll`、`ZOSAPI_Interfaces.dll` 和 `ZOSAPI_NetHelper.dll`
+- Windows .NET Framework 64 位 C# 编译器
+
+### 网页内三步验证
+
+1. 滚动到“04 Zemax 验证向导”。
+2. 点击“自动检测 OpticStudio”。这一步只读，不启动 Zemax，也不声称许可证有效。
+3. 勾选确认框，点击“运行 1 工况连接测试”。
+4. 等待 `PARAXIAL PASS · 一致性通过`。
+5. 连接测试通过后，再运行当前结果表并下载证据 ZIP。
+
+证据包包含输入、模型快照、OpticStudio 版本、许可证状态、结果 CSV、保存的 `.zos` 系统、独立校验报告和 SHA-256；不包含机器构建目录或原始日志。
+
+`PARAXIAL PASS` 只证明解析 ABCD 模型与理想 OpticStudio Paraxial 面一致，不代表真实眼、绝对辐照度、光安全或生物学结果通过。完整步骤见[《Zemax 连接与审计指南》](experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md)。
+
+## 4. 当前验证状态
+
+| 项目 | 当前结果 |
+|---|---:|
+| 固定焦距主矩阵 | 252 行，0 重复，0 数值缺失 |
+| 独立闭式复算最大光源直径差异 | `4.59e-09 mm` |
+| OpticStudio 24.1 六工况交叉验证 | 6 / 6 PASS |
+| 六工况最大边界误差 | `2.58e-11 µm` |
+| 最新网页连接测试 | 1 / 1 PASS |
+| 完整可审计基准批次 | 252 / 252 PASS |
+| 自动化测试 | 45 / 45 PASS |
+| 中文 PDF | 25 页，A4，SimSun/宋体已嵌入 |
+| 真实实验状态 | `NOT_READY` |
+
+模型适用性审计发现：252 个工况的最大源边缘—瞳孔边缘角均为 15.02°–37.59°，全部触发项目设置的 10° 真实光线复核线；140 个工况的工作 F 数低于 4。因此，当前结果适合用于候选机械空间、参数筛选和下一阶段真实模型设计，不能直接作为活体曝光设置。
+
+## 5. 结果、报告与证据
+
+| 内容 | 文件 |
+|---|---|
+| 实验与模型说明 | [experiments/eye_illumination/README.md](experiments/eye_illumination/README.md) |
+| Web 程序操作说明 | [experiments/eye_illumination/app/README.md](experiments/eye_illumination/app/README.md) |
+| Zemax 连接与审计 | [experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md](experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md) |
+| 真实实验适用性审计 | [real_experiment_readiness.md](experiments/eye_illumination/results/real_experiment_readiness.md) |
+| 综合 HTML 报告 | [eye_illumination_report.html](experiments/eye_illumination/report/eye_illumination_report.html) |
+| 25 页中文 PDF | [eye_illumination_experiment_report.pdf](experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf) |
+| 252 工况 CSV | [fixed_focal_source_sweep.csv](experiments/eye_illumination/results/fixed_focal_source_sweep.csv) |
+| 已执行 Notebook | [eye_illumination_analysis.ipynb](experiments/eye_illumination/notebooks/eye_illumination_analysis.ipynb) |
+| 不可变实验记录 | [experiments/runs/](experiments/runs/) |
+| Zemax 与二进制证据 | [experiments/artifacts/](experiments/artifacts/) |
+
+## 6. 版本兼容性
+
+- Web 计算程序支持 Windows 上的 Python 3.11+，不依赖特定 OpticStudio 版本。
+- ZOS-API 实机证据来自 OpticStudio `24.1.0`。
+- 其他 OpticStudio 版本如果仍提供上述三个 ZOS-API DLL，通常可以由程序自动发现，但必须先通过“1 工况连接测试”，不能沿用旧版本的许可证或数值结论。
+- 程序不会把 DLL 存在等同于许可证有效；许可证状态只由真实 ZOS-API 运行确认。
+
+## 7. 常见问题
+
+| 现象 | 处理方法 |
+|---|---|
+| 私有仓库无法克隆 | 运行 `gh auth login`，确认账号有仓库访问权限，再重新克隆。 |
+| 提示找不到 Python | 安装 64 位 Python 3.11+，或在仓库根目录执行 `powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\setup_local.ps1 -PythonPath "C:\path\to\python.exe"`。 |
+| 浏览器没有自动打开 | 保持启动窗口开启，手动访问 `http://127.0.0.1:8765/`。 |
+| 8765 端口已占用 | 在仓库根目录执行 `powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1 -Port 8766`，然后访问对应端口。 |
+| NumPy 缺失 | 重新运行 `setup_web_gui.cmd`。 |
+| 未检测到 OpticStudio | 在向导中选择包含三个 ZOS-API DLL 的实际安装目录。 |
+| 显示 `PARAXIAL PASS` 但仍是 `NOT_READY` | 这是预期行为；前者是模型一致性，后者是真实实验放行状态。 |
+| Zemax 任务失败 | 下载/查看失败摘要，并按连接指南检查版本、许可证、DLL 和 C# 编译器。 |
+
+## 8. 开发与完整复现
+
+普通用户不需要执行本节。
 
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-$env:ZEMAX_WORKSPACE = "C:\zemax-workspace"
-$env:ZEMAX_BACKEND = "mock"
-python server.py
+python -m pip install -e ".[dev,analysis]"
+python -m pytest -q
 ```
 
-For interactive MCP inspection:
+包含许可版 OpticStudio、Notebook 和 HTML 报告的完整工作流：
 
 ```powershell
-uv run mcp dev server.py
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\run_all.ps1 `
+  -OpticStudioDir "C:\path\to\installed\OpticStudio"
 ```
 
-Expected `zemax_health` behavior in mock mode: `connected` is true, `backend` is `mock`, the resolved workspace is shown, no OpticStudio version is claimed, and analysis/optimization capabilities are marked `estimated`.
-
-## MCP live ZOS-API preparation
-
-Install the optional bridge, run diagnostics, and only then start the server:
+中文 LaTeX/PDF 单独构建：
 
 ```powershell
-uv sync --extra zosapi --extra dev
-$env:ZEMAX_WORKSPACE = "C:\path\to\approved-workspace"
-$env:ZEMAX_BACKEND = "zosapi"
-$env:ZEMAX_CONNECT_MODE = "extension"
-$env:ZEMAX_ZOSAPI_NETHELPER_DLL = "C:\path\from\installed\samples\ZOSAPI_NetHelper.dll"
-uv run python scripts\diagnose_zosapi.py
-uv run python server.py
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\latex\build_report.ps1
 ```
 
-`extension` mode must never close a user-owned OpticStudio process. `standalone` closure still requires confirmation. Adapt `backend/zosapi_backend.py` only after comparing it to the local, version-matched Python samples. DLL load, license, and connection errors must remain diagnostic rather than being converted to apparent success.
+完整工作流会启动许可版 OpticStudio；运行前请保存其他 OpticStudio 工作并确认许可证可用。
 
-## MCP host configuration (secondary)
+## 9. 可选 MCP 自动化
 
-Claude Code template (replace every placeholder):
+MCP 不是运行本实验程序的必要条件。需要从 Codex、Claude Code 或其他 MCP 主机调用受限光学工具时，请阅读[《可选 MCP 使用指南》](MCP_GUIDE.md)。
 
-```powershell
-claude mcp add --transport stdio zemax-opticstudio `
-  --env ZEMAX_BACKEND=zosapi `
-  --env ZEMAX_WORKSPACE="C:\path\to\approved-workspace" `
-  --env ZEMAX_CONNECT_MODE=extension `
-  -- "C:\path\to\python.exe" "C:\path\to\zemax-mcp\server.py"
-```
-
-Codex configuration entry points vary by client version. A standard stdio definition needs `command`, `args`, and `env`:
-
-```json
-{
-  "mcpServers": {
-    "zemax-opticstudio": {
-      "command": "C:\\path\\to\\python.exe",
-      "args": ["C:\\path\\to\\zemax-mcp\\server.py"],
-      "env": {
-        "ZEMAX_BACKEND": "zosapi",
-        "ZEMAX_WORKSPACE": "C:\\path\\to\\approved-workspace",
-        "ZEMAX_CONNECT_MODE": "extension"
-      }
-    }
-  }
-}
-```
-
-## Recommended MCP optical workflow
-
-Ask for missing wavelength band, aperture or F-number, object condition, fields, sensor size, allowed materials, and optimization objective. Then:
-
-1. Call `new_sequential_design`, `create_singlet`, and `configure_system`.
-2. Call `quick_focus_preview` and `paraxial_summary`.
-3. Review EFL/BFL and assumptions; only then call `apply_quick_focus(confirm=true)`.
-4. Call `spot_diagram` and `mtf`, recognizing singlet spherical, chromatic, and off-axis aberrations.
-5. Call `preview_optimization`; call `run_optimization(..., confirm=true)` only after reviewing variables, bounds, and cost.
-6. Call `preview_save_design`; call `save_design(..., confirm=true)` only after reviewing the new path.
-
-Example request: “Using N-BK7, model a 25 mm diameter plano-convex singlet targeting 75 mm EFL at Fraunhofer F/d/C wavelengths, object at infinity, 10 mm entrance pupil, and fields 0° and 5°. Preview focus before changing it, then report paraxial data, spot sizes, and MTF.”
-
-## Recording every experimental milestone
-
-The repository is the experiment system of record. Copy `experiments/templates/experiment.json`, fill it with exact inputs and numeric outputs, then create a non-overwritable record:
-
-```powershell
-python scripts\record_experiment.py exp-001-bk7-focus C:\path\to\completed-record.json
-```
-
-Place referenced `.ZOS`, `.ZMX`, plots, arrays, or archives below `experiments/artifacts/<experiment-id>/`, update `EXPERIMENTS.md`, run tests, inspect the diff, commit the milestone, and push. The included `AGENTS.md` tells future Codex sessions to follow this process after every meaningful run. Never commit credentials, license details, user-specific paths, or sensitive logs.
-
-## MCP tool limits
-
-All length inputs are millimeters, wavelength inputs are micrometers, angles are degrees, and MTF frequencies are lp/mm. Lens diameter is 1–200 mm, center thickness 0.2–100 mm, curved radius magnitude 1–10,000 mm, wavelength 0.2–20 µm (up to 10), field magnitude up to 90° (up to 10), and MTF frequency 0–500 lp/mm (up to 20 samples). Optimization is bounded to 1–100 iterations and four whitelisted variables.
-
-## MCP troubleshooting
-
-| Symptom | Action |
-|---|---|
-| `ZEMAX_WORKSPACE` error | Create the intended directory explicitly, verify it is writable, then set the variable. |
-| `pythonnet` unavailable | Install `.[zosapi]` using the same Python architecture as OpticStudio. |
-| NetHelper load failure | Use the DLL path from the installed, version-matched ZOS-API sample. |
-| License/connection failure | Open OpticStudio, verify the license, connection mode, and sample code behavior. |
-| Glass rejected in mock mode | Use `N-BK7`, `N-SF11`, or `F_SILICA`; live catalogs require ZOS-API verification. |
-| Save refused | Use a relative `.ZOS` path below the workspace, an existing parent directory, and a new filename. |
-| Optimization unsupported | Use a bounded manual parameter sweep; no backend may fabricate success. |
-
-## Repository layout
+## 10. 仓库结构
 
 ```text
-experiments/eye_illumination/ primary local Web experiment program, model, report, and results
-experiments/eye_illumination/app/ Web GUI, local server, setup scripts, and Zemax job manager
-experiments/runs/        immutable JSON experiment records
-experiments/artifacts/   Git LFS-backed designs and large results
-experiments/templates/   record template
-experiments/eye_illumination/zemax/ generic auditable ZOS-API eye batch runner and verifier
-backend/                 secondary MCP backend protocol, mock, and guarded ZOS-API adapter
-server.py                secondary FastMCP stdio tools
-scripts/                 diagnostics and experiment recorder
-tests/                   validation, path, and mock-physics tests
+experiments/eye_illumination/      主程序、模型、结果、报告和 Zemax runner
+experiments/eye_illumination/app/  本地 Web GUI 与三步 Zemax 验证向导
+experiments/runs/                  不可覆盖的实验记录
+experiments/artifacts/             Git LFS 管理的 Zemax/二进制证据
+tests/                             模型、Web、批次和安全边界测试
+backend/ + server.py               可选 MCP 接口
+scripts/                           诊断和实验记录工具
 ```
+
+每个重要实验里程碑都必须新增不可变记录、保存相关证据、运行测试并推送 GitHub；详细规则见 [AGENTS.md](AGENTS.md)。

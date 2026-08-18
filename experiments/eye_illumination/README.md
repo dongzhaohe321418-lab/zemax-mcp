@@ -76,7 +76,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 - 小鸡眼 `f=8.5 mm`、3.5 mm 瞳孔时，60 D 与 120 D 的保守光源直径分别为 9.008 mm 和 6.254 mm。
 - 六个 OpticStudio 系统与解析 footprint 的最大边界误差为 `2.58e-11 µm`。
 - 通用审计执行器已在 OpticStudio 24.1 对完整 252 工况全部验证通过，0 个失败，最大边界误差为 `3.02e-11 µm`；另含外置负镜的跨眼模型冒烟批次也通过。
-- PDF 为 21 页，包含模型示意图、工作流、五张数据图、精确表格、验证和复现说明。
+- PDF 为 25 页，包含模型示意图、工作流、六张数据图、精确表格、验证、真实实验适用性审计和复现说明。
 
 ## 主要文件
 
@@ -95,7 +95,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 - `../runs/eye-illumination-fixed-focal-60-120d-v3.json`：不可覆盖的本次实验记录、哈希与关键观察。
 - `notebooks/eye_illumination_analysis.ipynb`：已执行的可复现 Notebook。
 - `report/eye_illumination_report.html`：自包含技术报告。
-- `report/latex/eye_illumination_experiment_report.pdf`：21 页中文宋体综合报告。
+- `report/latex/eye_illumination_experiment_report.pdf`：25 页中文宋体综合报告。
 
 ## 限制
 
