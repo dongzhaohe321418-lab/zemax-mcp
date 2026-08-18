@@ -1,7 +1,7 @@
 [project]
 name = "zemax-mcp"
 version = "0.1.0"
-description = "Safe stdio MCP server for Ansys Zemax OpticStudio simulations"
+description = "Local eye-illumination Web lab with optional safe MCP automation for Ansys Zemax OpticStudio"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,7 +11,10 @@ dependencies = [
 
 [project.optional-dependencies]
 zosapi = ["pythonnet>=3,<4"]
-dev = ["pytest>=8,<9"]
+dev = [
+  "pytest>=8,<9",
+  "numpy>=2,<3",
+]
 analysis = [
   "numpy>=2,<3",
   "pandas>=3,<4",
@@ -19,6 +22,7 @@ analysis = [
   "nbformat>=5,<6",
   "nbclient>=0.10,<1",
   "ipykernel>=7,<8",
+  "pymupdf>=1.26,<2",
 ]
 
 [tool.pytest.ini_options]

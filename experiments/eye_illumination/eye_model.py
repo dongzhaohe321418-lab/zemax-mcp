@@ -25,21 +25,25 @@ def thin_lens(power_D: float) -> np.ndarray:
 class Eye:
     eye_id: str
     label: str
-    effective_focal_length_mm: float
+    fixed_effective_focal_lengths_mm: tuple[float, ...]
     reported_axial_length_mm: float
+    image_medium_refractive_index: float
     posterior_pole_diameter_mm: float
-    accommodation_limit_D: float
     pupil_diameters_mm: tuple[float, ...]
     axial_sensitivity_mm: tuple[float, ...]
     external_lens_vertex_distance_mm: float
 
     @property
     def baseline_power_D(self) -> float:
-        return 1000.0 / self.effective_focal_length_mm
+        return 1000.0 / self.reference_focal_length_mm
+
+    @property
+    def reference_focal_length_mm(self) -> float:
+        return max(self.fixed_effective_focal_lengths_mm)
 
     @property
     def reduced_retina_distance_m(self) -> float:
-        return 1.0 / self.baseline_power_D
+        return self.reported_axial_length_mm / (1000.0 * self.image_medium_refractive_index)
 
     @property
     def target_radius_m(self) -> float:
@@ -55,12 +59,14 @@ def pre_eye_matrix(source_distance_m: float, external_power_D: float, vertex_dis
 
 
 def focus_solution(eye: Eye, source_distance_m: float, external_power_D: float = 0.0) -> dict[str, float | bool]:
-    vertex_m = eye.external_lens_vertex_distance_mm / 1000.0
+    # A zero-power external surface is optically absent, so its provisional
+    # mechanical vertex distance must not invalidate ultra-near no-lens cases.
+    vertex_m = 0.0 if external_power_D == 0.0 else eye.external_lens_vertex_distance_mm / 1000.0
     pre = pre_eye_matrix(source_distance_m, external_power_D, vertex_m)
     b = float(pre[0, 1])
     d = float(pre[1, 1])
-    accommodation_D = d / b
-    eye_power_D = eye.baseline_power_D + accommodation_D
+    eye_power_D = d / b + 1.0 / eye.reduced_retina_distance_m
+    accommodation_D = eye_power_D - eye.baseline_power_D
     total = translation(eye.reduced_retina_distance_m) @ thin_lens(eye_power_D) @ pre
     magnification = float(total[0, 0])
     source_diameter_mm = eye.posterior_pole_diameter_mm / abs(magnification)
@@ -70,8 +76,87 @@ def focus_solution(eye: Eye, source_distance_m: float, external_power_D: float =
         "magnification": magnification,
         "source_diameter_mm": source_diameter_mm,
         "source_area_mm2": math.pi * (source_diameter_mm / 2.0) ** 2,
-        "feasible_accommodation": 0.0 <= accommodation_D <= eye.accommodation_limit_D + 1e-9,
         "imaging_B_residual_m": float(total[0, 1]),
+    }
+
+
+def fixed_focal_source_solution(
+    eye: Eye,
+    source_distance_m: float,
+    focal_length_mm: float,
+    pupil_diameter_mm: float,
+    external_power_D: float = 0.0,
+) -> dict[str, float | bool]:
+    """Size a circular source for a fixed-power eye and fixed retina plane.
+
+    The retinal ray height is ``m_source*y_source + m_pupil*y_pupil``.
+    The geometric minimum lets the outer footprint just reach the target edge.
+    The conservative size makes the full-overlap plateau cover the entire target
+    disk, so no continuous focal-length fitting or accommodation is required.
+    """
+    if focal_length_mm not in eye.fixed_effective_focal_lengths_mm:
+        raise ValueError("focal_length_mm must be one of the configured fixed values")
+    if pupil_diameter_mm not in eye.pupil_diameters_mm:
+        raise ValueError("pupil_diameter_mm must be one of the configured values")
+    return adjustable_source_solution(
+        eye,
+        source_distance_m,
+        focal_length_mm,
+        pupil_diameter_mm,
+        external_power_D,
+    )
+
+
+def adjustable_source_solution(
+    eye: Eye,
+    source_distance_m: float,
+    focal_length_mm: float,
+    pupil_diameter_mm: float,
+    external_power_D: float = 0.0,
+) -> dict[str, float | bool]:
+    """Calculate a manually selected in-range case without fitting focal length.
+
+    The caller owns range validation. This function only enforces physical
+    positivity and uses the supplied focal length, axial geometry and pupil as
+    independent inputs.
+    """
+    if not math.isfinite(focal_length_mm) or focal_length_mm <= 0.0:
+        raise ValueError("focal_length_mm must be finite and positive")
+    if not math.isfinite(pupil_diameter_mm) or pupil_diameter_mm <= 0.0:
+        raise ValueError("pupil_diameter_mm must be finite and positive")
+    eye_power_D = 1000.0 / focal_length_mm
+    m_source, m_pupil = general_mapping(eye, source_distance_m, eye_power_D, external_power_D)
+    source_scale = abs(m_source)
+    if source_scale <= 0.0:
+        raise ValueError("source mapping coefficient must be non-zero")
+    pupil_radius_m = pupil_diameter_mm / 2000.0
+    pupil_blur_radius_m = abs(m_pupil) * pupil_radius_m
+    target_radius_m = eye.target_radius_m
+    geometric_radius_m = max(0.0, target_radius_m - pupil_blur_radius_m) / source_scale
+    conservative_radius_m = (target_radius_m + pupil_blur_radius_m) / source_scale
+    demand_D = 1.0 / source_distance_m
+    focus_object_demand_D = eye_power_D - 1.0 / eye.reduced_retina_distance_m
+    return {
+        "fixed_focal_length_mm": focal_length_mm,
+        "fixed_eye_power_D": eye_power_D,
+        "pupil_diameter_mm": pupil_diameter_mm,
+        "reduced_retina_distance_mm": 1000.0 * eye.reduced_retina_distance_m,
+        "focus_object_demand_D": focus_object_demand_D,
+        "retinal_defocus_D": demand_D - focus_object_demand_D,
+        "source_mapping_coefficient": m_source,
+        "pupil_mapping_coefficient": m_pupil,
+        "pupil_blur_diameter_mm": 2000.0 * pupil_blur_radius_m,
+        "geometric_min_source_diameter_mm": 2000.0 * geometric_radius_m,
+        "geometric_min_source_area_mm2": math.pi * (1000.0 * geometric_radius_m) ** 2,
+        "conservative_source_diameter_mm": 2000.0 * conservative_radius_m,
+        "conservative_source_area_mm2": math.pi * (1000.0 * conservative_radius_m) ** 2,
+        "geometric_coverage_margin_um": 1e6 * (
+            source_scale * geometric_radius_m + pupil_blur_radius_m - target_radius_m
+        ),
+        "conservative_plateau_margin_um": 1e6 * (
+            source_scale * conservative_radius_m - pupil_blur_radius_m - target_radius_m
+        ),
+        "pupil_blur_alone_covers_target": pupil_blur_radius_m >= target_radius_m,
     }
 
 
@@ -85,7 +170,6 @@ def infinity_solution(eye: Eye, external_power_D: float = 0.0) -> dict[str, floa
         "eye_power_D": eye.baseline_power_D + accommodation_D,
         "angular_diameter_rad": angular_diameter_rad,
         "angular_diameter_deg": math.degrees(angular_diameter_rad),
-        "feasible_accommodation": 0.0 <= accommodation_D <= eye.accommodation_limit_D + 1e-9,
     }
 
 
@@ -96,7 +180,7 @@ def general_mapping(
     external_power_D: float = 0.0,
 ) -> tuple[float, float]:
     """Return retina coefficients: y_retina = m_source*y_source + m_pupil*y_pupil."""
-    vertex_m = eye.external_lens_vertex_distance_mm / 1000.0
+    vertex_m = 0.0 if external_power_D == 0.0 else eye.external_lens_vertex_distance_mm / 1000.0
     pre = pre_eye_matrix(source_distance_m, external_power_D, vertex_m)
     total = translation(eye.reduced_retina_distance_m) @ thin_lens(eye_power_D) @ pre
     a_pre, b_pre = float(pre[0, 0]), float(pre[0, 1])
@@ -171,10 +255,10 @@ def load_eyes(config: dict) -> list[Eye]:
         Eye(
             eye_id=item["id"],
             label=item["label"],
-            effective_focal_length_mm=item["effective_focal_length_mm"],
+            fixed_effective_focal_lengths_mm=tuple(item["fixed_effective_focal_lengths_mm"]),
             reported_axial_length_mm=item["reported_axial_length_mm"],
+            image_medium_refractive_index=config["image_medium_refractive_index"],
             posterior_pole_diameter_mm=item["posterior_pole_diameter_mm"],
-            accommodation_limit_D=item["accommodation_limit_D"],
             pupil_diameters_mm=tuple(item["pupil_diameters_mm"]),
             axial_sensitivity_mm=tuple(item["axial_sensitivity_mm"]),
             external_lens_vertex_distance_mm=item["external_lens_vertex_distance_mm"],

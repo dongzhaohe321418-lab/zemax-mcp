@@ -1,0 +1,90 @@
+{
+  "application": {
+    "name": "Ansys Zemax OpticStudio",
+    "version": "24.1.0",
+    "zosapi_license_valid": true
+  },
+  "artifacts": [
+    "experiments/eye_illumination/results/fixed_focal_source_sweep.csv",
+    "experiments/eye_illumination/results/headline_results.csv",
+    "experiments/eye_illumination/results/validation_report.json",
+    "experiments/eye_illumination/results/zemax/zosapi_validation.csv",
+    "experiments/eye_illumination/notebooks/eye_illumination_analysis.ipynb",
+    "experiments/eye_illumination/report/artifact.json",
+    "experiments/eye_illumination/report/eye_illumination_report.html",
+    "experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf",
+    "experiments/eye_illumination/report/latex/qa_report.json"
+  ],
+  "experiment_id": "eye-illumination-fixed-focal-60-120d-v3",
+  "hypothesis": "With posterior-pole geometry fixed and each eye restricted to three discrete effective focal lengths, the object-side demand determines the source distance while focal length and pupil independently determine the source footprint bounds at the posterior pole.",
+  "inputs": {
+    "configuration": "experiments/eye_illumination/config/experiment.json",
+    "configuration_sha256": "efa805db577aa1a5fe79c89a8f017136fdd0ab6128f91b1199fae4d2e288cad8",
+    "fixed_focal_lengths_mm": {
+      "adult_18y": [
+        12.8,
+        14.75,
+        16.7
+      ],
+      "chick_30_45d": [
+        7.5,
+        8.0,
+        8.5
+      ],
+      "child_6y": [
+        13.5,
+        15.1,
+        16.7
+      ]
+    },
+    "image_medium_refractive_index": 1.336,
+    "monte_carlo_rays_per_case": 600000,
+    "random_seed": 20260814,
+    "source_demand_step_D": 10,
+    "source_demands_D": [
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120
+    ],
+    "wavelength_nm": 650.0
+  },
+  "limitations": [
+    "The supplied presentation gives focal-length ranges, not three exact values; endpoints and arithmetic midpoint are used and remain configurable.",
+    "The model is a paraxial effective thin-eye model with a fixed posterior-pole plane, not a multi-surface anatomical eye.",
+    "A zero geometric minimum means the pupil footprint alone covers the target disk; it does not imply a physically zero-sized emitter, so the conservative full-overlap value is the recommended engineering bound.",
+    "Absolute irradiance and biological safety remain out of scope without measured radiometry, exposure, spectrum, and tissue transmission."
+  ],
+  "next_step": "Replace the endpoint-plus-midpoint focal values if independently measured triplets become available, then add calibrated radiometry and a multi-surface non-sequential anatomical model.",
+  "objective": "Correct the eye-illumination simulation so object-side requirements from 60 D to 120 D are evaluated by varying source distance while each eye uses only three fixed equivalent focal lengths and the posterior pole remains fixed.",
+  "observations": [
+    "The complete matrix contains 252 eye-focal-pupil-demand cases and no accommodation output.",
+    "The conservative source diameter is always at least the geometric minimum; 54 cases have a zero geometric minimum because the pupil footprint already spans the target.",
+    "For the adult eye at 16.7 mm focal length and 5.0 mm pupil, the conservative diameter decreases from 10.388511 mm at 60 D to 7.694256 mm at 120 D.",
+    "The 600000-ray Monte Carlo comparison shows the geometric-minimum case captures all sampled rays but has lower uniformity, whereas the conservative case improves posterior-pole uniformity.",
+    "Six independently created OpticStudio systems agree with the analytical footprint bounds to within 2.5757174171303632e-11 micrometres."
+  ],
+  "outputs": {
+    "adult_f16p7_p5_120D_conservative_source_diameter_mm": 7.694256,
+    "adult_f16p7_p5_60D_conservative_source_diameter_mm": 10.388511,
+    "api_license_valid": true,
+    "fixed_focal_source_sweep_sha256": "a05e34128072759963273ad4d46f07ad345d30496ad68d8c24ee64e1fcd95c1a",
+    "fixed_focal_sweep_rows": 252,
+    "geometric_zero_count": 54,
+    "headline_results_sha256": "0b9b2a6b582b2d3c191d63e1590f1d1f245b91f2a4a2ae75edb5dca1d0b41123",
+    "max_zos_bound_error_um": 2.5757174171303632e-11,
+    "pdf_page_count": 21,
+    "pdf_sha256": "9f8eec1a1dca002b167bb65681e74fd998bac8ad6c101e75aa35f539516b7571",
+    "pdf_songti_embedded": true,
+    "tests_passed": 22,
+    "validation_report_sha256": "d44b3b54b1ea837fc99bde1290d589a113691fb336fce42c50bcfdbaf07b3dd7",
+    "validation_status": "passed",
+    "zos_case_count": 6
+  },
+  "payload_sha256": "6e73aa69c637c6a54cf93dd9477c567f54c5afb507331ffc75e126fbff616b11",
+  "recorded_at_utc": "2026-08-14T10:28:52.919299+00:00",
+  "schema_version": 1
+}

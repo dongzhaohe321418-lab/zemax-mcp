@@ -1,60 +1,99 @@
-# 小鸡与人眼 650 nm 全视网膜照明仿真
+# 小鸡与人眼 650 nm 固定焦距后极照明仿真
 
-本目录把用户提供的《小鸡和人眼光学仿真参数》转换为可重复执行、可审计的光学实验。它包含独立近轴模型、参数扫描、蒙特卡洛照度均匀性评估、真实 Ansys Zemax OpticStudio 24.1 ZOS-API 光线追迹、自动测试、执行完成的 Jupyter Notebook 和自包含 HTML 技术报告。
+本目录把用户提供的《小鸡和人眼光学仿真参数》转换为可重复执行、可审计的光学实验。当前版本修正了旧模型“连续改变等效焦距以强制调焦”的假设：后极平面由已知眼轴固定，每种眼只取三个离散固定焦距，物距、瞳孔和焦距均作为独立输入。
 
-## 已完成的建模
+## 专用实验程序
 
-三个有效眼模型分别表示 30–45 日龄小鸡、6 岁儿童和 18 岁成人。模型采用光线状态 `(y, nθ)` 与 ABCD 矩阵：
+`app/` 是为本实验制作的本地交互程序。它不是静态报告：界面直接调用版本化的 `eye_model.py`。固定基准模式严格复现三个焦距和 252 工况；独立的 PPT 范围探索模式允许手动改变有效焦距、眼轴、瞳孔、60–120 D 物方需求及外置凹透镜，并生成三水平灵敏度曲线和范围网格。程序不会为了满足物距而自动改变焦距。
 
-- 空间传播：`[[1, d/n], [0, 1]]`
-- 薄透镜：`[[1, 0], [-F, 1]]`
-- 聚焦条件：从光源平面到视网膜的系统矩阵满足 `B = 0`
-- 视网膜覆盖：聚焦成像圆盘直径不小于 PPT 指定的后极部目标直径
-- 离焦模糊：从最大边缘光线的视网膜交点包络计算几何模糊斑
+范围文件 `app/range_parameters.json` 同时记录数值来源。小鸡眼轴 10.5–12.5 mm 来自 PPT；儿童与成人眼轴的 ±0.5 mm 是既有灵敏度假设，因为 PPT 只给出约 23.0 mm 和 23.6 mm。角膜和晶状体部件参数仅作为来源参考显示；缺少面间距和折射率时不将其伪装成可独立追迹变量。
 
-调节通过改变眼的有效屈光力实现，视网膜位置固定。负外置镜片通过顶点距传播矩阵与眼透镜串联。物距、离焦、瞳孔、眼轴、调节上限和外置镜片均纳入扫参。
+第一次使用双击本目录的 `setup_web_gui.cmd`，它会建立私有 `.venv` 并自动启动；以后双击 `launch_web_gui.cmd`。也可以在仓库根目录执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1
+```
+
+程序默认打开 `http://127.0.0.1:8765/`，只监听本机地址，不上传实验数据。交互计算不需要启动 OpticStudio；ZOS-API 仍用于版本化结果的独立交叉验证。
+
+Web GUI 新增三步 Zemax 验证向导：只读自动发现安装、显式确认的 1 工况真实连接测试、清晰 PASS/FAIL 判定；测试通过后才解锁当前结果表的批量运行。结果表仍可生成确定性 Zemax 审计批次：相同输入会得到相同 batch ID 和 ZIP 哈希。批次内含服务器重新计算的输入、解析预期值、模型快照、通用 C# ZOS-API 执行器、独立校验器及一键 PowerShell 入口。它会为每个工况保存 `.zos`，记录 OpticStudio 版本、许可证状态、光线错误/渐晕和数值误差，最终生成 `verification_report.json`。详细安装、运行、人工抽查和故障排查见 [`ZEMAX_CONNECTION_GUIDE.md`](ZEMAX_CONNECTION_GUIDE.md)。
+
+## 当前固定焦距
+
+- 30–45 日龄小鸡：7.5、8.0、8.5 mm。
+- 6 岁儿童：13.5、15.1、16.7 mm。
+- 18 岁成人：12.8、14.75、16.7 mm。
+
+原 PPT 只给出焦距范围，没有明确列出三组实测值，因此当前采用范围两端加算术中点。若存在指定实测值，修改 `config/experiment.json` 后即可完整重跑。
+
+## 模型与实验矩阵
+
+光线状态采用 `(y, nθ)`，固定后极约化距离为报告眼轴除以像方折射率 1.336。对固定焦距、固定物距和固定瞳孔，视网膜高度写为：
+
+```text
+y_retina = m_source * y_source + m_pupil * y_pupil
+```
+
+主矩阵包含 3 个眼模型 × 3 个固定焦距 × 4 个瞳孔 × 7 个物方需求，共 252 行。物方需求为 60、70、80、90、100、110、120 D，对应 16.67–8.33 mm 物距；这些数值不再被解释为调节需求。
+
+每行输出两种尺寸：
+
+- `geometric_min_source_diameter_mm`：外部光线 footprint 刚好达到目标边缘的理论最小值。
+- `conservative_source_diameter_mm`：整个后极目标位于源像与瞳孔 footprint 全重叠平台内的推荐值。
+
+几何最小值可能为零，仅表示瞳孔离焦 footprint 已经达到目标边缘，不表示实际可以使用零面积光源。
 
 ## 一键复现
 
-前提：Windows、Python 3.11+、OpticStudio 与有效 ZOS-API 许可证。先安装依赖：
+前提：Windows、Python 3.11+、OpticStudio 2024 R1 和有效 ZOS-API 许可证。
 
 ```powershell
 python -m pip install -e ".[dev,analysis]"
-```
 
-然后在仓库根目录执行：
-
-```powershell
 powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\run_all.ps1 `
   -PythonPath "C:\path\to\python.exe" `
   -OpticStudioDir "C:\Program Files\Ansys Zemax OpticStudio 2024 R1.00"
 ```
 
-脚本依次重建独立模型结果和图、编译并运行 64 位 ZOS-API 验证器、验证数值、重建并执行 Notebook、运行全部测试、生成规范化报告数据和便携 HTML 报告。`.build/` 仅用于临时编译产物，不进入版本控制。
+该流程重新生成 252 行主扫描、600,000 光线蒙特卡洛案例、6 个固定焦距 `.zos` 系统、数值验证、已执行 Notebook 和自包含 HTML 报告。
 
-## 主要结果
+中文宋体 LaTeX/PDF 报告单独构建：
 
-- 成人与儿童在 100 mm（10 D）物距、无外置镜片时，需要约 35.93 mm 直径的圆形光源覆盖 6 mm 后极部；小鸡需要约 35.71 mm 覆盖 3 mm 后极部。
-- 无穷远条件下所需完整角直径为小鸡 20.46°、儿童与成人 20.59°。
-- 小鸡在 20 D 近距工况超过 15.69 D 调节上限；成人在 20 D 超过 18 D 上限；6 岁儿童在 PPT 给定 22.5 D 上限内可行。
-- 成人眼在 100 mm 物距加 -10 D 外置镜片时需要 17.00 D 调节，仍可行；-15 D 与 -20 D 分别需要 20.03 D、22.79 D，不可行。
-- 成人 5 mm 瞳孔在 10 D 离焦时几何模糊斑直径为 0.835 mm；小鸡 3.5 mm 瞳孔对应 0.294 mm。
-- 聚焦成人 10 D 蒙特卡洛案例的目标捕获比例为 1.000，`p10/mean` 均匀性为 0.846；采用覆盖 10 D 离焦的保守光源后，捕获比例为 0.771，`p10/mean` 为 0.831。
-- 5 个聚焦 ZOS-API 案例的最大视网膜边缘误差为 4.44×10⁻¹³ µm；故意不调焦案例的预测与 ZOS 展宽均为 0.82665 mm。
+```powershell
+powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\latex\build_report.ps1 `
+  -PythonPath "C:\path\to\python.exe"
+```
 
-## 目录与数据血缘
+构建脚本连续编译三次，并检查 A4 页面、SimSun/宋体嵌入、关键文本、图片数量、引用和版面越界。
 
-- `source/`：用户提供的原始 PPT（未修改）。
-- `config/experiment.json`：唯一实验参数源与假设清单。
-- `eye_model.py`：矩阵光学、调节、尺寸和离焦计算核心。
-- `run_experiment.py`：全部扫参、蒙特卡洛与静态图。
-- `zemax/ZosApiEyeValidation.cs`：真实 OpticStudio 系统创建与批量光线追迹。
-- `results/`：CSV、JSON、`.zos` 与 `.ZDA` 完整结果。
-- `notebooks/eye_illumination_analysis.ipynb`：含输出的可执行分析 Notebook。
-- `report/artifact.json`：报告的规范化、带来源数据。
+## 当前关键结果
+
+- 主扫描 252 行，结果中不再包含 `accommodation` 输出或“超过调节上限”的判定。
+- 成人眼 `f=16.7 mm`、5 mm 瞳孔时，60 D 与 120 D 的保守光源直径分别为 10.389 mm 和 7.694 mm。
+- 小鸡眼 `f=8.5 mm`、3.5 mm 瞳孔时，60 D 与 120 D 的保守光源直径分别为 9.008 mm 和 6.254 mm。
+- 六个 OpticStudio 系统与解析 footprint 的最大边界误差为 `2.58e-11 µm`。
+- 通用审计执行器已在 OpticStudio 24.1 对完整 252 工况全部验证通过，0 个失败，最大边界误差为 `3.02e-11 µm`；另含外置负镜的跨眼模型冒烟批次也通过。
+- PDF 为 21 页，包含模型示意图、工作流、五张数据图、精确表格、验证和复现说明。
+
+## 主要文件
+
+- `config/experiment.json`：固定焦距、眼轴、后极、瞳孔与物距的唯一参数源。
+- `eye_model.py`：固定参数 ABCD 映射和两种光源尺寸定义。
+- `results/fixed_focal_source_sweep.csv`：252 行完整主矩阵。
+- `results/headline_results.csv`：最大瞳孔下的 63 行查表结果。
+- `zemax/ZosApiEyeValidation.cs`：六个固定焦距 OpticStudio 系统的自动生成与追迹。
+- `zemax/ZosApiEyeBatch.cs`：读取应用批次的通用 OpticStudio Standalone 执行器。
+- `zemax/run_zemax_batch.ps1`：编译、运行和校验任意应用批次的一键入口。
+- `zemax/verify_zemax_results.py`：逐案例、逐文件哈希的独立 PASS/FAIL 校验器。
+- `ZEMAX_CONNECTION_GUIDE.md`：应用连接 OpticStudio 的完整中文操作与审计指南。
+- `../artifacts/eye-illumination-zemax-auditable-batch-v2/`：252 个 `.zos`、Zemax 结果、外镜冒烟批次、失败诊断和全部审计哈希。
+- `../runs/eye-illumination-zemax-auditable-batch-v2.json`：本次批次接入里程碑的不可覆盖实验记录。
+- `results/validation_report.json`：数值和 ZOS-API 自动验证。
+- `../runs/eye-illumination-fixed-focal-60-120d-v3.json`：不可覆盖的本次实验记录、哈希与关键观察。
+- `notebooks/eye_illumination_analysis.ipynb`：已执行的可复现 Notebook。
 - `report/eye_illumination_report.html`：自包含技术报告。
-- `validate_results.py` 与 `tests/test_eye_illumination_model.py`：自动数值验证和单元测试。
+- `report/latex/eye_illumination_experiment_report.pdf`：21 页中文宋体综合报告。
 
 ## 限制
 
-当前成果是几何光学和相对照度的第一阶段工程模型。PPT 未给出绝对光功率、曝光时间、光谱带宽、组织透射、曲率、折射率、像差、散射和眼球转动包络，因此不能据此声称绝对视网膜辐照度或眼组织安全。PPT 第 5 页的“15 D”按上下文暂解释为 -15 D；小鸡 5 mm 和人眼 12 mm 的外置镜片顶点距为待实测假设。
+当前结果是近轴几何覆盖和相对光线计数，不是绝对视网膜辐照度或眼组织安全结论。等效主平面、三个实际焦距、光源辐亮度、组织透射、像差和覆盖验收阈值仍需实测确认。范围模式可以加入外置近轴负镜，但这仍是等效面，不应冒充具有厚度、材料和像差的真实镜片。

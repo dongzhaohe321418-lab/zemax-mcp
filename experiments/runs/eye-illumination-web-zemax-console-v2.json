@@ -1,0 +1,45 @@
+{
+  "application": "Ansys Zemax OpticStudio",
+  "application_version": "24.1.0",
+  "artifacts": [
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/README.md",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/verification_report.json",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/zos_results.csv",
+    "experiments/artifacts/eye-illumination-web-zemax-console-v1/web_gui_zemax_21_case_evidence.zip"
+  ],
+  "backend": "zosapi",
+  "experiment_id": "eye-illumination-web-zemax-console-v2",
+  "hypothesis": "The final copy-only correction will preserve all validated optical and API behavior while making the post-run next action unambiguous.",
+  "inputs": {
+    "change": "Replace the stale running reminder after completion with an explicit verified-and-download-ready message.",
+    "portable_package_filename": "eye_illumination_web_gui_v5.zip",
+    "supersedes_experiment_id": "eye-illumination-web-zemax-console-v1",
+    "validated_zemax_batch_id": "eye-zemax-2a8b5f0189c5e6e8"
+  },
+  "next_step": "Use the one-case connection test after any OpticStudio upgrade before repeating a table batch.",
+  "objective": "Finalize the easy local Web GUI release after correcting the completed-job guidance text and rebuilding the portable archive.",
+  "observations": "The final UI now tells the user that the run is verified and that the audit evidence is ready, instead of retaining a do-not-close message after completion.",
+  "payload_sha256": "21c5f27d81876d2c44cd5d5aadd8d8f129bfb01fd798af8151c9ae34f304d533",
+  "recorded_at_utc": "2026-08-18T07:03:47.080331+00:00",
+  "results": {
+    "optical_validation_carried_forward": {
+      "api_license_valid": true,
+      "evidence_zip_sha256": "68df9f3ff53b06e03e2446a65887fae53119f8835274dd72b7f8f2d924a8eabd",
+      "failed_case_count": 0,
+      "maximum_boundary_error_um": 1.7763568394002505e-12,
+      "opticstudio_version": "24.1.0",
+      "passed_case_count": 21,
+      "verification_status": "PASS"
+    },
+    "portable_deployment": {
+      "archive_structure": "PASS",
+      "health_endpoint": "PASS",
+      "home_page_http_status": 200,
+      "package_sha256": "a7e7a14f071d26cfbeebbd028736fe0ffb9f2231da251e0e10e91f6a86b8c901",
+      "script_http_status": 200,
+      "status": "PASS"
+    },
+    "verification_scope": "The final change affects only user-facing completed-job text; model, batch runner, API execution, verifier, and committed ZOS evidence are unchanged from v1."
+  },
+  "schema_version": 1
+}

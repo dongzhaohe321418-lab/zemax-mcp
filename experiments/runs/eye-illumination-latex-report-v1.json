@@ -1,0 +1,50 @@
+{
+  "artifacts": [
+    "experiments/eye_illumination/report/latex/eye_illumination_experiment_report.tex",
+    "experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf",
+    "experiments/eye_illumination/report/latex/generated_results.tex",
+    "experiments/eye_illumination/report/latex/figures/*.png",
+    "experiments/eye_illumination/report/latex/qa_report.json",
+    "experiments/eye_illumination/report/latex/qa_contact_sheet.png",
+    "experiments/eye_illumination/report/latex/chart_map.md",
+    "experiments/eye_illumination/report/latex/build_report.ps1"
+  ],
+  "experiment_id": "eye-illumination-latex-report-v1",
+  "hypothesis": "A report generated directly from versioned CSV/JSON outputs can reproduce the validated numerical conclusions while remaining visually inspectable and rebuildable from one command.",
+  "inputs": {
+    "cjk_font": "SimSun",
+    "figure_generator": "experiments/eye_illumination/report/latex/make_latex_figures.py",
+    "report_data_generator": "experiments/eye_illumination/report/latex/generate_report_data.py",
+    "source_commit": "0188aa3a5713ea1ecabc4c033d8263ad8d70c98a",
+    "source_experiment_record": "experiments/runs/eye-illumination-650nm-v1.json",
+    "typesetter": "XeLaTeX via MiKTeX 25.12"
+  },
+  "limitations": [
+    "The report faithfully documents the current effective paraxial model and does not upgrade it to an anatomical multi-surface eye.",
+    "Absolute retinal irradiance and biological safety remain outside scope because source radiometry, exposure, spectrum, and tissue transmission are not supplied.",
+    "The embedded SimSun font is a Windows system font, so rebuilding on another operating system requires a metrically appropriate Songti font substitution."
+  ],
+  "next_step": "Collect measured radiometry and mechanical geometry, replace the effective thin lens with multi-surface anatomical eyes, and extend the OpticStudio validation to sequential aberration and non-sequential stray-light analyses.",
+  "objective": "Generate and self-check a comprehensive Chinese SimSun LaTeX/PDF report for the completed chick, child, and adult 650 nm posterior-pole illumination simulation.",
+  "observations": [
+    "The report contains an illustrative lens-system diagram and a separate reproducible-workflow diagram drawn as vector TikZ graphics.",
+    "Five quantitative figures are regenerated from validated result files with Chinese SimSun labels.",
+    "Automated PDF inspection passed, and manual visual review covered the cover, diagrams, equations, Monte Carlo heatmaps, OpticStudio comparison, long tables, conclusions, and references.",
+    "A long running header initially overlapped a chapter title; manual review caught it, the header was simplified, and the report was rebuilt successfully."
+  ],
+  "outputs": {
+    "a4_pages": true,
+    "embedded_raster_image_instances": 5,
+    "missing_required_text_count": 0,
+    "overfull_box_count": 0,
+    "pdf_page_count": 29,
+    "pdf_sha256": "762fa7f74b746a57adde1d90f534baa044aaa7ae49064113d33e9b911d65f625",
+    "pdf_size_bytes": 1199714,
+    "songti_embedded": true,
+    "sparse_page_count": 0,
+    "validation_status": "passed"
+  },
+  "payload_sha256": "08ea1d074591562eab9c775948147d10b77b9cd18b5ce8384432952af92a6f1d",
+  "recorded_at_utc": "2026-08-14T08:43:00.360492+00:00",
+  "schema_version": 1
+}

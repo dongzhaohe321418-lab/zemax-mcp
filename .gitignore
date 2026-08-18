@@ -12,6 +12,13 @@ scratch/
 *.tmp
 *.bak
 .build/
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
 
 # Experiment records in experiments/ are intentionally versioned.
 # Zemax and large binary files there are handled by Git LFS.

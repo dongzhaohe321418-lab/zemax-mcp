@@ -1,4 +1,4 @@
-"""Create and execute the reader-facing reproducibility notebook."""
+"""Create and execute the reader-facing fixed-focal reproducibility notebook."""
 
 from __future__ import annotations
 
@@ -27,28 +27,26 @@ def build() -> None:
     nb["metadata"]["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
     nb["cells"] = [
         markdown("""
-# 650 nm eye-illumination experiment
+# 650 nm fixed-focal eye-illumination experiment
 
 ## tl;dr
 
-This executed notebook reproduces the reduced-eye sweep, loads the real OpticStudio 24.1 cross-validation, and exposes the assumptions needed to interpret the source-size recommendations. The model is paraxial and radiometrically normalized; it does not establish retinal exposure safety.
+This executed notebook sizes a circular source for 60–120 D object-side requirements while holding the retina plane fixed and using only three discrete focal lengths per eye. It does not continuously alter focal length to force focus. Both a geometric minimum and a conservative full-overlap source diameter are reported.
         """),
         markdown("""
 ## Context & Methods
 
-### Key Assumptions
-
-- A rotationally symmetric effective thin eye lens represents each eye.
-- Accommodation changes eye power while retinal position remains fixed.
-- A uniform circular 650 nm source is imaged onto a circular posterior-pole target.
-- External lens vertex distance is 5 mm for chick and 12 mm for human eyes.
-- Absolute source flux, biological scattering, diffraction, aberrations, and exposure limits are not supplied by the source PPT and are not inferred.
+- Chick fixed focal lengths: 7.5, 8.0, 8.5 mm.
+- Child fixed focal lengths: 13.5, 15.1, 16.7 mm.
+- Adult fixed focal lengths: 12.8, 14.75, 16.7 mm.
+- The reduced retina distance is the reported axial length divided by 1.336.
+- Every row is one eye × focal length × pupil × object distance; no accommodation feasibility test is used.
+- The geometric minimum only makes the outer footprint reach the posterior-pole edge. The conservative diameter makes the full-overlap plateau cover the complete posterior-pole disk.
         """),
         code("""
 from pathlib import Path
 import json
 import pandas as pd
-import matplotlib.pyplot as plt
 from IPython.display import display, Image
 
 ROOT = Path.cwd()
@@ -63,50 +61,49 @@ config['experiment_id'], validation['overall_status']
         markdown("## Data"),
         code("""
 headline = pd.read_csv(RESULTS / 'headline_results.csv')
-focused = pd.read_csv(RESULTS / 'focused_source_sweep.csv')
+fixed = pd.read_csv(RESULTS / 'fixed_focal_source_sweep.csv')
 defocus = pd.read_csv(RESULTS / 'defocus_pupil_sweep.csv')
 axial = pd.read_csv(RESULTS / 'axial_length_sensitivity.csv')
 zos = pd.read_csv(RESULTS / 'zemax' / 'zosapi_validation.csv')
-display(headline)
+display(headline.head(12))
+display(fixed.groupby('eye_id').size().rename('rows'))
         """),
         markdown("""
-## Results
+## Fixed focal lengths change the source-size answer
 
-### Source size scales linearly with distance
-
-At a fixed target angular field, the required physical source becomes large at long working distance. Pupil diameter does not change in-focus paraxial image size; it changes throughput and the defocused blur footprint.
+The plotted recommendation is the conservative source diameter at each eye's largest configured pupil. Each panel contains exactly three focal-length curves. The curves differ because object distance, fixed power, pupil blur, and the fixed posterior-pole plane jointly determine the retinal footprint.
         """),
         code("display(Image(filename=str(FIGURES / 'source_diameter_vs_demand.png')))"),
         markdown("""
-### External negative lenses consume accommodation reserve
+## Pupil diameter remains an explicit design input
 
-The table and heatmap use the stated provisional vertex distances. A negative lens increases the positive accommodation required to focus the same physical source plane.
+With a fixed focal length the retinal footprint is generally defocused, so pupil diameter is no longer irrelevant. The adult endpoint comparison shows how the recommended conservative source diameter changes with pupil size and the selected fixed focal length.
         """),
-        code("display(Image(filename=str(FIGURES / 'adult_accommodation_heatmap.png')))"),
+        code("display(Image(filename=str(FIGURES / 'fixed_focal_pupil_comparison.png')))"),
         markdown("""
-### Defocus and pupil size jointly broaden retinal illumination
+## Geometric coverage and conservative coverage are different
 
-Blur-assisted geometric coverage is not equivalent to a useful focused image. Larger pupils increase the defocused footprint and reduce the source angular size needed for geometric coverage, but the optical result is less selective.
+The geometric minimum can have severe edge roll-off. The conservative full-overlap design is larger but keeps the target inside the convolution plateau. The Monte Carlo maps use 600,000 deterministic rays per case.
         """),
-        code("display(Image(filename=str(FIGURES / 'defocus_blur_by_pupil.png')))"),
+        code("display(Image(filename=str(FIGURES / 'retinal_irradiance_monte_carlo.png')))"),
         markdown("""
-### Real OpticStudio cross-validation
+## Real OpticStudio cross-validation
 
-The ZOS-API validation uses OpticStudio's sequential paraxial surface and normalized real-ray batch tracing. It checks three baseline eyes, two negative-lens cases, and one deliberately unaccommodated case.
+Six fixed-focal systems were built through ZOS-API. Four corner rays per system verify the analytical source/pupil footprint bounds at the reduced retina plane.
         """),
         code("""
-display(zos[['case_id','accommodation_D','source_diameter_mm','mean_image_y_mm','rms_spread_um']])
+display(zos[['case_id','fixed_focal_length_mm','source_distance_mm','pupil_diameter_mm','conservative_source_diameter_mm','bound_error_um']])
 display(Image(filename=str(FIGURES / 'zosapi_cross_validation.png')))
 validation
         """),
         markdown("""
 ## Takeaways
 
-- All focused ZOS-API cases place the source edge on the requested retinal edge to numerical precision.
-- At 10 D (100 mm), the required circular source diameter is about 35.7 mm for chick and 35.9 mm for either human model.
-- The 20 D source is beyond the assumed chick and adult accommodation limits, but within the assumed 6-year-old limit.
-- Negative external lenses rapidly reduce the set of focusable source distances.
-- These are geometric/paraxial design results, not absolute irradiance or biological-safety results. A full anatomical/GRIN and measured-QLED model is the next validation layer.
+- The primary matrix contains 252 fixed-focal rows: 3 eyes × 3 focal lengths × 4 pupils × 7 object distances.
+- No row changes the assigned focal length to satisfy the object-side requirement.
+- The conservative source diameter, not the old in-focus diameter, is the recommended first-order coverage value.
+- Some geometric minima become zero when pupil-driven defocus alone reaches the target; this does not mean a zero-area practical emitter is recommended.
+- These are paraxial geometric results, not absolute retinal irradiance or biological-safety results.
         """),
     ]
     nbf.write(nb, NOTEBOOK_PATH)
