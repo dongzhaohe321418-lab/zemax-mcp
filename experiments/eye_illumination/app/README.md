@@ -40,7 +40,19 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 - 生成 21 行当前对比或完整 252 行矩阵。
 - 生成当前眼模型的最小值/默认值/最大值三水平范围网格，并报告因外镜机械顺序而跳过的组合。
 - 将当前工况导出为 JSON，将结果矩阵导出为带 UTF-8 BOM 的 CSV。
+- 将当前结果表导出为确定性的 Zemax 审计 ZIP，内含模型快照、哈希、通用 ZOS-API runner 和独立 verifier。
 - 直接打开版本化 PDF 报告、验证 JSON 和基准矩阵。
+
+## 导出并用 OpticStudio 验证
+
+结果表加载后，点击“生成 Zemax 审计批次”。解压下载的 ZIP 后执行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_zemax_batch.ps1 `
+  -OpticStudioDir "C:\path\to\installed\OpticStudio"
+```
+
+只有输出目录中的 `verification_report.json` 同时满足 `verification_status = PASS`，才表示该批次经过真实 OpticStudio 验证。完整步骤、输出解释和故障排查见 [`../ZEMAX_CONNECTION_GUIDE.md`](../ZEMAX_CONNECTION_GUIDE.md)。
 
 ## 本地接口
 
@@ -50,6 +62,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 - `POST /api/sweep`：计算筛选矩阵或完整矩阵。
 - `POST /api/range-sensitivity`：计算有效焦距、眼轴或瞳孔的三水平灵敏度。
 - `POST /api/range-grid`：计算当前眼模型的三水平范围网格。
+- `POST /api/zemax-batch`：重新计算传入工况并下载确定性的可审计 Zemax ZIP。
 - `GET /api/case.json?...`：下载一个工况。
 - `GET /api/sweep.csv?...`：下载筛选矩阵或完整矩阵。
 - `GET /api/range-sensitivity.csv?...` 与 `GET /api/range-grid.csv?...`：下载范围探索结果。

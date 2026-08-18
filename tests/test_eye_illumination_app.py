@@ -6,6 +6,8 @@ import sys
 import threading
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+import zipfile
+import io
 
 import pytest
 
@@ -162,6 +164,24 @@ def test_http_server_serves_app_and_calculation() -> None:
         with urlopen(request, timeout=5) as response:
             result = json.load(response)
         assert result["conservative_source_diameter_mm"] == pytest.approx(6.2538132512)
+
+        batch_request = Request(
+            f"{base}/api/zemax-batch",
+            data=json.dumps({"cases": [{
+                "mode": "baseline", "eye_id": "chick_30_45d", "focal_length_mm": 8.5,
+                "pupil_diameter_mm": 3.5, "source_demand_D": 120,
+            }]}).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urlopen(batch_request, timeout=5) as response:
+            package = response.read()
+            assert response.headers["Content-Type"] == "application/zip"
+            assert response.headers["X-Zemax-Case-Count"] == "1"
+            assert response.headers["X-Zemax-Batch-Id"].startswith("eye-zemax-")
+        with zipfile.ZipFile(io.BytesIO(package)) as archive:
+            assert "manifest.json" in archive.namelist()
+            assert "scripts/ZosApiEyeBatch.cs" in archive.namelist()
 
         invalid = Request(
             f"{base}/api/calculate",

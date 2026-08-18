@@ -2,7 +2,7 @@
 
 A safety-first, stdio-only MCP server that lets Codex, Claude Code, or another MCP host drive constrained Ansys Zemax OpticStudio sequential-mode workflows. The project includes a deterministic mock backend so validation and protocol work can proceed without an OpticStudio installation.
 
-> Current status: the mock backend is implemented and testable. The ZOS-API adapter deliberately stops after read-only runtime discovery until its object names and connection sequence are checked against the samples installed with the target OpticStudio release. It has **not** been verified against a live licensed OpticStudio instance.
+> Current status: the general-purpose MCP ZOS-API adapter deliberately stops after read-only runtime discovery until its object names and connection sequence are checked against the samples installed with the target OpticStudio release. Separately, the dedicated eye-experiment C# batch runner has been verified on a licensed OpticStudio 24.1 instance across all 252 baseline cases and a cross-model external-lens smoke batch. These are distinct execution paths; success of the dedicated runner is not presented as verification of the unfinished general MCP adapter.
 
 ## Completed reference experiment
 
@@ -17,6 +17,8 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 ```
 
 Then open `http://127.0.0.1:8765/`. Python 3.11 and the project analysis dependencies are required; OpticStudio is not needed for interactive ABCD calculations.
+
+The results table can also be frozen as a deterministic, auditable Zemax batch ZIP. Each package includes validated `cases.csv`, expected ray boundaries, model/configuration snapshots, SHA-256 hashes, a generic C# ZOS-API standalone runner, immutable run-directory logic, saved `.zos` systems, and an independent Python verifier that emits an explicit `PASS` or `FAIL`. Generating a package is not represented as a Zemax result: the package manifest remains `NOT_RUN_IN_ZEMAX` until a licensed OpticStudio run produces a passing verification report. See the detailed Chinese [`Zemax connection and audit guide`](experiments/eye_illumination/ZEMAX_CONNECTION_GUIDE.md).
 
 ```text
 MCP host (Codex / Claude Code)
@@ -176,6 +178,7 @@ experiments/runs/        immutable JSON experiment records
 experiments/artifacts/   Git LFS-backed designs and large results
 experiments/templates/   record template
 experiments/eye_illumination/ completed reproducible 650 nm eye study and report
+experiments/eye_illumination/zemax/ generic auditable ZOS-API eye batch runner and verifier
 scripts/                 diagnostics and experiment recorder
 tests/                   validation, path, and mock-physics tests
 server.py                FastMCP stdio tools

@@ -317,3 +317,32 @@ class ExperimentService:
             "rows": rows,
             "skipped": skipped,
         }
+
+    def zemax_batch_rows(self, request: dict[str, Any]) -> list[dict[str, Any]]:
+        """Recalculate untrusted browser inputs before freezing a Zemax batch."""
+        if not isinstance(request, dict):
+            raise RequestError("request body must be a JSON object")
+        cases = request.get("cases")
+        if not isinstance(cases, list) or not cases:
+            raise RequestError("cases must be a non-empty array")
+        if len(cases) > 1000:
+            raise RequestError("Zemax batch is limited to 1000 cases")
+        allowed = {
+            "mode",
+            "eye_id",
+            "focal_length_mm",
+            "axial_length_mm",
+            "pupil_diameter_mm",
+            "source_demand_D",
+            "external_lens_power_D",
+        }
+        rows: list[dict[str, Any]] = []
+        for index, item in enumerate(cases, start=1):
+            if not isinstance(item, dict):
+                raise RequestError(f"case {index} must be a JSON object")
+            inputs = {key: value for key, value in item.items() if key in allowed}
+            try:
+                rows.append(self.calculate(inputs))
+            except RequestError as exc:
+                raise RequestError(f"case {index}: {exc}") from exc
+        return rows

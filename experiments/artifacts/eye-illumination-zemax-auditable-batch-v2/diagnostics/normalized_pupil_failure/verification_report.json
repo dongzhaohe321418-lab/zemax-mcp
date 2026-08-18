@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "verification_status": "FAIL",
+  "verified_at_utc": "2026-08-18T06:22:10.664736+00:00",
+  "batch_id": "eye-zemax-e5aa143193b539a8",
+  "batch_manifest_sha256": "8270c46a81b711a7f6fd8f78f71621f52a9ae6461ea171139c713a004a8e75c7",
+  "package_integrity": {
+    "status": "PASS",
+    "files": {
+      "README_ZEMAX_BATCH.md": true,
+      "cases.csv": true,
+      "expected_results.csv": true,
+      "model_snapshot/experiment.json": true,
+      "model_snapshot/eye_model.py": true,
+      "model_snapshot/range_parameters.json": true,
+      "scripts/ZosApiEyeBatch.cs": true,
+      "scripts/run_zemax_batch.ps1": true,
+      "scripts/verify_zemax_results.py": true
+    }
+  },
+  "opticstudio_versions": [
+    "24.1.0"
+  ],
+  "api_license_valid": true,
+  "expected_case_count": 4,
+  "passed_case_count": 2,
+  "failed_case_count": 2,
+  "maximum_boundary_error_um": 77.19523476410295,
+  "issues": [],
+  "case_findings": [
+    {
+      "case_id": "adultm18y_range_f14p75_a23p6_p5_d60_xm3_c55d1e3b25",
+      "status": "FAIL",
+      "issues": [
+        "boundary error exceeds tolerance"
+      ]
+    },
+    {
+      "case_id": "chickm30m45d_range_f7p83_a12p2_p2p7_d60_xm1_f5994493cc",
+      "status": "FAIL",
+      "issues": [
+        "boundary error exceeds tolerance"
+      ]
+    }
+  ],
+  "result_file_sha256": {
+    "run_metadata.json": "735f2bd5531a3f52f835b637c7e88e14e32ab265fb2f08ade10119f8f391b211",
+    "runner.log": "b9d9ac451ed89101235f9bda45de681469427054b12edc06676dc772980e61d8",
+    "systems/adultm18y_range_f14p75_a23p6_p5_d60_xm3_c55d1e3b25.ZDA": "b555c5a108c0a35697580980251b4da4a18733ce7fed7ec963bdd55a0d4f4609",
+    "systems/adultm18y_range_f14p75_a23p6_p5_d60_xm3_c55d1e3b25.zos": "c8d28f61cbbe2d3e999e01b869d0dabf83536df8df6e9d2f1674c0ce0dca5390",
+    "systems/chickm30m45d_baseline_f7p5_a11p7_p2_d60_x0_48566da0e7.ZDA": "b555c5a108c0a35697580980251b4da4a18733ce7fed7ec963bdd55a0d4f4609",
+    "systems/chickm30m45d_baseline_f7p5_a11p7_p2_d60_x0_48566da0e7.zos": "81eae663250703cfe0c2ff88c37aba0c0bb9b165265d14afd393d55445d780c5",
+    "systems/chickm30m45d_range_f7p83_a12p2_p2p7_d60_xm1_f5994493cc.ZDA": "b555c5a108c0a35697580980251b4da4a18733ce7fed7ec963bdd55a0d4f4609",
+    "systems/chickm30m45d_range_f7p83_a12p2_p2p7_d60_xm1_f5994493cc.zos": "f36f3d862ebc1fc5884e504384abd1eb6a3c8363248453e1ee919c2b5fecde42",
+    "systems/childm6y_range_f15p1_a23_p3_d80_x0_abb52b09d4.ZDA": "b555c5a108c0a35697580980251b4da4a18733ce7fed7ec963bdd55a0d4f4609",
+    "systems/childm6y_range_f15p1_a23_p3_d80_x0_abb52b09d4.zos": "47af25fcf75ae943bb7a3ac242145e5fa01ce83c9f2ef1a64c261bfb7421c688",
+    "zos_results.csv": "68c2914e99ad6a823c78c6c3f374d26fe9af9f04f4444a86f573cd827664deef"
+  }
+}

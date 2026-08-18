@@ -325,6 +325,8 @@ function renderTable(rows) {
     fragment.append(tr);
   });
   body.append(fragment);
+  $("download-zemax-batch").disabled = rows.length === 0;
+  $("zemax-batch-status").textContent = rows.length ? `当前将导出 ${rows.length} 个工况。` : "等待结果表。";
 }
 
 function downloadUrl(path) {
@@ -334,6 +336,55 @@ function downloadUrl(path) {
   document.body.append(link);
   link.click();
   setTimeout(() => link.remove(), 1000);
+}
+
+function zemaxCaseInput(row) {
+  return {
+    mode: row.mode,
+    eye_id: row.eye_id,
+    focal_length_mm: row.effective_focal_length_mm,
+    axial_length_mm: row.axial_length_mm,
+    pupil_diameter_mm: row.pupil_diameter_mm,
+    source_demand_D: row.source_demand_D,
+    external_lens_power_D: row.external_lens_power_D,
+  };
+}
+
+async function downloadZemaxBatch() {
+  if (!state.rows.length) return;
+  const button = $("download-zemax-batch");
+  try {
+    button.disabled = true;
+    button.textContent = "正在封装与计算哈希…";
+    $("zemax-batch-status").textContent = "服务器正在逐行重新验证输入。";
+    const response = await fetch("/api/zemax-batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cases: state.rows.map(zemaxCaseInput) }),
+    });
+    if (!response.ok) {
+      const payload = await response.json();
+      throw new Error(payload.error || `HTTP ${response.status}`);
+    }
+    const blob = await response.blob();
+    const batchId = response.headers.get("X-Zemax-Batch-Id") || "eye-zemax-batch";
+    const digest = response.headers.get("X-Content-SHA256") || "unknown";
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${batchId}.zip`;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
+    $("zemax-batch-status").textContent = `${batchId} · ZIP SHA-256 ${digest.slice(0, 16)}… · 尚未在 Zemax 运行`;
+    showToast(`已生成 ${state.rows.length} 个工况的 Zemax 审计批次。`);
+  } catch (error) {
+    $("zemax-batch-status").textContent = `生成失败：${error.message}`;
+    showToast(`Zemax 批次生成失败：${error.message}`, true);
+  } finally {
+    button.disabled = false;
+    button.textContent = "生成 Zemax 审计批次";
+  }
 }
 
 async function fullSweep() {
@@ -396,6 +447,7 @@ $("external-lens-select").addEventListener("change", calculateCurrent);
 $("metric-select").addEventListener("change", renderChart);
 $("sensitivity-select").addEventListener("change", loadChartRows);
 $("full-sweep").addEventListener("click", fullSweep);
+$("download-zemax-batch").addEventListener("click", downloadZemaxBatch);
 
 [["focal", "mm", 2], ["axial", "mm", 2], ["pupil", "mm", 2], ["demand", "D", 0]].forEach(([id, unit, digits]) => {
   $(`range-${id}`).addEventListener("input", () => updateRangeOutput(id, unit, digits));

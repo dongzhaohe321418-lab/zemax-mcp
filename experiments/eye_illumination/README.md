@@ -16,6 +16,8 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 
 程序默认打开 `http://127.0.0.1:8765/`，只监听本机地址，不上传实验数据。交互计算不需要启动 OpticStudio；ZOS-API 仍用于版本化结果的独立交叉验证。
 
+结果表新增“生成 Zemax 审计批次”：相同输入会得到相同 batch ID 和 ZIP 哈希。批次内含服务器重新计算的输入、解析预期值、模型快照、通用 C# ZOS-API 执行器、独立校验器及一键 PowerShell 入口。它会为每个工况保存 `.zos`，记录 OpticStudio 版本、许可证状态、光线错误/渐晕和数值误差，最终生成 `verification_report.json`。详细安装、运行、人工抽查和故障排查见 [`ZEMAX_CONNECTION_GUIDE.md`](ZEMAX_CONNECTION_GUIDE.md)。
+
 ## 当前固定焦距
 
 - 30–45 日龄小鸡：7.5、8.0、8.5 mm。
@@ -70,6 +72,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 - 成人眼 `f=16.7 mm`、5 mm 瞳孔时，60 D 与 120 D 的保守光源直径分别为 10.389 mm 和 7.694 mm。
 - 小鸡眼 `f=8.5 mm`、3.5 mm 瞳孔时，60 D 与 120 D 的保守光源直径分别为 9.008 mm 和 6.254 mm。
 - 六个 OpticStudio 系统与解析 footprint 的最大边界误差为 `2.58e-11 µm`。
+- 通用审计执行器已在 OpticStudio 24.1 对完整 252 工况全部验证通过，0 个失败，最大边界误差为 `3.02e-11 µm`；另含外置负镜的跨眼模型冒烟批次也通过。
 - PDF 为 21 页，包含模型示意图、工作流、五张数据图、精确表格、验证和复现说明。
 
 ## 主要文件
@@ -79,6 +82,12 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 - `results/fixed_focal_source_sweep.csv`：252 行完整主矩阵。
 - `results/headline_results.csv`：最大瞳孔下的 63 行查表结果。
 - `zemax/ZosApiEyeValidation.cs`：六个固定焦距 OpticStudio 系统的自动生成与追迹。
+- `zemax/ZosApiEyeBatch.cs`：读取应用批次的通用 OpticStudio Standalone 执行器。
+- `zemax/run_zemax_batch.ps1`：编译、运行和校验任意应用批次的一键入口。
+- `zemax/verify_zemax_results.py`：逐案例、逐文件哈希的独立 PASS/FAIL 校验器。
+- `ZEMAX_CONNECTION_GUIDE.md`：应用连接 OpticStudio 的完整中文操作与审计指南。
+- `../artifacts/eye-illumination-zemax-auditable-batch-v2/`：252 个 `.zos`、Zemax 结果、外镜冒烟批次、失败诊断和全部审计哈希。
+- `../runs/eye-illumination-zemax-auditable-batch-v2.json`：本次批次接入里程碑的不可覆盖实验记录。
 - `results/validation_report.json`：数值和 ZOS-API 自动验证。
 - `../runs/eye-illumination-fixed-focal-60-120d-v3.json`：不可覆盖的本次实验记录、哈希与关键观察。
 - `notebooks/eye_illumination_analysis.ipynb`：已执行的可复现 Notebook。
@@ -87,4 +96,4 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 
 ## 限制
 
-当前结果是近轴几何覆盖和相对光线计数，不是绝对视网膜辐照度或眼组织安全结论。等效主平面、三个实际焦距、光源辐亮度、组织透射、像差和覆盖验收阈值仍需实测确认。外置负镜片实验暂缓到固定焦距基线获得确认后再加入。
+当前结果是近轴几何覆盖和相对光线计数，不是绝对视网膜辐照度或眼组织安全结论。等效主平面、三个实际焦距、光源辐亮度、组织透射、像差和覆盖验收阈值仍需实测确认。范围模式可以加入外置近轴负镜，但这仍是等效面，不应冒充具有厚度、材料和像差的真实镜片。

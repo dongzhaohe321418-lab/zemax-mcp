@@ -17,8 +17,10 @@ import webbrowser
 
 try:
     from .service import ExperimentService, RequestError
+    from .zemax_batch import build_batch_package
 except ImportError:  # Direct execution from launch_app.ps1.
     from service import ExperimentService, RequestError
+    from zemax_batch import build_batch_package
 
 APP_DIR = Path(__file__).resolve().parent
 STATIC_DIR = APP_DIR / "static"
@@ -27,6 +29,7 @@ ARTIFACTS = {
     "/report.pdf": EXPERIMENT_DIR / "report" / "latex" / "eye_illumination_experiment_report.pdf",
     "/results.csv": EXPERIMENT_DIR / "results" / "fixed_focal_source_sweep.csv",
     "/validation.json": EXPERIMENT_DIR / "results" / "validation_report.json",
+    "/zemax-guide.md": EXPERIMENT_DIR / "ZEMAX_CONNECTION_GUIDE.md",
 }
 STATIC_FILES = {
     "/": STATIC_DIR / "index.html",
@@ -101,6 +104,17 @@ class ExperimentHandler(BaseHTTPRequestHandler):
         )
         self.wfile.write(body)
 
+    def _download_bytes(
+        self,
+        body: bytes,
+        filename: str,
+        content_type: str,
+        extra_headers: dict[str, str] | None = None,
+    ) -> None:
+        headers = {"Content-Disposition": f'attachment; filename="{filename}"', **(extra_headers or {})}
+        self._headers(content_type, len(body), extra_headers=headers)
+        self.wfile.write(body)
+
     def _request_json(self) -> dict:
         try:
             length = int(self.headers.get("Content-Length", "0"))
@@ -170,6 +184,22 @@ class ExperimentHandler(BaseHTTPRequestHandler):
                 self._json(self.service.range_sensitivity(payload))
             elif path == "/api/range-grid":
                 self._json(self.service.range_grid(payload))
+            elif path == "/api/zemax-batch":
+                rows = self.service.zemax_batch_rows(payload)
+                try:
+                    package = build_batch_package(rows)
+                except ValueError as exc:
+                    raise RequestError(str(exc)) from exc
+                self._download_bytes(
+                    package.content,
+                    package.filename,
+                    "application/zip",
+                    {
+                        "X-Zemax-Batch-Id": package.batch_id,
+                        "X-Content-SHA256": package.sha256,
+                        "X-Zemax-Case-Count": str(package.case_count),
+                    },
+                )
             else:
                 self._json({"error": "not found"}, HTTPStatus.NOT_FOUND)
         except RequestError as exc:

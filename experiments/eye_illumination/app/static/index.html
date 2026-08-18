@@ -26,6 +26,7 @@
       </div>
       <div class="hero-actions">
         <a class="button secondary" href="/report.pdf" target="_blank">打开完整 PDF 报告</a>
+        <a class="text-link" href="/zemax-guide.md" target="_blank">Zemax 接入与审计指南 <span>↗</span></a>
         <a class="text-link" href="/validation.json" target="_blank">查看验证记录 <span>↗</span></a>
       </div>
       <div class="hero-meta" aria-label="实验摘要">
@@ -215,6 +216,18 @@
         <div class="matrix-actions">
           <button id="full-sweep" class="button secondary" type="button">生成全部 252 工况</button>
           <button id="download-csv" class="button primary" type="button" disabled>下载表格 CSV</button>
+        </div>
+      </div>
+      <div class="zemax-batch-card">
+        <div>
+          <p class="eyebrow">ZOS-API AUDIT BATCH</p>
+          <h3>把当前结果表冻结为可复查的 Zemax 批次</h3>
+          <p>服务器会重新计算每一行并生成确定性 ZIP，内含案例清单、模型快照、C# ZOS-API 执行器、独立验证器和 SHA-256。生成 ZIP 不等于已验证；运行后必须以 <code>verification_report.json = PASS</code> 为准。</p>
+        </div>
+        <div class="zemax-batch-actions">
+          <button id="download-zemax-batch" class="button primary" type="button" disabled>生成 Zemax 审计批次</button>
+          <a href="/zemax-guide.md" target="_blank">查看完整连接步骤</a>
+          <small id="zemax-batch-status">等待结果表。</small>
         </div>
       </div>
       <div class="table-shell">
