@@ -56,7 +56,7 @@
 
 \title{小鸡与人眼 650 nm 固定焦距后极照明\\光学仿真实验报告}
 \author{固定参数 ABCD 模型与 Ansys Zemax OpticStudio ZOS-API 交叉验证}
-\date{2026年8月14日\quad 报告版本 2.0.0}
+\date{2026年8月18日\quad 报告版本 3.0.0}
 
 \begin{document}
 \pagenumbering{Roman}
@@ -89,11 +89,15 @@
   \vfill
   {\large 技术报告｜中文正文：宋体｜A4\par}
   \vspace{0.25cm}
-  {\large 2026年8月14日\par}
+  {\large 2026年8月18日\par}
 \end{titlepage}
 
 \chapter*{技术摘要}
 \addcontentsline{toc}{chapter}{技术摘要}
+\keyresult{审计结论分为两个层级：近轴计算在既定模型内通过，真实实验状态为“未就绪”。} 252 个工况的单位换算、闭式 ABCD 系数、光源直径、面积和覆盖裕量已独立重算；OpticStudio 24.1 的 Paraxial 系统也在数值舍入精度内复现同一边界。但这只能证明软件正确执行了一阶等效眼模型，不能证明真实生物眼、绝对辐照度、光安全或生物学效果正确。
+
+定量适用性筛查进一步显示，保守源边缘到瞳孔边缘的最大光线角在全部 \CasesAboveAngleScreen 个工况中都超过项目设置的 $10^\circ$ 近轴筛查线，范围为 \MinimumEdgeAngle$^\circ$--\MaximumEdgeAngle$^\circ$；另有 \CasesBelowFfour 个工况的工作 F 数低于 4。因此，本报告中的尺寸只能作为\keyresult{真实曲面建模和台架标定前的一阶机械候选值}，不得直接作为人体或动物活体实验的最终光源尺寸、功率或曝光处方。
+
 本版纠正了上一版模型的核心假设。上一版通过连续改变小鸡眼和人眼的等效焦距，使每个物距都满足严格调焦条件，因此把 $60$--$120\D$ 物方需求错误地等同于眼的调节需求，并得到“全部超过调节上限”的结论。当前模型不再这样处理：\keyresult{每种眼模型只使用三个离散固定焦距，后极平面由已知眼轴参数固定，物距、焦距和瞳孔作为相互独立的输入。}
 
 固定焦距取 PPT 范围的两端及算术中点：
@@ -106,7 +110,7 @@
 \[
 3\text{种眼}\times3\text{个固定焦距}\times4\text{个瞳孔}\times7\text{个物距}=\keyresult{\MainSweepRows\text{个工况}}.
 \]
-每一行同时给出“几何最小光源直径”和“保守全重叠光源直径”。前者只保证光线 footprint 的外边界达到目标，后者保证整个后极目标位于源像与瞳孔 footprint 卷积的全重叠平台内，因此本报告推荐后者作为首轮机械尺寸设计值。以最大瞳孔和最长固定焦距为例，成人眼 $f=16.7\mm$ 时，$60\D$ 与 $120\D$ 的保守直径分别为 \keyresult{\AdultSixtyConservative\,mm} 和 \keyresult{\AdultOneTwentyConservative\,mm}；小鸡 $f=8.5\mm$ 时分别为 \keyresult{\ChickSixtyConservative\,mm} 和 \keyresult{\ChickOneTwentyConservative\,mm}。
+每一行同时给出“几何最小光源直径”和“保守全重叠光源直径”。前者只保证光线 footprint 的外边界达到目标，后者保证整个后极目标位于源像与瞳孔 footprint 卷积的全重叠平台内。后者只能作为首轮机械空间候选上界；在真实曲面、辐射度和安全标定完成前，不是实验放行值。以最大瞳孔和最长固定焦距为例，成人眼 $f=16.7\mm$ 时，$60\D$ 与 $120\D$ 的保守直径分别为 \keyresult{\AdultSixtyConservative\,mm} 和 \keyresult{\AdultOneTwentyConservative\,mm}；小鸡 $f=8.5\mm$ 时分别为 \keyresult{\ChickSixtyConservative\,mm} 和 \keyresult{\ChickOneTwentyConservative\,mm}。
 
 ZOS-API 在 OpticStudio 24.1 中建立六个固定焦距 Paraxial 系统，解析 footprint 上下界与真实光线追迹的最大误差为 \keyresult{$\ZosMaxError\um$}。该验证证明固定参数 ABCD 实现与 Zemax 一阶光线传播一致，但不等价于真实生物眼像差、散射、绝对辐照度或光安全验证。
 
@@ -114,7 +118,7 @@ ZOS-API 在 OpticStudio 24.1 中建立六个固定焦距 Paraxial 系统，解�
 \clearpage
 \pagenumbering{arabic}
 
-\chapter{问题修正与工程结论}
+\chapter{问题修正与适用范围结论}
 
 \section{旧结论失效的原因是模型强制调焦，而不是物距本身不可实现}
 旧模型对每一个物距求解新的眼屈光力，使总传递矩阵满足成像条件 $B_m=0$。当基准像距又被校准为 $t=1/F_0$ 时，无外置镜片情形会退化为“附加屈光力等于物方需求”。因此 $60$--$120\D$ 必然被解释成 $60$--$120\D$ 调节，随后与生理调节上限比较。这一结论回答的是“眼是否能通过连续改变焦距把该物面精确成像到后极”，而不是用户实际提出的“固定焦距与固定后极参数下，需要多大的光源覆盖后极”。
@@ -122,8 +126,8 @@ ZOS-API 在 OpticStudio 24.1 中建立六个固定焦距 Paraxial 系统，解�
 \section{当前模型保持焦距和后极位置固定，只改变外部工况}
 当前实验对每个离散焦距单独运行。一次工况中，$f$、眼轴 $L$、后极直径、瞳孔和物距全部是已知量，不允许求解一个新的 $f$。输出变量只有源面尺寸、映射系数、瞳孔 footprint、几何覆盖裕量和保守覆盖裕量。报告不再使用“调节是否超限”作为主扫描判据。
 
-\section{推荐读数是保守全重叠直径，而不是几何最小值}
-几何最小值可能为零：当固定焦距导致的瞳孔离焦 footprint 已经大于后极目标时，点源在纯几何意义上也能把光线扩展到目标边缘。本次 \MainSweepRows 个工况中有 \GeometricZeroCount 个出现这种情况。它不表示工程上可安装零面积光源，也不保证边缘最低照度。保守直径始终为正，并把完整目标放入全重叠区域，因此更适合与后续照度阈值、散射和安全约束衔接。
+\section{一阶候选读数是保守全重叠直径，而不是几何最小值}
+几何最小值可能为零：当固定焦距导致的瞳孔离焦 footprint 已经大于后极目标时，点源在纯几何意义上也能把光线扩展到目标边缘。本次 \MainSweepRows 个工况中有 \GeometricZeroCount 个出现这种情况。它不表示工程上可安装零面积光源，也不保证边缘最低照度。保守直径始终为正，并把完整目标放入全重叠区域，因此更适合与后续真实光线、照度阈值、散射和安全约束衔接，但仍不是活体实验设定值。
 
 \chapter{输入参数与固定焦距定义}
 
@@ -292,7 +296,7 @@ powershell -ExecutionPolicy Bypass -File `
 \bottomrule
 \end{longtable}
 \endgroup
-表中 $120\D$ 的若干几何最小值为零，是因为瞳孔离焦 footprint 已经触及或超过目标边缘。工程推荐仍应读取“保守”列；若项目最终接受某个最低照度阈值，也可以在几何与保守值之间通过非序列辐射度仿真寻找更小尺寸。
+表中 $120\D$ 的若干几何最小值为零，是因为瞳孔离焦 footprint 已经触及或超过目标边缘。一阶机械候选应读取“保守”列；若项目最终接受某个最低照度阈值，也可以在几何与保守值之间通过真实曲面非序列辐射度仿真寻找更小尺寸。未经该验证，任何一列都不能作为活体曝光处方。
 
 \section{瞳孔成为显式设计变量}
 \begin{figure}[H]
@@ -348,9 +352,18 @@ powershell -ExecutionPolicy Bypass -File `
 每个系统把等效眼焦距、物距、瞳孔和约化后极距离写入顺序模式 Paraxial 系统；源面正负边缘与瞳孔正负边缘构成四条角点光线。最大边界误差 \ZosMaxError\,$\mu$m 处于数值舍入量级，说明 Python 矩阵和 OpticStudio 使用了相同的固定参数传播关系。
 
 \section{自动质量控制}
-验证脚本要求：物方需求必须精确为七级且步长 $10\D$；每种眼必须恰有三个指定焦距和四个瞳孔；主扫描必须为 252 行；结果中不得含调节输出列；保守直径不得小于几何最小直径；全重叠裕量残差小于 $10^{-8}\um$；六个 ZOS 系统均存在且 API 许可证有效；解析/Zemax 边界误差小于 $10^{-6}\um$。任何一项失败都会使一键工作流返回非零状态。
+验证脚本要求：物方需求必须精确为七级且步长 $10\D$；每种眼必须恰有三个指定焦距和四个瞳孔；主扫描必须为 252 行且复合主键无重复；结果中不得含调节输出列；保守直径不得小于几何最小直径；全重叠裕量残差小于 $10^{-8}\um$；六个 ZOS 系统均存在且 API 许可证有效；解析/Zemax 边界误差小于 $10^{-6}\um$。第二个独立脚本不调用模型函数，而从 CSV 重新计算 $s$、$m_s$、$m_p$、源直径、面积、最大边缘角和 F 数。数值验证失败会使一键工作流返回非零状态；真实实验状态则始终单独显示，不会因为数学测试通过而自动放行。
 
 \chapter{限制、不确定性与后续建模}
+
+\section{适用性诊断阻止把近轴结果直接用于活体实验}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth]{model_applicability_cn.png}
+\caption{252 个工况的近轴适用性筛查。$10^\circ$ 是本项目用于触发真实光线复核的保守工程线，不是通用合格证；F/4 参考来自 OpticStudio 对 Paraxial 面 OPD 精度的官方说明。}
+\label{fig:applicability}
+\end{figure}
+\Cref{fig:applicability} 显示，全部 \CasesAboveAngleScreen 个工况的最大边缘角均高于 $10^\circ$，甚至全部 \CasesAboveFifteen 个工况均高于 $15^\circ$；\CasesBelowFfour 个工况低于 F/4，同时通过两项项目筛查的工况数为 \CasesPassingBothScreens。\href{https://ansyshelp.ansys.com/public/Views/Secured/Zemax/v252/en/OpticStudio_User_Guide/OpticStudio_Help/topics/Paraxial_and_Parabasal_Rays.html}{Ansys 对近轴光学的定义}明确依赖小角度线性化，并提醒不满足一阶假设时应谨慎使用近轴量；其\href{https://ansyshelp.ansys.com/public/Views/Secured/Zemax/v25101/en/OpticStudio_User_Guide/OpticStudio_Help/topics/Paraxial_sequential_surfaces_lens_data_editor.html}{Paraxial 面说明}还建议，为获得最大 OPD 计算精度，工作 F 数不应快于约 F/4。现有 ZOS-API 运行使用的正是理想 Paraxial 面，所以数值吻合不能发现真实曲面在大角度和快速光束下的偏差。
 
 \section{三个中间焦距仍需用户确认}
 用户明确要求每种眼只使用三个固定值，但原始 PPT 只给出焦距范围，没有列出三组明确实测值。本报告采用“范围两端加算术中点”的透明规则。若实际指定值不同，只需修改 \sourcefile{config/experiment.json} 的数组并重跑；代码会拒绝数组之外的焦距。
@@ -359,7 +372,10 @@ powershell -ExecutionPolicy Bypass -File `
 用 $t=L/1.336$ 把眼轴转为约化后极距离，是当前可审计的一阶近似。真实眼的等效主平面不在角膜顶点，且会随角膜、晶状体、房水和玻璃体参数变化。后续多曲面模型应显式建立角膜前后表面、晶状体或 GRIN、介质折射率和视网膜曲率，再用实测眼轴校准像面。
 
 \section{几何覆盖不等于辐照度或安全}
-PPT 未给出光源辐亮度、光谱带宽、曝光时间、组织透射率和安全阈值，因此本报告只给相对光线计数与几何尺寸。任何动物或人体实验前，必须补充绝对辐射度标定，并按适用 IEC/ISO 标准完成视网膜热危害和光化学危害评价。
+PPT 未给出光源辐亮度、光谱带宽、曝光时间、组织透射率和安全阈值，因此本报告只给相对光线计数与几何尺寸。任何动物或人体实验前，必须补充可溯源的绝对辐射度标定和测量不确定度，并按适用标准完成视网膜热危害与光化学危害评价。眼科仪器应核对 \href{https://www.iso.org/standard/79919.html}{ISO 15004-2:2024}；非相干 LED/灯系统应核对 \href{https://webstore.iec.ch/en/publication/7076}{IEC 62471}；激光系统应核对 \href{https://webstore.iec.ch/en/publication/3587}{IEC 60825-1}。标准适用性和最终限值必须由本机构光安全负责人确认，本报告不代替正式风险评估。
+
+\section{活体实验还需要伦理审批和硬件安全控制}
+小鸡属于活体脊椎动物实验，照射可能改变生物学状态，必须按所在地和机构要求取得动物伦理/IACUC 等效审批，并由兽医和研究团队明确麻醉、固定、监测、停止规则及术后观察。人体实验必须取得适用的 IRB/伦理审批和知情同意。两类实验都需要在光源驱动器中设置经批准的硬件功率上限、联锁、曝光计时、失效安全和独立功率复核；软件计算值不能替代这些控制。
 
 \section{外置镜片应在固定焦距基线确认后加入}
 原 PPT 的负镜片扫描属于后续扩展。需要先确认三个固定焦距、镜片顶点距以及超近物距下的机械元件顺序，再建立“固定焦距 $\times$ 物距 $\times$ 瞳孔 $\times$ 外置镜片”的新矩阵。不得恢复为通过改变眼焦距来补偿外置镜片的旧方法。
@@ -376,6 +392,7 @@ PPT 未给出光源辐亮度、光谱带宽、曝光时间、组织透射率和�
 \sourcefile{monte\_carlo\_summary.json} & 几何最小与保守设计各 600,000 条光线的捕获和均匀性指标\\
 \sourcefile{zemax/zosapi\_validation.csv} & 六个固定焦距 ZOS 系统的解析/追迹边界比较\\
 \sourcefile{validation\_report.json} & 行数、参数水平、覆盖恒等式、许可证和 ZOS 误差的自动判定\\
+\sourcefile{real\_experiment\_readiness.json/.md} & 独立闭式复算、近轴角度/F 数筛查、数据来源质量和真实实验阻断条件\\
 \sourcefile{eye\_illumination\_analysis.ipynb} & 已执行 Notebook，展示数据、图表和验证结果\\
 \bottomrule
 \end{longtable}
@@ -386,7 +403,9 @@ PPT 未给出光源辐亮度、光谱带宽、曝光时间、组织透射率和�
 \chapter{结论与建议}
 本次修正消除了“物方需求等于调节需求”的模型混淆。小鸡、儿童和成人的等效焦距现在各只有三个离散固定值；后极位置固定；物距、瞳孔和焦距共同决定光源 footprint。主扫描不再输出“全部超过调节上限”的结论，而输出可直接审计的几何最小与保守全重叠尺寸。
 
-当前建议是：以保守直径作为机械空间和初版光源尺寸上界，以几何最小值作为理论下界；在用户确认三个实际焦距、等效主平面和覆盖验收阈值后，再用非序列 Zemax 模型和实测辐亮度在两者之间优化。成人 $f=16.7\mm$、5 mm 瞳孔的保守直径在 $60\D$ 和 $120\D$ 分别为 \AdultSixtyConservative\,mm 与 \AdultOneTwentyConservative\,mm，体现了固定焦距条件下不同于旧版简单减半关系的结果。
+独立审计确认这些尺寸在近轴模型内部计算正确，但\keyresult{真实实验状态是“未就绪”}。全部工况超过项目 $10^\circ$ 角度筛查线，且多数小鸡工况处于快速光束范围；PPT 也没有提供完整解剖处方、真实源辐射度、曝光时间或安全剂量。因此，保守直径只能用于预留机械空间和建立后续真实模型，几何最小值只能作为一阶理论下界。成人 $f=16.7\mm$、5 mm 瞳孔的保守直径在 $60\D$ 和 $120\D$ 分别为 \AdultSixtyConservative\,mm 与 \AdultOneTwentyConservative\,mm，但这两个数值目前都不得直接用于活体曝光。后续照明与能量模型可依照\href{https://optics.ansys.com/hc/en-us/articles/42661670424851-Exploring-Non-Sequential-Mode-in-OpticStudio}{Ansys 非序列模式指南}建立真实源、材料和探测器。
+
+放行真实实验的最小路径是：获得个体或可靠解剖参数并建立真实曲面眼；用 real ray 和非序列辐射度模型重算；在仿生眼/校准探测器上验证覆盖、均匀性和绝对辐照度；完成 ISO/IEC 光安全评价；取得动物或人体伦理审批；最后才把经批准、带测量不确定度和硬件限幅的数值写入实验方案。
 
 \appendix
 \chapter{结果字段定义}
@@ -401,7 +420,10 @@ PPT 未给出光源辐亮度、光谱带宽、曝光时间、组织透射率和�
 \sourcefile{pupil\_mapping\_coefficient} & 瞳孔高度到后极高度的线性系数 $m_p$\\
 \sourcefile{pupil\_blur\_diameter\_mm} & $2|m_p|R_p$，固定焦距下的瞳孔 footprint 直径\\
 \sourcefile{geometric\_min\_source\_diameter\_mm} & 外支持域刚好覆盖后极目标的理论最小源直径\\
-\sourcefile{conservative\_source\_diameter\_mm} & 全重叠平台覆盖整个后极目标的推荐源直径\\
+\sourcefile{conservative\_source\_diameter\_mm} & 全重叠平台覆盖整个后极目标的近轴候选源直径；不是活体实验放行值\\
+\sourcefile{maximum\_source\_pupil\_ray\_angle\_deg} & 保守源边缘到瞳孔边缘四种组合中的最大几何角，用于小角度适用性筛查\\
+\sourcefile{working\_f\_number} & 固定有效焦距除以瞳孔直径，用于识别快速光束工况\\
+\sourcefile{real\_experiment\_readiness} & 固定为需要标定的阻断状态，防止把一阶数值误报为实验放行\\
 \sourcefile{geometric\_coverage\_margin\_um} & 几何外支持域相对目标边缘的裕量\\
 \sourcefile{conservative\_plateau\_margin\_um} & 全重叠平台相对目标边缘的裕量；应接近零\\
 \bottomrule
@@ -415,6 +437,8 @@ PPT 未给出光源辐亮度、光谱带宽、曝光时间、组织透射率和�
   \item 252 行主扫描全部生成；
   \item 两种覆盖定义均有明确公式与非负裕量；
   \item 六个 OpticStudio 固定焦距系统已保存并交叉验证；
+  \item 独立脚本未调用模型函数而重新计算闭式结果和适用性指标；
+  \item 真实实验状态明确为未就绪，软件和报告均不把 Paraxial PASS 显示为安全放行；
   \item Notebook、HTML、LaTeX、PDF 和结果表来自同一份配置；
   \item PDF 使用 A4 页面，中文宋体嵌入，图表与表格经过最终版面检查。
 \end{enumerate}

@@ -14,6 +14,8 @@
     "fixed_focal_source_sweep.csv",
     "headline_results.csv",
     "monte_carlo_summary.json",
+    "real_experiment_readiness.json",
+    "real_experiment_readiness.md",
     "run_manifest.json",
     "validation_report.json",
     "zemax",
@@ -23,5 +25,5 @@
     "source_diameter_vs_demand.png",
     "zosapi_cross_validation.png"
   ],
-  "model_status": "executed fixed-focal reduced-eye model; selected footprint bounds cross-validated by ZOS-API"
+  "model_status": "executed first-order fixed-focal reduced-eye model; selected footprint bounds cross-validated only against an equivalent OpticStudio Paraxial model"
 }

@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "as_of_date": "2026-08-18",
+  "experiment_id": "eye-illumination-fixed-focal-60-120d-v3",
+  "question": "Are the calculated source sizes correct enough to guide real chick or human-eye experiments?",
+  "calculation_validation_status": "VERIFIED_WITHIN_FIRST_ORDER_MODEL",
+  "real_experiment_readiness_status": "NOT_READY",
+  "decision": "DO_NOT_USE_AS_FINAL_EXPOSURE_OR_SAFETY_SETTINGS",
+  "independent_recalculation": {
+    "row_count": 252,
+    "expected_row_count": 252,
+    "duplicate_case_count": 0,
+    "missing_numeric_value_count": 0,
+    "maximum_source_distance_error_mm": 4.2857148940811385e-09,
+    "maximum_eye_power_error_D": 3.3333350302200415e-08,
+    "maximum_source_mapping_error": 4.790419172451266e-10,
+    "maximum_pupil_mapping_error": 4.895479577271544e-10,
+    "maximum_conservative_diameter_error_mm": 4.590651414559943e-09,
+    "maximum_conservative_area_error_mm2": 4.956461907568155e-09,
+    "maximum_edge_angle_error_deg": 4.941803410929424e-09,
+    "maximum_working_f_number_error": 4.285714005902719e-10
+  },
+  "paraxial_applicability": {
+    "case_count": 252,
+    "screening_angle_limit_deg": 10.0,
+    "minimum_maximum_ray_angle_deg": 15.019589674540413,
+    "median_maximum_ray_angle_deg": 22.97971803057272,
+    "maximum_maximum_ray_angle_deg": 37.588272908531465,
+    "cases_above_screening_angle": 252,
+    "cases_above_15_deg": 252,
+    "minimum_working_f_number": 2.142857142857143,
+    "median_working_f_number": 3.71875,
+    "maximum_working_f_number": 8.35,
+    "f_number_screening_limit": 4.0,
+    "cases_below_f_number_4": 140,
+    "cases_passing_both_project_screens": 0
+  },
+  "source_data_quality": {
+    "ppt_has_bibliographic_sources": false,
+    "ppt_values_are_often_approximate": true,
+    "wavelength_650_nm_present_in_ppt": false,
+    "child_axial_range_is_model_assumption": true,
+    "adult_axial_range_is_model_assumption": true,
+    "middle_focal_values_are_measured": false,
+    "source_radiance_power_exposure_present": false,
+    "anatomical_surface_prescription_complete": false
+  },
+  "opticstudio_validation_scope": {
+    "version": "24.1.0",
+    "api_license_valid": true,
+    "case_count": 6,
+    "maximum_boundary_error_um": 2.5757174171303632e-11,
+    "scope": "Paraxial equivalent-eye boundary agreement only",
+    "does_not_establish": [
+      "real-ray anatomical accuracy",
+      "absolute retinal irradiance",
+      "photobiological safety",
+      "biological efficacy"
+    ]
+  },
+  "real_experiment_blockers": [
+    {
+      "name": "真实解剖与主平面未标定",
+      "reason": "当前把完整眼轴直接约化为薄透镜到后极距离；PPT 不足以唯一确定角膜、晶状体、主平面和视网膜曲率。"
+    },
+    {
+      "name": "全部工况超出项目近轴角度筛查线",
+      "reason": "最大边缘光线角为 15.02°–37.59°；现有 Zemax 证据使用 Paraxial 面，不能量化真实高角度误差。"
+    },
+    {
+      "name": "绝对辐射度和安全剂量缺失",
+      "reason": "没有经校准的光谱辐亮度/功率、带宽、曝光时间、组织透射、热危害和光化学危害计算。"
+    },
+    {
+      "name": "覆盖验收标准未定义",
+      "reason": "几何支持域和全重叠平台不是实测最低照度、均匀性、信噪比或生物学终点。"
+    },
+    {
+      "name": "伦理与操作控制未记录",
+      "reason": "活体小鸡或人体实验需要机构审批、风险评估、硬件限幅/联锁、停止规则和受训人员确认。"
+    }
+  ],
+  "official_safety_references": [
+    {
+      "standard": "ISO 15004-2:2024",
+      "scope": "Optical radiation safety for ophthalmic instruments directing radiation into or at the eye",
+      "url": "https://www.iso.org/standard/79919.html"
+    },
+    {
+      "standard": "IEC 62471:2006",
+      "scope": "Photobiological safety of lamps and lamp systems, including LEDs and excluding lasers",
+      "url": "https://webstore.iec.ch/en/publication/7076"
+    },
+    {
+      "standard": "IEC 60825-1:2014",
+      "scope": "Laser product classification and safety requirements",
+      "url": "https://webstore.iec.ch/en/publication/3587"
+    }
+  ],
+  "official_modeling_references": [
+    {
+      "title": "Paraxial and Parabasal Rays",
+      "publisher": "Ansys",
+      "url": "https://ansyshelp.ansys.com/public/Views/Secured/Zemax/v252/en/OpticStudio_User_Guide/OpticStudio_Help/topics/Paraxial_and_Parabasal_Rays.html"
+    },
+    {
+      "title": "Paraxial sequential surface",
+      "publisher": "Ansys",
+      "url": "https://ansyshelp.ansys.com/public/Views/Secured/Zemax/v25101/en/OpticStudio_User_Guide/OpticStudio_Help/topics/Paraxial_sequential_surfaces_lens_data_editor.html"
+    },
+    {
+      "title": "Exploring Non-Sequential Mode in OpticStudio",
+      "publisher": "Ansys",
+      "url": "https://optics.ansys.com/hc/en-us/articles/42661670424851-Exploring-Non-Sequential-Mode-in-OpticStudio"
+    }
+  ]
+}

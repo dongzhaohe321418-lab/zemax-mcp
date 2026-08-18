@@ -1,4 +1,5 @@
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -8,7 +9,17 @@ EXPERIMENT = Path(__file__).parents[1] / "experiments" / "eye_illumination"
 import sys
 sys.path.insert(0, str(EXPERIMENT))
 
-from eye_model import axial_blur, defocus_bounds_for_infinity, fixed_focal_source_solution, load_eyes
+from eye_model import (
+    adjustable_source_solution,
+    axial_blur,
+    defocus_bounds_for_infinity,
+    fixed_focal_source_solution,
+    general_mapping,
+    load_eyes,
+    pre_eye_matrix,
+    thin_lens,
+    translation,
+)
 
 
 @pytest.fixture(scope="module")
@@ -72,3 +83,61 @@ def test_defocus_blur_is_zero_at_zero_defocus(eyes):
 def test_nominal_axial_length_has_zero_blur(eyes):
     for eye in eyes:
         assert axial_blur(eye, eye.reported_axial_length_mm, eye.pupil_diameters_mm[-1])["blur_diameter_mm"] == pytest.approx(0.0)
+
+
+def test_closed_form_no_lens_mapping_matches_matrix_solution(eyes):
+    for eye in eyes:
+        for demand in (60.0, 85.0, 120.0):
+            source_distance_m = 1.0 / demand
+            for focal_length_mm in eye.fixed_effective_focal_lengths_mm:
+                eye_power_D = 1000.0 / focal_length_mm
+                observed_source, observed_pupil = general_mapping(
+                    eye, source_distance_m, eye_power_D
+                )
+                expected_source = -eye.reduced_retina_distance_m / source_distance_m
+                expected_pupil = (
+                    1.0
+                    + eye.reduced_retina_distance_m / source_distance_m
+                    - eye.reduced_retina_distance_m * eye_power_D
+                )
+                assert observed_source == pytest.approx(expected_source, abs=1e-14)
+                assert observed_pupil == pytest.approx(expected_pupil, abs=1e-14)
+
+
+def test_general_mapping_reproduces_direct_corner_rays_with_external_lens(eyes):
+    eye = eyes[0]
+    source_distance_m = 1.0 / 60.0
+    external_power_D = -5.0
+    eye_power_D = 1000.0 / 8.0
+    pre = pre_eye_matrix(
+        source_distance_m,
+        external_power_D,
+        eye.external_lens_vertex_distance_mm / 1000.0,
+    )
+    total = translation(eye.reduced_retina_distance_m) @ thin_lens(eye_power_D) @ pre
+    source_coefficient, pupil_coefficient = general_mapping(
+        eye, source_distance_m, eye_power_D, external_power_D
+    )
+    for source_height_m in (-0.003, 0.0015):
+        for pupil_height_m in (-0.00175, 0.00175):
+            launch_angle = (pupil_height_m - pre[0, 0] * source_height_m) / pre[0, 1]
+            direct_height = float((total @ [source_height_m, launch_angle])[0])
+            mapped_height = (
+                source_coefficient * source_height_m
+                + pupil_coefficient * pupil_height_m
+            )
+            assert mapped_height == pytest.approx(direct_height, abs=1e-14)
+
+
+def test_paraxial_diagnostics_are_explicit_and_recomputed(eyes):
+    eye = eyes[2]
+    result = adjustable_source_solution(eye, 1.0 / 120.0, 16.7, 5.0)
+    expected_slope = (
+        result["conservative_source_diameter_mm"] / 2000.0 + 5.0 / 2000.0
+    ) / (1.0 / 120.0)
+    assert result["maximum_source_pupil_ray_angle_deg"] == pytest.approx(
+        math.degrees(math.atan(expected_slope))
+    )
+    assert result["working_f_number"] == pytest.approx(16.7 / 5.0)
+    assert result["paraxial_screening_pass"] is False
+    assert result["real_experiment_readiness"] == "BLOCKED_CALIBRATION_REQUIRED"

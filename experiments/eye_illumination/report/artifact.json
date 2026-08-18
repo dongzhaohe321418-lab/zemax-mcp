@@ -4,8 +4,8 @@
     "version": 1,
     "surface": "report",
     "title": "小鸡与人眼 650 nm 固定焦距后极照明仿真",
-    "description": "固定后极位置、每眼三个离散焦距、60–120 D 物方需求下的光源几何尺寸与 OpticStudio 交叉验证。",
-    "generatedAt": "2026-08-14T00:00:00Z",
+    "description": "固定后极位置、每眼三个离散焦距、60–120 D 物方需求下的一阶候选尺寸、OpticStudio 交叉验证与真实实验适用性审计。",
+    "generatedAt": "2026-08-18T00:00:00Z",
     "cards": [],
     "charts": [
       {
@@ -184,7 +184,7 @@
           "engine": "sqlite",
           "sql": "SELECT *, printf('f=%g mm', fixed_focal_length_mm) AS focal_label\nFROM headline_results WHERE eye_id='adult_18y' ORDER BY fixed_focal_length_mm, source_demand_D",
           "description": "报告生成器实际执行的 SQLite 查询。",
-          "executed_at": "2026-08-14T00:00:00Z",
+          "executed_at": "2026-08-18T00:00:00Z",
           "tables_used": [
             "headline_results"
           ]
@@ -198,7 +198,7 @@
           "engine": "sqlite",
           "sql": "SELECT *, printf('f=%g mm', fixed_focal_length_mm) AS focal_label,\nprintf('%g D', source_demand_D) AS demand_label\nFROM fixed_focal_source_sweep\nWHERE eye_id='adult_18y' AND source_demand_D IN (60,120)\nORDER BY source_demand_D, fixed_focal_length_mm, pupil_diameter_mm",
           "description": "报告生成器实际执行的 SQLite 查询。",
-          "executed_at": "2026-08-14T00:00:00Z",
+          "executed_at": "2026-08-18T00:00:00Z",
           "tables_used": [
             "fixed_focal_source_sweep"
           ]
@@ -212,7 +212,7 @@
           "engine": "sqlite",
           "sql": "SELECT * FROM headline_results ORDER BY eye_id, fixed_focal_length_mm, source_demand_D",
           "description": "报告生成器实际执行的 SQLite 查询。",
-          "executed_at": "2026-08-14T00:00:00Z",
+          "executed_at": "2026-08-18T00:00:00Z",
           "tables_used": [
             "headline_results"
           ]
@@ -226,7 +226,7 @@
           "engine": "sqlite",
           "sql": "SELECT * FROM zosapi_validation ORDER BY case_id",
           "description": "报告生成器实际执行的 SQLite 查询。",
-          "executed_at": "2026-08-14T00:00:00Z",
+          "executed_at": "2026-08-18T00:00:00Z",
           "tables_used": [
             "zosapi_validation"
           ]
@@ -236,6 +236,11 @@
         "id": "validation",
         "label": "自动验证结果",
         "path": "experiments/eye_illumination/results/validation_report.json"
+      },
+      {
+        "id": "readiness",
+        "label": "真实实验适用性审计",
+        "path": "experiments/eye_illumination/results/real_experiment_readiness.json"
       },
       {
         "id": "monte",
@@ -253,13 +258,19 @@
         "id": "summary",
         "type": "markdown",
         "sourceId": "validation",
-        "body": "## 技术摘要\n\n本版纠正了旧模型的核心假设：**不再连续改变等效焦距以强制满足物方需求**。小鸡、儿童和成人各只使用三个固定焦距；后极平面由已知眼轴和像方折射率固定。完整主矩阵包含 **252 个工况**。每个工况同时给出几何最小尺寸和推荐的保守全重叠尺寸，不再输出“超过调节上限”的判定。"
+        "body": "## 技术摘要\n\n本版纠正了旧模型的核心假设：**不再连续改变等效焦距以强制满足物方需求**。小鸡、儿童和成人各只使用三个固定焦距；后极平面由已知眼轴和像方折射率固定。完整主矩阵包含 **252 个工况**。计算在一阶模型内部通过，但真实实验状态为 **NOT READY**；这些尺寸不是动物或人体眼部照明的最终功率、尺寸或曝光处方。"
+      },
+      {
+        "id": "readiness",
+        "type": "markdown",
+        "sourceId": "readiness",
+        "body": "## 数学复算通过，但全部工况触发真实光线复核\n\n252 个工况的最大源边缘—瞳孔边缘角为 **15.02°–37.59°**，全部超过项目 10° 近轴筛查线；另有 **140 个工况**低于 F/4。OpticStudio 证据使用理想 Paraxial 面，因此只能证明代码一致性，不能证明真实眼、绝对辐照度或光安全。"
       },
       {
         "id": "finding",
         "type": "markdown",
         "sourceId": "headline_query",
-        "body": "## 固定焦距后，光源尺寸由物距、焦距和瞳孔共同决定\n\n旧版聚焦解让光源尺寸几乎只随物距缩放；纠正后，瞳孔产生的离焦 footprint 与固定焦距共同进入尺寸计算。保守直径保证整个后极目标位于源像与瞳孔模糊卷积的全重叠平台内，因此比仅让外边界碰到目标的几何最小直径更适合作为第一阶段设计值。"
+        "body": "## 固定焦距后，光源尺寸由物距、焦距和瞳孔共同决定\n\n旧版聚焦解让光源尺寸几乎只随物距缩放；纠正后，瞳孔产生的离焦 footprint 与固定焦距共同进入尺寸计算。保守直径保证整个后极目标位于源像与瞳孔模糊卷积的全重叠平台内，因此可作为后续真实模型的第一阶段机械候选值；它不是活体实验放行值。"
       },
       {
         "id": "adult_chart",
@@ -288,7 +299,7 @@
       {
         "id": "definition",
         "type": "markdown",
-        "body": "## 范围、参数与尺寸定义\n\n- 物方需求：60、70、80、90、100、110、120 D，对应物距 16.67–8.33 mm。\n- 固定焦距：小鸡 7.5/8.0/8.5 mm；儿童 13.5/15.1/16.7 mm；成人 12.8/14.75/16.7 mm。中间值采用 PPT 区间的算术中点。\n- 固定后极平面：报告眼轴除以 1.336 的约化传播距离；目标直径为小鸡 3 mm、人眼 6 mm。\n- 几何最小直径：源像与瞳孔 footprint 的外边界刚好覆盖目标。\n- 保守直径：目标完全位于卷积全重叠平台内，是当前推荐值。"
+        "body": "## 范围、参数与尺寸定义\n\n- 物方需求：60、70、80、90、100、110、120 D，对应物距 16.67–8.33 mm。\n- 固定焦距：小鸡 7.5/8.0/8.5 mm；儿童 13.5/15.1/16.7 mm；成人 12.8/14.75/16.7 mm。中间值采用 PPT 区间的算术中点。\n- 固定后极平面：报告眼轴除以 1.336 的约化传播距离；目标直径为小鸡 3 mm、人眼 6 mm。\n- 几何最小直径：源像与瞳孔 footprint 的外边界刚好覆盖目标。\n- 保守直径：目标完全位于卷积全重叠平台内，是近轴机械候选值，不是实验放行值。"
       },
       {
         "id": "headline",
@@ -316,12 +327,12 @@
       {
         "id": "limitations",
         "type": "markdown",
-        "body": "## 限制、不确定性与稳健性\n\n中间焦距由区间端点的算术中点选取；若用户已有指定的三个实测焦距，应直接替换配置并重跑。1.336 是约化眼像方折射率假设，等效主平面位置仍未由 PPT 唯一确定。当前结果是近轴几何覆盖，不代表绝对视网膜辐照度、组织安全、像差或散射。几何最小值为零只表示瞳孔离焦 footprint 已达到目标边缘，并不表示实际可使用零面积光源。"
+        "body": "## 限制、不确定性与稳健性\n\nPPT 使用近似参数且没有给出原始文献；650 nm 不在 PPT 中；儿童和成人眼轴范围是模型灵敏度假设；中间焦距是算术中点。1.336 是约化眼像方折射率假设，等效主平面位置仍未唯一确定。当前结果是近轴几何覆盖，不代表真实曲面、绝对视网膜辐照度、组织安全、像差、散射或生物学效果。"
       },
       {
         "id": "next",
         "type": "markdown",
-        "body": "## 建议的下一阶段\n\n1. 用实测值确认每个模型的三个固定焦距和等效主平面位置。\n2. 明确验收标准是几何覆盖、最低照度还是均匀性阈值。\n3. 在确认固定焦距基线后，再加入外置负镜片、实际顶点距和倾斜偏心。\n4. 用非序列探测器及实测光源辐亮度验证绝对照度和安全边界。"
+        "body": "## 真实实验放行路径\n\n1. 用个体或可靠解剖数据建立真实曲面眼，并确认三个固定焦距和主平面。\n2. 使用 real ray 和非序列辐射度模型，导入实测光源角分布、光谱和透射。\n3. 在仿生眼/校准探测器上验证覆盖、均匀性、绝对辐照度和不确定度。\n4. 按 ISO 15004-2:2024 及适用 IEC 标准完成光安全评价。\n5. 小鸡取得动物伦理/IACUC 等效审批；人体取得 IRB/伦理审批与知情同意。"
       },
       {
         "id": "questions",
@@ -332,7 +343,7 @@
   },
   "snapshot": {
     "version": 1,
-    "generatedAt": "2026-08-14T00:00:00Z",
+    "generatedAt": "2026-08-18T00:00:00Z",
     "status": "ready",
     "datasets": {
       "summary": [
@@ -341,7 +352,11 @@
           "adult_60_conservative_mm": 10.38851111,
           "adult_120_conservative_mm": 7.694255557,
           "zos_bound_error_um": 2.5757174171303632e-11,
-          "conservative_uniformity": 0.7171051161127378
+          "conservative_uniformity": 0.7171051161127378,
+          "real_experiment_readiness": "NOT_READY",
+          "minimum_edge_angle_deg": 15.019589674540413,
+          "maximum_edge_angle_deg": 37.588272908531465,
+          "cases_below_f_number_4": 140
         }
       ],
       "adult_chart": [
@@ -371,6 +386,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 22.58943187,
+          "small_angle_linearization_error_percent": 5.525153981,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm"
         },
         {
@@ -399,6 +422,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.98756363,
+          "small_angle_linearization_error_percent": 6.862446157,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm"
         },
         {
@@ -427,6 +458,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.29569924,
+          "small_angle_linearization_error_percent": 8.321499494,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm"
         },
         {
@@ -455,6 +494,14 @@
           "geometric_coverage_margin_um": 24.41991018,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 29.51174574,
+          "small_angle_linearization_error_percent": 9.894887192,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm"
         },
         {
@@ -483,6 +530,14 @@
           "geometric_coverage_margin_um": 466.0366766,
           "conservative_plateau_margin_um": 4.33680869e-13,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 31.63487323,
+          "small_angle_linearization_error_percent": 11.57524928,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm"
         },
         {
@@ -511,6 +566,14 @@
           "geometric_coverage_margin_um": 907.6534431,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 33.665339,
+          "small_angle_linearization_error_percent": 13.35539391,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm"
         },
         {
@@ -539,6 +602,14 @@
           "geometric_coverage_margin_um": 1349.27021,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 35.6043086,
+          "small_angle_linearization_error_percent": 15.22837608,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm"
         },
         {
@@ -567,6 +638,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 23.83892913,
+          "small_angle_linearization_error_percent": 6.200096004,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm"
         },
         {
@@ -595,6 +674,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 26.19093088,
+          "small_angle_linearization_error_percent": 7.601194987,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm"
         },
         {
@@ -623,6 +710,14 @@
           "geometric_coverage_margin_um": 38.92215569,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 28.45168749,
+          "small_angle_linearization_error_percent": 9.120218589,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm"
         },
         {
@@ -651,6 +746,14 @@
           "geometric_coverage_margin_um": 480.5389222,
           "conservative_plateau_margin_um": -1.301042607e-12,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 30.6197796,
+          "small_angle_linearization_error_percent": 10.74976044,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm"
         },
         {
@@ -679,6 +782,14 @@
           "geometric_coverage_margin_um": 922.1556886,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 32.69496117,
+          "small_angle_linearization_error_percent": 12.48253619,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm"
         },
         {
@@ -707,6 +818,14 @@
           "geometric_coverage_margin_um": 1363.772455,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 34.67798066,
+          "small_angle_linearization_error_percent": 14.31147302,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm"
         },
         {
@@ -735,6 +854,14 @@
           "geometric_coverage_margin_um": 1805.389222,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 36.57040432,
+          "small_angle_linearization_error_percent": 16.22977726,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm"
         },
         {
@@ -763,6 +890,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.78066066,
+          "small_angle_linearization_error_percent": 6.740100912,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm"
         },
         {
@@ -791,6 +926,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.09679789,
+          "small_angle_linearization_error_percent": 8.188765637,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm"
         },
         {
@@ -819,6 +962,14 @@
           "geometric_coverage_margin_um": 388.5223565,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 29.32097668,
+          "small_angle_linearization_error_percent": 9.752415485,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm"
         },
         {
@@ -847,6 +998,14 @@
           "geometric_coverage_margin_um": 830.139123,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 31.45226315,
+          "small_angle_linearization_error_percent": 11.42368022,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm"
         },
         {
@@ -875,6 +1034,14 @@
           "geometric_coverage_margin_um": 1271.755889,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 33.4908264,
+          "small_angle_linearization_error_percent": 13.19534979,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm"
         },
         {
@@ -903,6 +1070,14 @@
           "geometric_coverage_margin_um": 1713.372656,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 35.43775931,
+          "small_angle_linearization_error_percent": 15.06045491,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm"
         },
         {
@@ -931,6 +1106,14 @@
           "geometric_coverage_margin_um": 2154.989422,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 37.29490498,
+          "small_angle_linearization_error_percent": 17.01232667,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm"
         }
       ],
@@ -961,6 +1144,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 15.01958967,
+          "small_angle_linearization_error_percent": 2.355365611,
+          "working_f_number": 6.4,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "60 D"
         },
@@ -990,6 +1181,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 17.61767576,
+          "small_angle_linearization_error_percent": 3.275531065,
+          "working_f_number": 4.266666667,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "60 D"
         },
@@ -1019,6 +1218,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 20.14308001,
+          "small_angle_linearization_error_percent": 4.33429479,
+          "working_f_number": 3.2,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "60 D"
         },
@@ -1048,6 +1255,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 22.58943187,
+          "small_angle_linearization_error_percent": 5.525153981,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "60 D"
         },
@@ -1077,6 +1292,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 15.57017996,
+          "small_angle_linearization_error_percent": 2.536573847,
+          "working_f_number": 7.375,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "60 D"
         },
@@ -1106,6 +1329,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 18.42038087,
+          "small_angle_linearization_error_percent": 3.593992233,
+          "working_f_number": 4.916666667,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "60 D"
         },
@@ -1135,6 +1366,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 21.17923864,
+          "small_angle_linearization_error_percent": 4.818153069,
+          "working_f_number": 3.6875,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "60 D"
         },
@@ -1164,6 +1403,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 23.83892913,
+          "small_angle_linearization_error_percent": 6.200096004,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "60 D"
         },
@@ -1193,6 +1440,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 15.99020791,
+          "small_angle_linearization_error_percent": 2.679738666,
+          "working_f_number": 8.35,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "60 D"
         },
@@ -1222,6 +1477,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 19.03061481,
+          "small_angle_linearization_error_percent": 3.847248559,
+          "working_f_number": 5.566666667,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "60 D"
         },
@@ -1251,6 +1514,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 21.96374575,
+          "small_angle_linearization_error_percent": 5.20444143,
+          "working_f_number": 4.175,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "60 D"
         },
@@ -1280,6 +1551,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.78066066,
+          "small_angle_linearization_error_percent": 6.740100912,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "60 D"
         },
@@ -1309,6 +1588,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 21.22197186,
+          "small_angle_linearization_error_percent": 4.83874739,
+          "working_f_number": 6.4,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "120 D"
         },
@@ -1338,6 +1625,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 26.45302091,
+          "small_angle_linearization_error_percent": 7.768366476,
+          "working_f_number": 4.266666667,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "120 D"
         },
@@ -1367,6 +1662,14 @@
           "geometric_coverage_margin_um": 479.4161677,
           "conservative_plateau_margin_um": -4.33680869e-13,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 31.24941169,
+          "small_angle_linearization_error_percent": 11.25690273,
+          "working_f_number": 3.2,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "120 D"
         },
@@ -1396,6 +1699,14 @@
           "geometric_coverage_margin_um": 1349.27021,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 35.6043086,
+          "small_angle_linearization_error_percent": 15.22837608,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=12.8 mm",
           "demand_label": "120 D"
         },
@@ -1425,6 +1736,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 21.73440475,
+          "small_angle_linearization_error_percent": 5.089708596,
+          "working_f_number": 7.375,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "120 D"
         },
@@ -1454,6 +1773,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.16012994,
+          "small_angle_linearization_error_percent": 8.23088219,
+          "working_f_number": 4.916666667,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "120 D"
         },
@@ -1483,6 +1810,14 @@
           "geometric_coverage_margin_um": 844.3113772,
           "conservative_plateau_margin_um": 4.33680869e-13,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 32.10652921,
+          "small_angle_linearization_error_percent": 11.97309316,
+          "working_f_number": 3.6875,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "120 D"
         },
@@ -1512,6 +1847,14 @@
           "geometric_coverage_margin_um": 1805.389222,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 36.57040432,
+          "small_angle_linearization_error_percent": 16.22977726,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=14.75 mm",
           "demand_label": "120 D"
         },
@@ -1541,6 +1884,14 @@
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
           "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 22.12471383,
+          "small_angle_linearization_error_percent": 5.285869094,
+          "working_f_number": 8.35,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "120 D"
         },
@@ -1570,6 +1921,14 @@
           "geometric_coverage_margin_um": 92.99365341,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 27.69612214,
+          "small_angle_linearization_error_percent": 8.592856527,
+          "working_f_number": 5.566666667,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "120 D"
         },
@@ -1599,6 +1958,14 @@
           "geometric_coverage_margin_um": 1123.991538,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 32.75278639,
+          "small_angle_linearization_error_percent": 12.53339692,
+          "working_f_number": 4.175,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "120 D"
         },
@@ -1628,6 +1995,14 @@
           "geometric_coverage_margin_um": 2154.989422,
           "conservative_plateau_margin_um": 0.0,
           "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 37.29490498,
+          "small_angle_linearization_error_percent": 17.01232667,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
           "focal_label": "f=16.7 mm",
           "demand_label": "120 D"
         }
@@ -1658,7 +2033,15 @@
           "conservative_source_area_mm2": 61.76642365,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 22.58943187,
+          "small_angle_linearization_error_percent": 5.525153981,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1685,7 +2068,15 @@
           "conservative_source_area_mm2": 54.30869901,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.98756363,
+          "small_angle_linearization_error_percent": 6.862446157,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1712,7 +2103,15 @@
           "conservative_source_area_mm2": 49.03017437,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.29569924,
+          "small_angle_linearization_error_percent": 8.321499494,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1739,7 +2138,15 @@
           "conservative_source_area_mm2": 45.11118489,
           "geometric_coverage_margin_um": 24.41991018,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 29.51174574,
+          "small_angle_linearization_error_percent": 9.894887192,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1766,7 +2173,15 @@
           "conservative_source_area_mm2": 42.09350701,
           "geometric_coverage_margin_um": 466.0366766,
           "conservative_plateau_margin_um": 4.33680869e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 31.63487323,
+          "small_angle_linearization_error_percent": 11.57524928,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1793,7 +2208,15 @@
           "conservative_source_area_mm2": 39.70219284,
           "geometric_coverage_margin_um": 907.6534431,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 33.665339,
+          "small_angle_linearization_error_percent": 13.35539391,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1820,7 +2243,15 @@
           "conservative_source_area_mm2": 37.76284635,
           "geometric_coverage_margin_um": 1349.27021,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 35.6043086,
+          "small_angle_linearization_error_percent": 15.22837608,
+          "working_f_number": 2.56,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1847,7 +2278,15 @@
           "conservative_source_area_mm2": 74.33778951,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 23.83892913,
+          "small_angle_linearization_error_percent": 6.200096004,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1874,7 +2313,15 @@
           "conservative_source_area_mm2": 64.37254928,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 26.19093088,
+          "small_angle_linearization_error_percent": 7.601194987,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1901,7 +2348,15 @@
           "conservative_source_area_mm2": 57.36905179,
           "geometric_coverage_margin_um": 38.92215569,
           "conservative_plateau_margin_um": -4.33680869e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 28.45168749,
+          "small_angle_linearization_error_percent": 9.120218589,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1928,7 +2383,15 @@
           "conservative_source_area_mm2": 52.20066202,
           "geometric_coverage_margin_um": 480.5389222,
           "conservative_plateau_margin_um": -1.301042607e-12,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 30.6197796,
+          "small_angle_linearization_error_percent": 10.74976044,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1955,7 +2418,15 @@
           "conservative_source_area_mm2": 48.2415784,
           "geometric_coverage_margin_um": 922.1556886,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 32.69496117,
+          "small_angle_linearization_error_percent": 12.48253619,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -1982,7 +2453,15 @@
           "conservative_source_area_mm2": 45.11844599,
           "geometric_coverage_margin_um": 1363.772455,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 34.67798066,
+          "small_angle_linearization_error_percent": 14.31147302,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2009,7 +2488,15 @@
           "conservative_source_area_mm2": 42.59566665,
           "geometric_coverage_margin_um": 1805.389222,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 36.57040432,
+          "small_angle_linearization_error_percent": 16.22977726,
+          "working_f_number": 2.95,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2036,7 +2523,15 @@
           "conservative_source_area_mm2": 84.76108333,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.78066066,
+          "small_angle_linearization_error_percent": 6.740100912,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2063,7 +2558,15 @@
           "conservative_source_area_mm2": 72.66491851,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.09679789,
+          "small_angle_linearization_error_percent": 8.188765637,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2090,7 +2593,15 @@
           "conservative_source_area_mm2": 64.20363941,
           "geometric_coverage_margin_um": 388.5223565,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 29.32097668,
+          "small_angle_linearization_error_percent": 9.752415485,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2117,7 +2628,15 @@
           "conservative_source_area_mm2": 57.98462649,
           "geometric_coverage_margin_um": 830.139123,
           "conservative_plateau_margin_um": -4.33680869e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 31.45226315,
+          "small_angle_linearization_error_percent": 11.42368022,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2144,7 +2663,15 @@
           "conservative_source_area_mm2": 53.23746477,
           "geometric_coverage_margin_um": 1271.755889,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 33.4908264,
+          "small_angle_linearization_error_percent": 13.19534979,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2171,7 +2698,15 @@
           "conservative_source_area_mm2": 49.50419931,
           "geometric_coverage_margin_um": 1713.372656,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 35.43775931,
+          "small_angle_linearization_error_percent": 15.06045491,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "adult_18y",
@@ -2198,7 +2733,15 @@
           "conservative_source_area_mm2": 46.49680323,
           "geometric_coverage_margin_um": 2154.989422,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 37.29490498,
+          "small_angle_linearization_error_percent": 17.01232667,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2225,7 +2768,15 @@
           "conservative_source_area_mm2": 51.43576882,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 19.17653881,
+          "small_angle_linearization_error_percent": 3.909256393,
+          "working_f_number": 2.142857143,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2252,7 +2803,15 @@
           "conservative_source_area_mm2": 43.43381457,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 20.94573541,
+          "small_angle_linearization_error_percent": 4.706522494,
+          "working_f_number": 2.142857143,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2279,7 +2838,15 @@
           "conservative_source_area_mm2": 37.87606884,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 22.67408807,
+          "small_angle_linearization_error_percent": 5.569420787,
+          "working_f_number": 2.142857143,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2306,7 +2873,15 @@
           "conservative_source_area_mm2": 33.81632287,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.35996103,
+          "small_angle_linearization_error_percent": 6.49547302,
+          "working_f_number": 2.142857143,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2333,7 +2908,15 @@
           "conservative_source_area_mm2": 30.73418154,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 26.00209156,
+          "small_angle_linearization_error_percent": 7.482153672,
+          "working_f_number": 2.142857143,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2360,7 +2943,15 @@
           "conservative_source_area_mm2": 28.3219538,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.59956854,
+          "small_angle_linearization_error_percent": 8.526914996,
+          "working_f_number": 2.142857143,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2387,7 +2978,15 @@
           "conservative_source_area_mm2": 26.38706196,
           "geometric_coverage_margin_um": 45.65868263,
           "conservative_plateau_margin_um": 2.168404345e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 29.15180702,
+          "small_angle_linearization_error_percent": 9.627209544,
+          "working_f_number": 2.142857143,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2414,7 +3013,15 @@
           "conservative_source_area_mm2": 57.80071593,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 19.91854684,
+          "small_angle_linearization_error_percent": 4.233318268,
+          "working_f_number": 2.285714286,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2441,7 +3048,15 @@
           "conservative_source_area_mm2": 48.43735148,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 21.67094859,
+          "small_angle_linearization_error_percent": 5.058228153,
+          "working_f_number": 2.285714286,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2468,7 +3083,15 @@
           "conservative_source_area_mm2": 41.95745198,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 23.38177832,
+          "small_angle_linearization_error_percent": 5.947745073,
+          "working_f_number": 2.285714286,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2495,7 +3118,15 @@
           "conservative_source_area_mm2": 37.23908501,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 25.04955801,
+          "small_angle_linearization_error_percent": 6.899367887,
+          "working_f_number": 2.285714286,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2522,7 +3153,15 @@
           "conservative_source_area_mm2": 33.666971,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 26.67317429,
+          "small_angle_linearization_error_percent": 7.910558906,
+          "working_f_number": 2.285714286,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2549,7 +3188,15 @@
           "conservative_source_area_mm2": 30.87826917,
           "geometric_coverage_margin_um": 20.11601796,
           "conservative_plateau_margin_um": -2.168404345e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 28.25185523,
+          "small_angle_linearization_error_percent": 8.978767924,
+          "working_f_number": 2.285714286,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2576,7 +3223,15 @@
           "conservative_source_area_mm2": 28.64643259,
           "geometric_coverage_margin_um": 173.372006,
           "conservative_plateau_margin_um": -2.168404345e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 29.78514356,
+          "small_angle_linearization_error_percent": 10.10145363,
+          "working_f_number": 2.285714286,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2603,7 +3258,15 @@
           "conservative_source_area_mm2": 63.72509665,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -2.168404345e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 20.56753532,
+          "small_angle_linearization_error_percent": 4.528928062,
+          "working_f_number": 2.428571429,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2630,7 +3293,15 @@
           "conservative_source_area_mm2": 53.07870705,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 22.30484894,
+          "small_angle_linearization_error_percent": 5.377877884,
+          "working_f_number": 2.428571429,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2657,7 +3328,15 @@
           "conservative_source_area_mm2": 45.73206354,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.00000348,
+          "small_angle_linearization_error_percent": 6.290521074,
+          "working_f_number": 2.428571429,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2684,7 +3363,15 @@
           "conservative_source_area_mm2": 40.39616966,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 25.65165741,
+          "small_angle_linearization_error_percent": 7.264340104,
+          "working_f_number": 2.428571429,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2711,7 +3398,15 @@
           "conservative_source_area_mm2": 36.36569673,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.25882579,
+          "small_angle_linearization_error_percent": 8.296790027,
+          "working_f_number": 2.428571429,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2738,7 +3433,15 @@
           "conservative_source_area_mm2": 33.22555256,
           "geometric_coverage_margin_um": 132.8042445,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 28.82085563,
+          "small_angle_linearization_error_percent": 9.385321558,
+          "working_f_number": 2.428571429,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "chick_30_45d",
@@ -2765,7 +3468,15 @@
           "conservative_source_area_mm2": 30.71705764,
           "geometric_coverage_margin_um": 286.0602325,
           "conservative_plateau_margin_um": 2.168404345e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 30.33739818,
+          "small_angle_linearization_error_percent": 10.52740149,
+          "working_f_number": 2.428571429,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2792,7 +3503,15 @@
           "conservative_source_area_mm2": 70.53098288,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 23.47497245,
+          "small_angle_linearization_error_percent": 5.998677373,
+          "working_f_number": 2.7,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2819,7 +3538,15 @@
           "conservative_source_area_mm2": 61.33299708,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 25.84058552,
+          "small_angle_linearization_error_percent": 7.381271473,
+          "working_f_number": 2.7,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2846,7 +3573,15 @@
           "conservative_source_area_mm2": 54.85606622,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 28.11528152,
+          "small_angle_linearization_error_percent": 8.882915626,
+          "working_f_number": 2.7,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2873,7 +3608,15 @@
           "conservative_source_area_mm2": 50.06826577,
           "geometric_coverage_margin_um": 185.4346862,
           "conservative_plateau_margin_um": -4.33680869e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 30.29744823,
+          "small_angle_linearization_error_percent": 10.49619422,
+          "working_f_number": 2.7,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2900,7 +3643,15 @@
           "conservative_source_area_mm2": 46.39540725,
           "geometric_coverage_margin_um": 615.8239077,
           "conservative_plateau_margin_um": 4.33680869e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 32.38667332,
+          "small_angle_linearization_error_percent": 12.21379811,
+          "working_f_number": 2.7,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2927,7 +3678,15 @@
           "conservative_source_area_mm2": 43.4943953,
           "geometric_coverage_margin_um": 1046.213129,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 34.38356617,
+          "small_angle_linearization_error_percent": 14.0286176,
+          "working_f_number": 2.7,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2954,7 +3713,15 @@
           "conservative_source_area_mm2": 41.14842253,
           "geometric_coverage_margin_um": 1476.602351,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 36.28958024,
+          "small_angle_linearization_error_percent": 15.9338132,
+          "working_f_number": 2.7,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -2981,7 +3748,15 @@
           "conservative_source_area_mm2": 80.60326511,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 24.41402711,
+          "small_angle_linearization_error_percent": 6.526602597,
+          "working_f_number": 3.02,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3008,7 +3783,15 @@
           "conservative_source_area_mm2": 69.36207365,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 26.74423625,
+          "small_angle_linearization_error_percent": 7.956803644,
+          "working_f_number": 3.02,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3035,7 +3818,15 @@
           "conservative_source_area_mm2": 61.48493096,
           "geometric_coverage_margin_um": 92.85402705,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 28.98274146,
+          "small_angle_linearization_error_percent": 9.503138723,
+          "working_f_number": 3.02,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3062,7 +3853,15 @@
           "conservative_source_area_mm2": 55.68641312,
           "geometric_coverage_margin_um": 523.2432486,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 31.12842227,
+          "small_angle_linearization_error_percent": 11.15822146,
+          "working_f_number": 3.02,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3089,7 +3888,15 @@
           "conservative_source_area_mm2": 51.25433252,
           "geometric_coverage_margin_um": 953.6324702,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 33.18128876,
+          "small_angle_linearization_error_percent": 12.91481116,
+          "working_f_number": 3.02,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3116,7 +3923,15 @@
           "conservative_source_area_mm2": 47.76476818,
           "geometric_coverage_margin_um": 1384.021692,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 35.14230238,
+          "small_angle_linearization_error_percent": 14.76589688,
+          "working_f_number": 3.02,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3143,7 +3958,15 @@
           "conservative_source_area_mm2": 44.95076774,
           "geometric_coverage_margin_um": 1814.410913,
           "conservative_plateau_margin_um": -8.67361738e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 37.01320105,
+          "small_angle_linearization_error_percent": 16.70476009,
+          "working_f_number": 3.02,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3170,7 +3993,15 @@
           "conservative_source_area_mm2": 89.23672391,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": 4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 25.1630895,
+          "small_angle_linearization_error_percent": 6.967299626,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3197,7 +4028,15 @@
           "conservative_source_area_mm2": 76.21352228,
           "geometric_coverage_margin_um": 0.0,
           "conservative_plateau_margin_um": -4.33680869e-13,
-          "pupil_blur_alone_covers_target": 0
+          "pupil_blur_alone_covers_target": 0,
+          "maximum_source_pupil_ray_angle_deg": 27.46440314,
+          "small_angle_linearization_error_percent": 8.435148457,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3224,7 +4063,15 @@
           "conservative_source_area_mm2": 67.11989111,
           "geometric_coverage_margin_um": 365.932805,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 29.67352418,
+          "small_angle_linearization_error_percent": 10.01677827,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3251,7 +4098,15 @@
           "conservative_source_area_mm2": 60.44633801,
           "geometric_coverage_margin_um": 796.3220266,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 31.78971007,
+          "small_angle_linearization_error_percent": 11.70483844,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3278,7 +4133,15 @@
           "conservative_source_area_mm2": 55.35903634,
           "geometric_coverage_margin_um": 1226.711248,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 33.81329211,
+          "small_angle_linearization_error_percent": 13.4921531,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3305,7 +4168,15 @@
           "conservative_source_area_mm2": 51.36300659,
           "geometric_coverage_margin_um": 1657.10047,
           "conservative_plateau_margin_um": 0.0,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 35.7454966,
+          "small_angle_linearization_error_percent": 15.37179826,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         },
         {
           "eye_id": "child_6y",
@@ -3332,7 +4203,15 @@
           "conservative_source_area_mm2": 48.14731854,
           "geometric_coverage_margin_um": 2087.489691,
           "conservative_plateau_margin_um": -8.67361738e-13,
-          "pupil_blur_alone_covers_target": 1
+          "pupil_blur_alone_covers_target": 1,
+          "maximum_source_pupil_ray_angle_deg": 37.58827291,
+          "small_angle_linearization_error_percent": 17.33715807,
+          "working_f_number": 3.34,
+          "paraxial_screening_angle_limit_deg": 10.0,
+          "paraxial_screening_min_f_number": 4.0,
+          "paraxial_screening_pass": 0,
+          "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+          "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED"
         }
       ],
       "zos": [
@@ -3502,7 +4381,7 @@
         "engine": "sqlite",
         "sql": "SELECT *, printf('f=%g mm', fixed_focal_length_mm) AS focal_label\nFROM headline_results WHERE eye_id='adult_18y' ORDER BY fixed_focal_length_mm, source_demand_D",
         "description": "报告生成器实际执行的 SQLite 查询。",
-        "executed_at": "2026-08-14T00:00:00Z",
+        "executed_at": "2026-08-18T00:00:00Z",
         "tables_used": [
           "headline_results"
         ]
@@ -3516,7 +4395,7 @@
         "engine": "sqlite",
         "sql": "SELECT *, printf('f=%g mm', fixed_focal_length_mm) AS focal_label,\nprintf('%g D', source_demand_D) AS demand_label\nFROM fixed_focal_source_sweep\nWHERE eye_id='adult_18y' AND source_demand_D IN (60,120)\nORDER BY source_demand_D, fixed_focal_length_mm, pupil_diameter_mm",
         "description": "报告生成器实际执行的 SQLite 查询。",
-        "executed_at": "2026-08-14T00:00:00Z",
+        "executed_at": "2026-08-18T00:00:00Z",
         "tables_used": [
           "fixed_focal_source_sweep"
         ]
@@ -3530,7 +4409,7 @@
         "engine": "sqlite",
         "sql": "SELECT * FROM headline_results ORDER BY eye_id, fixed_focal_length_mm, source_demand_D",
         "description": "报告生成器实际执行的 SQLite 查询。",
-        "executed_at": "2026-08-14T00:00:00Z",
+        "executed_at": "2026-08-18T00:00:00Z",
         "tables_used": [
           "headline_results"
         ]
@@ -3544,7 +4423,7 @@
         "engine": "sqlite",
         "sql": "SELECT * FROM zosapi_validation ORDER BY case_id",
         "description": "报告生成器实际执行的 SQLite 查询。",
-        "executed_at": "2026-08-14T00:00:00Z",
+        "executed_at": "2026-08-18T00:00:00Z",
         "tables_used": [
           "zosapi_validation"
         ]
@@ -3554,6 +4433,11 @@
       "id": "validation",
       "label": "自动验证结果",
       "path": "experiments/eye_illumination/results/validation_report.json"
+    },
+    {
+      "id": "readiness",
+      "label": "真实实验适用性审计",
+      "path": "experiments/eye_illumination/results/real_experiment_readiness.json"
     },
     {
       "id": "monte",

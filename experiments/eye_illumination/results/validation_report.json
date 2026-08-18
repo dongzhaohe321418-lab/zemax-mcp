@@ -55,5 +55,13 @@
   "zos_bound_max_error_um": 2.5757174171303632e-11,
   "opticstudio_version": "24.1.0",
   "api_license_valid": true,
+  "duplicate_case_count": 0,
+  "missing_value_count": 0,
+  "minimum_maximum_source_pupil_ray_angle_deg": 15.01958967,
+  "maximum_maximum_source_pupil_ray_angle_deg": 37.58827291,
+  "cases_above_paraxial_angle_screen": 252,
+  "cases_below_f_number_4": 140,
+  "validation_scope": "first-order paraxial calculation and equivalent OpticStudio Paraxial boundary only",
+  "real_experiment_readiness": "NOT_READY_CALIBRATION_AND_SAFETY_REQUIRED",
   "overall_status": "passed"
 }

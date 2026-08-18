@@ -13,6 +13,14 @@ from typing import Iterable
 import numpy as np
 
 
+# These are project screening guardrails, not universal optical standards.  A
+# case that passes them is still only suitable for first-order design; a case
+# that fails them must not be promoted to a physical-eye recommendation without
+# a real-ray anatomical model and bench calibration.
+PARAXIAL_SCREENING_ANGLE_DEG = 10.0
+PARAXIAL_SCREENING_MIN_F_NUMBER = 4.0
+
+
 def translation(distance_m: float, refractive_index: float = 1.0) -> np.ndarray:
     return np.array([[1.0, distance_m / refractive_index], [0.0, 1.0]])
 
@@ -107,6 +115,60 @@ def fixed_focal_source_solution(
     )
 
 
+def paraxial_applicability_diagnostics(
+    eye: Eye,
+    source_distance_m: float,
+    focal_length_mm: float,
+    pupil_diameter_mm: float,
+    source_diameter_mm: float,
+    external_power_D: float = 0.0,
+) -> dict[str, float | bool | str]:
+    """Screen whether the requested ray bundle is close to the paraxial domain.
+
+    The maximum launch slope is evaluated across the four combinations of the
+    conservative source edge and pupil edge.  ``atan(slope)`` is reported as a
+    geometric angle only to quantify the small-angle risk; it is not a real-ray
+    correction to the equivalent-eye model.
+    """
+    if not math.isfinite(source_diameter_mm) or source_diameter_mm < 0.0:
+        raise ValueError("source_diameter_mm must be finite and non-negative")
+    vertex_m = 0.0 if external_power_D == 0.0 else eye.external_lens_vertex_distance_mm / 1000.0
+    pre = pre_eye_matrix(source_distance_m, external_power_D, vertex_m)
+    a_pre, b_pre = float(pre[0, 0]), float(pre[0, 1])
+    if abs(b_pre) <= np.finfo(float).eps:
+        raise ValueError("source-to-pupil mapping is singular")
+    source_radius_m = source_diameter_mm / 2000.0
+    pupil_radius_m = pupil_diameter_mm / 2000.0
+    launch_slopes = [
+        (pupil_height - a_pre * source_height) / b_pre
+        for source_height in (-source_radius_m, source_radius_m)
+        for pupil_height in (-pupil_radius_m, pupil_radius_m)
+    ]
+    maximum_slope = max(abs(value) for value in launch_slopes)
+    geometric_angle_rad = math.atan(maximum_slope)
+    linearization_error_percent = (
+        0.0
+        if geometric_angle_rad == 0.0
+        else 100.0 * abs(maximum_slope - geometric_angle_rad) / geometric_angle_rad
+    )
+    working_f_number = focal_length_mm / pupil_diameter_mm
+    maximum_angle_deg = math.degrees(geometric_angle_rad)
+    screening_pass = (
+        maximum_angle_deg <= PARAXIAL_SCREENING_ANGLE_DEG
+        and working_f_number >= PARAXIAL_SCREENING_MIN_F_NUMBER
+    )
+    return {
+        "maximum_source_pupil_ray_angle_deg": maximum_angle_deg,
+        "small_angle_linearization_error_percent": linearization_error_percent,
+        "working_f_number": working_f_number,
+        "paraxial_screening_angle_limit_deg": PARAXIAL_SCREENING_ANGLE_DEG,
+        "paraxial_screening_min_f_number": PARAXIAL_SCREENING_MIN_F_NUMBER,
+        "paraxial_screening_pass": screening_pass,
+        "model_domain": "FIRST_ORDER_PARAXIAL_ONLY",
+        "real_experiment_readiness": "BLOCKED_CALIBRATION_REQUIRED",
+    }
+
+
 def adjustable_source_solution(
     eye: Eye,
     source_distance_m: float,
@@ -134,6 +196,7 @@ def adjustable_source_solution(
     target_radius_m = eye.target_radius_m
     geometric_radius_m = max(0.0, target_radius_m - pupil_blur_radius_m) / source_scale
     conservative_radius_m = (target_radius_m + pupil_blur_radius_m) / source_scale
+    conservative_source_diameter_mm = 2000.0 * conservative_radius_m
     demand_D = 1.0 / source_distance_m
     focus_object_demand_D = eye_power_D - 1.0 / eye.reduced_retina_distance_m
     return {
@@ -148,7 +211,7 @@ def adjustable_source_solution(
         "pupil_blur_diameter_mm": 2000.0 * pupil_blur_radius_m,
         "geometric_min_source_diameter_mm": 2000.0 * geometric_radius_m,
         "geometric_min_source_area_mm2": math.pi * (1000.0 * geometric_radius_m) ** 2,
-        "conservative_source_diameter_mm": 2000.0 * conservative_radius_m,
+        "conservative_source_diameter_mm": conservative_source_diameter_mm,
         "conservative_source_area_mm2": math.pi * (1000.0 * conservative_radius_m) ** 2,
         "geometric_coverage_margin_um": 1e6 * (
             source_scale * geometric_radius_m + pupil_blur_radius_m - target_radius_m
@@ -157,6 +220,14 @@ def adjustable_source_solution(
             source_scale * conservative_radius_m - pupil_blur_radius_m - target_radius_m
         ),
         "pupil_blur_alone_covers_target": pupil_blur_radius_m >= target_radius_m,
+        **paraxial_applicability_diagnostics(
+            eye,
+            source_distance_m,
+            focal_length_mm,
+            pupil_diameter_mm,
+            conservative_source_diameter_mm,
+            external_power_D,
+        ),
     }
 
 

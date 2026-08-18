@@ -31,6 +31,8 @@ def main() -> None:
     zos = read_csv(RESULTS / "zemax" / "zosapi_validation.csv")
     monte = json.loads((RESULTS / "monte_carlo_summary.json").read_text(encoding="utf-8"))
     validation = json.loads((RESULTS / "validation_report.json").read_text(encoding="utf-8"))
+    readiness = json.loads((RESULTS / "real_experiment_readiness.json").read_text(encoding="utf-8"))
+    applicability = readiness["paraxial_applicability"]
 
     eye_order = ["chick_30_45d", "child_6y", "adult_18y"]
     eye_cn = {"chick_30_45d": "30--45日龄小鸡", "child_6y": "6岁儿童", "adult_18y": "18岁成人"}
@@ -91,6 +93,12 @@ def main() -> None:
         rf"\newcommand{{\GeometricUniformity}}{{{monte['geometric_minimum']['p10_to_mean_uniformity']:.3f}}}",
         rf"\newcommand{{\ConservativeCapture}}{{{100 * monte['conservative_full_overlap']['captured_ray_fraction']:.2f}}}",
         rf"\newcommand{{\ConservativeUniformity}}{{{monte['conservative_full_overlap']['p10_to_mean_uniformity']:.3f}}}",
+        rf"\newcommand{{\MinimumEdgeAngle}}{{{applicability['minimum_maximum_ray_angle_deg']:.2f}}}",
+        rf"\newcommand{{\MaximumEdgeAngle}}{{{applicability['maximum_maximum_ray_angle_deg']:.2f}}}",
+        rf"\newcommand{{\CasesAboveAngleScreen}}{{{applicability['cases_above_screening_angle']}}}",
+        rf"\newcommand{{\CasesAboveFifteen}}{{{applicability['cases_above_15_deg']}}}",
+        rf"\newcommand{{\CasesBelowFfour}}{{{applicability['cases_below_f_number_4']}}}",
+        rf"\newcommand{{\CasesPassingBothScreens}}{{{applicability['cases_passing_both_project_screens']}}}",
         r"\newcommand{\FocalRows}{" + "\n".join(focal_rows) + "}",
         r"\newcommand{\EndpointRows}{" + "\n".join(endpoint_rows) + "}",
         r"\newcommand{\ZosRows}{" + "\n".join(zos_rows) + "}",

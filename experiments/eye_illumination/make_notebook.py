@@ -31,7 +31,7 @@ def build() -> None:
 
 ## tl;dr
 
-This executed notebook sizes a circular source for 60–120 D object-side requirements while holding the retina plane fixed and using only three discrete focal lengths per eye. It does not continuously alter focal length to force focus. Both a geometric minimum and a conservative full-overlap source diameter are reported.
+This executed notebook sizes a circular source for 60–120 D object-side requirements while holding the retina plane fixed and using only three discrete focal lengths per eye. It does not continuously alter focal length to force focus. The arithmetic is verified within the first-order model, but the real-experiment readiness audit is **NOT READY** because anatomy, real-ray behavior, calibrated radiometry, safety, and ethics evidence are incomplete.
         """),
         markdown("""
 ## Context & Methods
@@ -56,7 +56,8 @@ RESULTS = ROOT / 'results'
 FIGURES = ROOT / 'figures'
 config = json.loads((ROOT / 'config' / 'experiment.json').read_text(encoding='utf-8'))
 validation = json.loads((RESULTS / 'validation_report.json').read_text(encoding='utf-8'))
-config['experiment_id'], validation['overall_status']
+readiness = json.loads((RESULTS / 'real_experiment_readiness.json').read_text(encoding='utf-8'))
+config['experiment_id'], validation['overall_status'], readiness['real_experiment_readiness_status']
         """),
         markdown("## Data"),
         code("""
@@ -97,13 +98,32 @@ display(Image(filename=str(FIGURES / 'zosapi_cross_validation.png')))
 validation
         """),
         markdown("""
+## Real-experiment applicability screen
+
+The OpticStudio evidence above uses an ideal Paraxial surface, so agreement at numerical round-off establishes implementation consistency only. The independent screen recomputes the extreme conservative-source-edge to pupil-edge angle and the working F-number for all 252 cases. Passing a screen would still require an anatomical real-ray model and calibrated bench evidence; failing it blocks promotion of the paraxial value to a physical-eye setting.
+        """),
+        code("""
+applicability = readiness['paraxial_applicability']
+display(pd.DataFrame([{
+    'cases': applicability['case_count'],
+    'minimum edge angle (deg)': applicability['minimum_maximum_ray_angle_deg'],
+    'median edge angle (deg)': applicability['median_maximum_ray_angle_deg'],
+    'maximum edge angle (deg)': applicability['maximum_maximum_ray_angle_deg'],
+    'cases above 10 deg': applicability['cases_above_screening_angle'],
+    'cases below F/4': applicability['cases_below_f_number_4'],
+    'cases passing both screens': applicability['cases_passing_both_project_screens'],
+}]))
+readiness['calculation_validation_status'], readiness['decision']
+        """),
+        markdown("""
 ## Takeaways
 
 - The primary matrix contains 252 fixed-focal rows: 3 eyes × 3 focal lengths × 4 pupils × 7 object distances.
 - No row changes the assigned focal length to satisfy the object-side requirement.
-- The conservative source diameter, not the old in-focus diameter, is the recommended first-order coverage value.
+- The conservative source diameter is a first-order mechanical candidate, not a final experimental or exposure setting.
 - Some geometric minima become zero when pupil-driven defocus alone reaches the target; this does not mean a zero-area practical emitter is recommended.
-- These are paraxial geometric results, not absolute retinal irradiance or biological-safety results.
+- All 252 cases exceed the project's 10-degree paraxial angle screen; 140 cases are faster than F/4. A measured anatomical real-ray model is required.
+- These are paraxial geometric results, not absolute retinal irradiance, biological efficacy, or optical-safety results.
         """),
     ]
     nbf.write(nb, NOTEBOOK_PATH)

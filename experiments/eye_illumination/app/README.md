@@ -2,6 +2,8 @@
 
 这是 `eye-illumination-fixed-focal-60-120d-v3` 的本地交互应用。程序直接调用上级目录的 `eye_model.py` 和版本化参数，不会在前端复制或重新实现光学公式。应用包含两个明确分开的模式：
 
+页面顶部的“真实实验状态：未就绪”是强制安全边界，不是普通提示。当前输出只是一阶近轴机械候选值；每个工况同时显示最大源边缘—瞳孔边缘角和工作 F 数。即使 Zemax 显示 `PARAXIAL PASS`，也只表示解析模型与理想 Paraxial 面一致，不表示真实眼、绝对照度、组织安全或伦理放行。
+
 - **固定三焦距基准**：严格复现已验证的 252 工况矩阵。
 - **PPT 参数范围探索**：允许用户手动调整 PPT 声明的有效焦距、眼轴和瞳孔范围，但不会根据物距自动反求焦距。
 
@@ -44,7 +46,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 - 支持 PPT 第 5 页的 0、-1、-3、-5、-10、-15、-20 D 外置凹透镜选项；机械顺序无效的组合会被拒绝，不会静默给出错误结果。
 - 物方需求保持在 60–120 D；基准矩阵步长 10 D，范围模式滑块步长 1 D。
 - 已知眼轴、后极目标和像方折射率在界面中只读显示。
-- 即时输出几何最小和推荐全重叠光源尺寸。
+- 即时输出几何最小和近轴全重叠候选光源尺寸，并显示模型适用性诊断。
 - 绘制光源—等效透镜—固定后极的 SVG 光路示意。
 - 比较三个固定焦距随物方需求变化的曲线。
 - 在范围模式中可分别查看有效焦距、眼轴或瞳孔的三水平灵敏度曲线。
@@ -63,7 +65,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch
 1. 滚动到“04 Zemax 验证向导”。
 2. 点击“自动检测 OpticStudio”。这一步不会启动 Zemax，许可证仍应显示“未测试”。
 3. 检测通过后，勾选显式确认框，点击“运行 1 工况连接测试”。
-4. 等待明确的 `PASS · 验证通过`。界面同时显示 OpticStudio 版本、通过工况数和最大边界误差。
+4. 等待明确的 `PARAXIAL PASS · 一致性通过`。界面同时显示 OpticStudio 版本、通过工况数和最大边界误差；该状态不是安全或活体实验放行。
 5. PASS 后可点击“在 Zemax 运行当前结果表”；结束后下载可移交审计证据包。
 
 网页不会在载入或只读检测时启动 OpticStudio。许可证状态只有真实 ZOS-API 运行返回有效时才显示“有效 · 已实测”。服务器仅监听 `127.0.0.1`，不向云端发送参数。
@@ -78,6 +80,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run_zemax_batch.ps1 `
 ```
 
 只有输出目录中的 `verification_report.json` 同时满足 `verification_status = PASS`，才表示该批次经过真实 OpticStudio 验证。完整步骤、输出解释和故障排查见 [`../ZEMAX_CONNECTION_GUIDE.md`](../ZEMAX_CONNECTION_GUIDE.md)。
+
+这里的 `PASS` 范围仅限 Paraxial 等效模型。进入动物或人体实验前，必须阅读 [`../results/real_experiment_readiness.md`](../results/real_experiment_readiness.md)，并解决其中所有阻断条件。
 
 ## 本地接口
 

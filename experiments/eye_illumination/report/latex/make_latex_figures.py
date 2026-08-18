@@ -134,6 +134,65 @@ def main() -> None:
     fig.savefig(FIGURES / "zos_validation_cn.png", dpi=220)
     plt.close(fig)
 
+    # Model-domain diagnostic: this is intentionally a screening figure, not a
+    # claim that a single angular threshold certifies paraxial validity.
+    order = ["chick_30_45d", "child_6y", "adult_18y"]
+    y = np.arange(len(order))
+    fig, axes = plt.subplots(1, 2, figsize=(11.2, 4.5))
+    angle_min = []
+    angle_median = []
+    angle_max = []
+    below_f4 = []
+    at_or_above_f4 = []
+    for eye_id in order:
+        subset = fixed[fixed.eye_id == eye_id]
+        values = subset.maximum_source_pupil_ray_angle_deg.to_numpy()
+        angle_min.append(float(np.min(values)))
+        angle_median.append(float(np.median(values)))
+        angle_max.append(float(np.max(values)))
+        below = int((subset.working_f_number < 4.0).sum())
+        below_f4.append(below)
+        at_or_above_f4.append(len(subset) - below)
+    angle_min = np.array(angle_min)
+    angle_median = np.array(angle_median)
+    angle_max = np.array(angle_max)
+    axes[0].errorbar(
+        angle_median,
+        y,
+        xerr=[angle_median - angle_min, angle_max - angle_median],
+        fmt="o",
+        color=BLUE,
+        ecolor=BLUE,
+        capsize=5,
+        linewidth=2,
+        label="最小—中位—最大",
+    )
+    axes[0].axvline(10.0, color=ORANGE, linestyle="--", linewidth=1.6, label="项目筛查线 10°")
+    axes[0].set_yticks(y, [labels[item] for item in order])
+    axes[0].set_xlabel("保守源边缘—瞳孔边缘最大角（°）")
+    axes[0].set_title("全部 252 工况超过 10°")
+    axes[0].legend(frameon=False, fontsize=8)
+    style(axes[0])
+
+    axes[1].barh(y, below_f4, color=ORANGE, edgecolor=INK, hatch="//", label="F/# < 4")
+    axes[1].barh(
+        y,
+        at_or_above_f4,
+        left=below_f4,
+        color="#D8DEE8",
+        edgecolor=INK,
+        label="F/# ≥ 4",
+    )
+    axes[1].set_yticks(y, [labels[item] for item in order])
+    axes[1].set_xlabel("工况数（每个模型 84）")
+    axes[1].set_title("工作 F 数筛查")
+    axes[1].legend(frameon=False, fontsize=8)
+    style(axes[1])
+    fig.suptitle("近轴模型适用性诊断（筛查不等于实验放行）")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "model_applicability_cn.png", dpi=220)
+    plt.close(fig)
+
 
 if __name__ == "__main__":
     main()

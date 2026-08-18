@@ -171,6 +171,9 @@ function renderResult(result) {
   $("geometric-value").textContent = fixed(result.geometric_min_source_diameter_mm);
   $("distance-value").textContent = fixed(result.source_distance_mm, 2);
   $("blur-value").textContent = fixed(result.pupil_blur_diameter_mm);
+  $("edge-angle-value").textContent = `${fixed(result.maximum_source_pupil_ray_angle_deg, 1)}°`;
+  $("f-number-value").textContent = `F/${fixed(result.working_f_number, 2)}`;
+  $("readiness-value").textContent = "未就绪 · 需标定";
   $("diagram-demand").textContent = `${fixed(result.source_demand_D, result.mode === "range" ? 1 : 0)} D`;
   $("source-label").textContent = `${fixed(result.conservative_source_diameter_mm)} mm`;
   $("lens-label").textContent = result.external_lens_power_D
@@ -180,9 +183,12 @@ function renderResult(result) {
   $("axial-value").textContent = `${fixed(result.axial_length_mm, 2)} mm`;
   const modeText = result.mode === "range" ? "范围探索值" : "固定网格值";
   const interpretation = result.pupil_blur_alone_covers_target
-    ? "瞳孔离焦 footprint 已覆盖目标边缘，因此几何最小值为 0；实际设计仍应采用推荐全重叠尺寸。"
-    : `建议使用 ${fixed(result.conservative_source_diameter_mm)} mm 光源，使目标完整位于全重叠平台内。`;
-  $("interpretation").querySelector("p").textContent = `${modeText}：${interpretation}`;
+    ? "瞳孔离焦 footprint 已覆盖目标边缘，因此几何最小值为 0。"
+    : `${fixed(result.conservative_source_diameter_mm)} mm 可使目标在近轴模型中位于全重叠平台内。`;
+  const scopeWarning = result.paraxial_screening_pass
+    ? "该值仍需真实曲面、辐射度和安全标定后才能进入活体实验。"
+    : `最大边缘角 ${fixed(result.maximum_source_pupil_ray_angle_deg, 1)}° 或工作 F 数未通过项目近轴筛查；不得直接作为活体实验设置。`;
+  $("interpretation").querySelector("p").textContent = `${modeText}：${interpretation} ${scopeWarning}`;
   $("download-json").disabled = false;
   renderDiagram(result);
 }
@@ -461,14 +467,14 @@ function renderZemaxJob(job) {
     $("zemax-job-message").textContent = `${job.batch_id} · ${job.case_count} 个工况，请勿关闭启动窗口。`;
   } else if (job.status === "pass") {
     panel.className = "verification-state pass";
-    $("zemax-verification-label").textContent = "PASS · 验证通过";
+    $("zemax-verification-label").textContent = "PARAXIAL PASS · 一致性通过";
     $("zemax-verification-detail").textContent = job.message;
     $("zemax-license-check").textContent = verification.api_license_valid ? "有效 · 已实测" : "未确认";
     $("zemax-license-check").className = verification.api_license_valid ? "pass-text" : "fail-text";
     $("zemax-step-result").classList.add("complete");
     if (job.mode === "connection_test") state.zemaxConnectionPassed = true;
     $("zemax-job-message").textContent = `${job.batch_id} · ${job.case_count} 个工况已验证，可下载审计证据包。`;
-    showToast(`Zemax ${job.case_count} 工况验证通过。`);
+    showToast(`Zemax ${job.case_count} 工况近轴一致性通过；不代表真实眼或光安全放行。`);
   } else {
     panel.className = "verification-state fail";
     $("zemax-verification-label").textContent = "FAIL · 未通过";
