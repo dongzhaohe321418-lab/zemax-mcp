@@ -1,7 +1,7 @@
 [project]
 name = "zemax-mcp"
 version = "0.1.0"
-description = "Safe stdio MCP server for Ansys Zemax OpticStudio simulations"
+description = "Local eye-illumination Web lab with optional safe MCP automation for Ansys Zemax OpticStudio"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
