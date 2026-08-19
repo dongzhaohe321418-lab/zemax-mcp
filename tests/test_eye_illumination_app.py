@@ -143,6 +143,21 @@ def test_http_server_serves_app_and_calculation() -> None:
     thread.start()
     base = f"http://127.0.0.1:{server.server_address[1]}"
     try:
+        with urlopen(f"{base}/", timeout=5) as response:
+            app_html = response.read().decode("utf-8")
+            assert response.headers["Content-Type"] == "text/html"
+            assert 'id="lang-zh"' in app_html
+            assert 'id="lang-en"' in app_html
+            assert 'src="/i18n.js"' in app_html
+            assert "让物距改变光源" not in app_html
+        with urlopen(f"{base}/i18n.js", timeout=5) as response:
+            i18n_script = response.read().decode("utf-8")
+            assert "OpticBenchI18n" in i18n_script
+            assert "Three-fixed-focal baseline" in i18n_script
+        for report_path in ("/report.pdf", "/report-en.pdf"):
+            with urlopen(f"{base}{report_path}", timeout=5) as response:
+                assert response.headers["Content-Type"] == "application/pdf"
+                assert response.read(4) == b"%PDF"
         with urlopen(f"{base}/api/health", timeout=5) as response:
             assert json.load(response)["status"] == "ok"
         with urlopen(f"{base}/readiness.json", timeout=5) as response:

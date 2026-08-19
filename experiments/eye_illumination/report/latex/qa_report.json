@@ -1,47 +1,88 @@
 {
-  "pdf": "eye_illumination_experiment_report.pdf",
-  "page_count": 25,
-  "embedded_raster_image_instances": 6,
-  "font_names": [
-    "BYANTN+CMR8",
-    "DPKYKM+SimSun",
-    "FPFBJA+SimSun",
-    "GGIGJT+CMMI10",
-    "HGULVP+SimSun",
-    "ICVCHA+TimesNewRomanPS-BoldMT",
-    "IYJQCM+CMSY7",
-    "JQUVPC+CMR10",
-    "KMVWNC+CMR12",
-    "LIKDDX+SimSun",
-    "LXKTAB+ArialMT",
-    "PAABIO+Consolas",
-    "PALLLW+CMSY10",
-    "QCIDYR+CMEX10",
-    "RXPNXT+SimSun",
-    "TFCVNM+CMMI8",
-    "TUFXIV+TimesNewRomanPSMT",
-    "VXDYAE+CMSY8",
-    "WMKHGO+SimSun",
-    "YSPCSO+CMMI12",
-    "ZIPWPU+CMMI7"
-  ],
-  "songti_font_names": [
-    "DPKYKM+SimSun",
-    "FPFBJA+SimSun",
-    "HGULVP+SimSun",
-    "LIKDDX+SimSun",
-    "RXPNXT+SimSun",
-    "WMKHGO+SimSun"
-  ],
-  "missing_required_text": [],
-  "sparse_pages": [],
-  "all_pages_a4": true,
   "status": "passed",
-  "preview_pages": [
-    0,
-    6,
-    12,
-    18,
-    24
-  ]
+  "reports": {
+    "zh-CN": {
+      "language": "zh-CN",
+      "pdf": "eye_illumination_experiment_report.pdf",
+      "page_count": 25,
+      "embedded_raster_image_instances": 6,
+      "font_names": [
+        "BYANTN+CMR8",
+        "DPKYKM+SimSun",
+        "FPFBJA+SimSun",
+        "GGIGJT+CMMI10",
+        "HGULVP+SimSun",
+        "ICVCHA+TimesNewRomanPS-BoldMT",
+        "IYJQCM+CMSY7",
+        "JQUVPC+CMR10",
+        "KMVWNC+CMR12",
+        "LIKDDX+SimSun",
+        "LXKTAB+ArialMT",
+        "PAABIO+Consolas",
+        "PALLLW+CMSY10",
+        "QCIDYR+CMEX10",
+        "RXPNXT+SimSun",
+        "TFCVNM+CMMI8",
+        "TUFXIV+TimesNewRomanPSMT",
+        "VXDYAE+CMSY8",
+        "WMKHGO+SimSun",
+        "YSPCSO+CMMI12",
+        "ZIPWPU+CMMI7"
+      ],
+      "expected_font_names": [
+        "DPKYKM+SimSun",
+        "FPFBJA+SimSun",
+        "HGULVP+SimSun",
+        "LIKDDX+SimSun",
+        "RXPNXT+SimSun",
+        "WMKHGO+SimSun"
+      ],
+      "missing_required_text": [],
+      "sparse_pages": [],
+      "all_pages_a4": true,
+      "status": "passed",
+      "preview_pages": [
+        1,
+        7,
+        13,
+        19,
+        25
+      ]
+    },
+    "en": {
+      "language": "en",
+      "pdf": "eye_illumination_experiment_report_en.pdf",
+      "page_count": 22,
+      "embedded_raster_image_instances": 6,
+      "font_names": [
+        "BNIDKP+CMMI10",
+        "BUSSEW+CMEX10",
+        "DCXYUC+CMSY7",
+        "DPQXKE+CMMI8",
+        "GWBSCD+CMSY8",
+        "JSCFRK+ArialMT",
+        "OKXTFE+CMR8",
+        "PQTRWH+TimesNewRomanPS-BoldMT",
+        "RDNBYS+Consolas",
+        "TSQWZI+TimesNewRomanPSMT",
+        "UBXSHQ+CMR10",
+        "WULIIL+CMSY10"
+      ],
+      "expected_font_names": [
+        "PQTRWH+TimesNewRomanPS-BoldMT",
+        "TSQWZI+TimesNewRomanPSMT"
+      ],
+      "missing_required_text": [],
+      "sparse_pages": [],
+      "all_pages_a4": true,
+      "status": "passed",
+      "preview_pages": [
+        1,
+        6,
+        12,
+        17,
+        22
+      ]
+    }
+  }
 }

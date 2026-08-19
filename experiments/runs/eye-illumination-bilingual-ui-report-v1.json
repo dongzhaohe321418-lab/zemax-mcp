@@ -1,0 +1,63 @@
+{
+  "application": "OpticBench Eye Illumination Web GUI and LaTeX report pipeline",
+  "application_version": "3.1.0",
+  "artifacts": [
+    "experiments/eye_illumination/app/static/index.html",
+    "experiments/eye_illumination/app/static/styles.css",
+    "experiments/eye_illumination/app/static/i18n.js",
+    "experiments/eye_illumination/app/static/app.js",
+    "experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf",
+    "experiments/eye_illumination/report/latex/eye_illumination_experiment_report_en.pdf",
+    "experiments/eye_illumination/report/latex/qa_report.json",
+    "experiments/eye_illumination/report/latex/qa_contact_sheet.png",
+    "experiments/eye_illumination/report/latex/qa_contact_sheet_en.png"
+  ],
+  "backend": "existing validated Python reduced-angle ABCD results; no new OpticStudio execution",
+  "experiment_id": "eye-illumination-bilingual-ui-report-v1",
+  "hypothesis": "\u5728\u4e0d\u6539\u53d8\u4efb\u4f55\u5149\u5b66\u8f93\u5165\u3001\u516c\u5f0f\u6216\u65e2\u6709\u6570\u503c\u7ed3\u679c\u7684\u524d\u63d0\u4e0b\uff0c\u53ef\u901a\u8fc7\u8868\u73b0\u5c42\u56fd\u9645\u5316\u548c\u53cc\u8bed\u62a5\u544a\u6784\u5efa\uff0c\u4f7f\u4e2d\u6587\u4e0e\u82f1\u6587\u7528\u6237\u83b7\u5f97\u4e00\u81f4\u7684\u8ba1\u7b97\u3001Zemax \u9a8c\u8bc1\u72b6\u6001\u548c\u5b89\u5168\u8fb9\u754c\u3002",
+  "inputs": {
+    "experiment_id": "eye-illumination-fixed-focal-60-120d-v3",
+    "eye_models": [
+      "chick_30_45d",
+      "child_6y",
+      "adult_18y"
+    ],
+    "focal_policy": "three discrete fixed focal lengths per eye in baseline mode; bounded manual range values in range-exploration mode",
+    "language_modes": [
+      "zh-CN",
+      "en"
+    ],
+    "object_side_demands_D": [
+      60,
+      70,
+      80,
+      90,
+      100,
+      110,
+      120
+    ],
+    "source_results_changed": false
+  },
+  "next_step": "\u53d6\u5f97\u5b9e\u6d4b\u7b49\u6548\u4e3b\u5e73\u9762\u3001\u4e09\u4e2a\u7126\u8ddd\u3001\u8f90\u4eae\u5ea6\u4e0e\u7ec4\u7ec7\u900f\u5c04\u6570\u636e\u540e\uff0c\u5efa\u7acb\u771f\u5b9e\u66f2\u9762 real-ray/\u975e\u5e8f\u5217\u6a21\u578b\u5e76\u5b8c\u6210\u5149\u5b89\u5168\u3001\u53f0\u67b6\u548c\u4f26\u7406\u653e\u884c\uff1b\u5728\u6b64\u4e4b\u524d\u4fdd\u6301 NOT_READY\u3002",
+  "objective": "\u4e3a\u773c\u90e8\u540e\u6781\u7167\u660e\u5b9e\u9a8c\u7a0b\u5e8f\u63d0\u4f9b\u7d27\u51d1\u4e13\u4e1a\u7684\u4e2d\u82f1\u6587 Web GUI\uff0c\u5e76\u751f\u6210\u4e0e\u754c\u9762\u8bed\u8a00\u4e00\u81f4\u3001\u53ef\u590d\u73b0\u548c\u53ef\u5ba1\u8ba1\u7684\u4e2d\u82f1\u6587 LaTeX PDF \u62a5\u544a\u3002",
+  "observations": "\u754c\u9762\u53ef\u5728\u4e2d\u6587\u4e0e\u82f1\u6587\u95f4\u5373\u65f6\u5207\u6362\uff0c\u52a8\u6001\u7ed3\u679c\u3001\u56fe\u8868\u3001\u8303\u56f4\u53c2\u6570\u6765\u6e90\u3001Zemax \u5411\u5bfc\u548c PDF \u94fe\u63a5\u540c\u6b65\u66f4\u65b0\u3002\u5df2\u5220\u9664\u4e0d\u5408\u9002\u7684\u65e7\u6807\u9898\u3002\u6d4f\u89c8\u5668\u5b9e\u6d4b\u8986\u76d6\u57fa\u51c6\u6a21\u5f0f\u3001\u8303\u56f4\u6a21\u5f0f\u3001\u7a84\u5c4f\u548c 1440x900 \u684c\u9762\u5e03\u5c40\uff1b\u672a\u53d1\u73b0\u6b8b\u7559\u82f1\u6587\u754c\u9762\u4e2d\u6587\u3001\u6a2a\u5411\u6ea2\u51fa\u6216\u63a7\u5236\u53f0\u9519\u8bef\u3002\u4e24\u4efd PDF \u5747\u901a\u8fc7 A4\u3001\u5b57\u4f53\u3001\u56fe\u7247\u3001\u5173\u952e\u6587\u5b57\u3001\u7a00\u758f\u9875\u3001\u5f15\u7528\u548c Overfull \u68c0\u67e5\u3002\u672c\u91cc\u7a0b\u7891\u672a\u8fd0\u884c\u65b0\u7684\u8bb8\u53ef OpticStudio \u4efb\u52a1\uff0c\u4e5f\u672a\u6539\u53d8\u5149\u5b66\u7ed3\u8bba\u3002",
+  "payload_sha256": "c72c7076319f08e5c4eeecfe3d2fbe6c4af312adf8f11d91ac380187f80945a1",
+  "recorded_at_utc": "2026-08-19T02:02:29.450211+00:00",
+  "results": {
+    "app_js_sha256": "c22525c8b37e6da8ff709daafef48d1fb928ed23b61964648694425cb5818c17",
+    "automated_tests_passed": 45,
+    "automated_tests_total": 45,
+    "browser_console_errors": 0,
+    "chinese_pdf_pages": 25,
+    "chinese_pdf_sha256": "a153911cda3056f12c1b0a283df70f34a46501cfb8d5e84345d6366391fd4498",
+    "english_pdf_pages": 22,
+    "english_pdf_sha256": "8f5ad146b49426682cedae66c55f841a18731cdbc2d1f31c9ba25f27065da436",
+    "horizontal_overflow_detected": false,
+    "i18n_js_sha256": "fb37644711debd5a1f77fb1a8a0eb3f2246018ab1c0d824497dd40d3a3eb8b37",
+    "legacy_headline_present": false,
+    "numerical_results_changed": false,
+    "pdf_validation_status": "PASS",
+    "real_experiment_readiness_status": "NOT_READY"
+  },
+  "schema_version": 1
+}

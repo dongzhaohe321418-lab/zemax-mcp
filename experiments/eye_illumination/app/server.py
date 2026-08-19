@@ -30,6 +30,7 @@ EXPERIMENT_DIR = APP_DIR.parent
 ARTIFACTS = {
     "/report.html": EXPERIMENT_DIR / "report" / "eye_illumination_report.html",
     "/report.pdf": EXPERIMENT_DIR / "report" / "latex" / "eye_illumination_experiment_report.pdf",
+    "/report-en.pdf": EXPERIMENT_DIR / "report" / "latex" / "eye_illumination_experiment_report_en.pdf",
     "/results.csv": EXPERIMENT_DIR / "results" / "fixed_focal_source_sweep.csv",
     "/validation.json": EXPERIMENT_DIR / "results" / "validation_report.json",
     "/readiness.json": EXPERIMENT_DIR / "results" / "real_experiment_readiness.json",
@@ -40,6 +41,7 @@ STATIC_FILES = {
     "/": STATIC_DIR / "index.html",
     "/index.html": STATIC_DIR / "index.html",
     "/styles.css": STATIC_DIR / "styles.css",
+    "/i18n.js": STATIC_DIR / "i18n.js",
     "/app.js": STATIC_DIR / "app.js",
     "/favicon.svg": STATIC_DIR / "favicon.svg",
 }

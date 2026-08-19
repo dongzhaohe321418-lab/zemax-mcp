@@ -6,7 +6,7 @@
 
 ## 专用实验程序
 
-`app/` 是为本实验制作的本地交互程序。它不是静态报告：界面直接调用版本化的 `eye_model.py`。固定基准模式严格复现三个焦距和 252 工况；独立的 PPT 范围探索模式允许手动改变有效焦距、眼轴、瞳孔、60–120 D 物方需求及外置凹透镜，并生成三水平灵敏度曲线和范围网格。程序不会为了满足物距而自动改变焦距。
+`app/` 是为本实验制作的本地交互程序。它不是静态报告：界面直接调用版本化的 `eye_model.py`。紧凑型 Web GUI 可在中文与 English 之间即时切换，固定基准模式严格复现三个焦距和 252 工况；独立的 PPT 范围探索模式允许手动改变有效焦距、眼轴、瞳孔、60–120 D 物方需求及外置凹透镜，并生成三水平灵敏度曲线和范围网格。程序不会为了满足物距而自动改变焦距。
 
 范围文件 `app/range_parameters.json` 同时记录数值来源。小鸡眼轴 10.5–12.5 mm 来自 PPT；儿童与成人眼轴的 ±0.5 mm 是既有灵敏度假设，因为 PPT 只给出约 23.0 mm 和 23.6 mm。角膜和晶状体部件参数仅作为来源参考显示；缺少面间距和折射率时不将其伪装成可独立追迹变量。
 
@@ -60,14 +60,14 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\run_all.ps
 
 该流程重新生成 252 行主扫描、600,000 光线蒙特卡洛案例、6 个固定焦距 `.zos` 系统、数值验证、已执行 Notebook 和自包含 HTML 报告。
 
-中文宋体 LaTeX/PDF 报告单独构建：
+中英文 LaTeX/PDF 报告一次构建：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\latex\build_report.ps1 `
   -PythonPath "C:\path\to\python.exe"
 ```
 
-构建脚本连续编译三次，并检查 A4 页面、SimSun/宋体嵌入、关键文本、图片数量、引用和版面越界。
+构建脚本分别连续编译三次，并检查两份报告的 A4 页面、对应字体嵌入、关键文本、图片数量、引用和版面越界。
 
 ## 当前关键结果
 
@@ -76,7 +76,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 - 小鸡眼 `f=8.5 mm`、3.5 mm 瞳孔时，60 D 与 120 D 的保守光源直径分别为 9.008 mm 和 6.254 mm。
 - 六个 OpticStudio 系统与解析 footprint 的最大边界误差为 `2.58e-11 µm`。
 - 通用审计执行器已在 OpticStudio 24.1 对完整 252 工况全部验证通过，0 个失败，最大边界误差为 `3.02e-11 µm`；另含外置负镜的跨眼模型冒烟批次也通过。
-- PDF 为 25 页，包含模型示意图、工作流、六张数据图、精确表格、验证、真实实验适用性审计和复现说明。
+- 中文 PDF 为 25 页，英文 PDF 为 22 页；两者均包含模型示意图、工作流、六张数据图、精确表格、验证、真实实验适用性审计和复现说明。
 
 ## 主要文件
 
@@ -96,6 +96,7 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\lat
 - `notebooks/eye_illumination_analysis.ipynb`：已执行的可复现 Notebook。
 - `report/eye_illumination_report.html`：自包含技术报告。
 - `report/latex/eye_illumination_experiment_report.pdf`：25 页中文宋体综合报告。
+- `report/latex/eye_illumination_experiment_report_en.pdf`：22 页英文综合报告。
 
 ## 限制
 

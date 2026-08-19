@@ -53,7 +53,7 @@ experiments\eye_illumination\launch_web_gui.cmd
 .\experiments\eye_illumination\launch_web_gui.cmd
 ```
 
-程序地址是 [http://127.0.0.1:8765/](http://127.0.0.1:8765/)。服务器只监听本机回环地址，不把实验参数发送到云端。关闭启动窗口或按 `Ctrl+C` 即可停止。
+程序地址是 [http://127.0.0.1:8765/](http://127.0.0.1:8765/)。右上角可在中文与 English 之间即时切换，动态计算、图表、Zemax 向导和 PDF 报告链接会同步切换。服务器只监听本机回环地址，不把实验参数发送到云端。关闭启动窗口或按 `Ctrl+C` 即可停止。
 
 ## 2. 最简单的使用流程
 
@@ -98,6 +98,7 @@ experiments\eye_illumination\launch_web_gui.cmd
 | 完整可审计基准批次 | 252 / 252 PASS |
 | 自动化测试 | 45 / 45 PASS |
 | 中文 PDF | 25 页，A4，SimSun/宋体已嵌入 |
+| English PDF | 22 页，A4，Times New Roman 已嵌入 |
 | 真实实验状态 | `NOT_READY` |
 
 模型适用性审计发现：252 个工况的最大源边缘—瞳孔边缘角均为 15.02°–37.59°，全部触发项目设置的 10° 真实光线复核线；140 个工况的工作 F 数低于 4。因此，当前结果适合用于候选机械空间、参数筛选和下一阶段真实模型设计，不能直接作为活体曝光设置。
@@ -112,6 +113,7 @@ experiments\eye_illumination\launch_web_gui.cmd
 | 真实实验适用性审计 | [real_experiment_readiness.md](experiments/eye_illumination/results/real_experiment_readiness.md) |
 | 综合 HTML 报告 | [eye_illumination_report.html](experiments/eye_illumination/report/eye_illumination_report.html) |
 | 25 页中文 PDF | [eye_illumination_experiment_report.pdf](experiments/eye_illumination/report/latex/eye_illumination_experiment_report.pdf) |
+| 22-page English PDF | [eye_illumination_experiment_report_en.pdf](experiments/eye_illumination/report/latex/eye_illumination_experiment_report_en.pdf) |
 | 252 工况 CSV | [fixed_focal_source_sweep.csv](experiments/eye_illumination/results/fixed_focal_source_sweep.csv) |
 | 已执行 Notebook | [eye_illumination_analysis.ipynb](experiments/eye_illumination/notebooks/eye_illumination_analysis.ipynb) |
 | 不可变实验记录 | [experiments/runs/](experiments/runs/) |
@@ -155,11 +157,13 @@ powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\run_all.ps
   -OpticStudioDir "C:\path\to\installed\OpticStudio"
 ```
 
-中文 LaTeX/PDF 单独构建：
+中英文 LaTeX/PDF 一次构建：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\report\latex\build_report.ps1
 ```
+
+脚本会生成并自检两份报告：25 页中文宋体版和 22 页英文版，同时检查 A4 页面、字体嵌入、关键文字、图片数量、引用和版面越界。
 
 完整工作流会启动许可版 OpticStudio；运行前请保存其他 OpticStudio 工作并确认许可证可用。
 

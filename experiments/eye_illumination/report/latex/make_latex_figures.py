@@ -1,4 +1,4 @@
-"""Create Chinese fixed-focal figures for the LaTeX report."""
+"""Create Chinese and English fixed-focal figures for the LaTeX reports."""
 
 from __future__ import annotations
 
@@ -25,12 +25,50 @@ from eye_model import detector_metrics, fixed_focal_source_solution, general_map
 
 BLUE, ORANGE, PINK, GOLD, INK = "#2457A6", "#D9782D", "#B44D73", "#B28A20", "#252A34"
 
+EN = {
+    "30–45日龄小鸡": "30–45-day-old chick",
+    "6岁儿童": "6-year-old child",
+    "18岁成人": "18-year-old adult",
+    "物方需求（D）": "Object-side demand (D)",
+    "保守光源直径（mm）": "Conservative source diameter (mm)",
+    "三个固定焦距下的保守光源直径（各模型最大瞳孔）": "Conservative source diameter for three fixed focal lengths (maximum pupil)",
+    "成人眼，{demand} D": "Adult eye, {demand} D",
+    "瞳孔直径（mm）": "Pupil diameter (mm)",
+    "固定焦距与瞳孔共同决定光源尺寸": "Source size depends jointly on fixed focal length and pupil",
+    "等效离焦（D）": "Equivalent defocus (D)",
+    "模糊斑直径（mm）": "Blur-footprint diameter (mm)",
+    "瞳孔直径控制固定像面上的离焦 footprint": "Pupil diameter controls the defocus footprint at the fixed image plane",
+    "几何最小尺寸": "Geometric minimum",
+    "保守全重叠尺寸": "Conservative full overlap",
+    "视网膜 x（mm）": "Retinal x (mm)",
+    "视网膜 y（mm）": "Retinal y (mm)",
+    "相对光线计数": "Relative ray count",
+    "解析上界": "Analytical bound",
+    "OpticStudio 上界": "OpticStudio bound",
+    "视网膜光线高度上界（mm）": "Retinal ray-height bound (mm)",
+    "固定焦距解析 footprint 与 OpticStudio 一致": "Fixed-focal analytical footprint agrees with OpticStudio",
+    "最小—中位—最大": "Minimum–median–maximum",
+    "项目筛查线 10°": "Project screening line: 10°",
+    "保守源边缘—瞳孔边缘最大角（°）": "Maximum conservative source-edge–pupil-edge angle (°)",
+    "全部 252 工况超过 10°": "All 252 cases exceed 10°",
+    "工况数（每个模型 84）": "Case count (84 per model)",
+    "工作 F 数筛查": "Working F-number screen",
+    "近轴模型适用性诊断（筛查不等于实验放行）": "Paraxial-model applicability diagnostics (screening is not release)",
+}
 
-def setup() -> None:
+
+def tr(value: str, language: str, **values: object) -> str:
+    translated = EN.get(value, value) if language == "en" else value
+    return translated.format(**values)
+
+
+def setup(language: str) -> None:
     font_path = Path("C:/Windows/Fonts/simsun.ttc")
-    if font_path.exists():
+    if language == "cn" and font_path.exists():
         font_manager.fontManager.addfont(font_path)
         plt.rcParams["font.family"] = font_manager.FontProperties(fname=font_path).get_name()
+    else:
+        plt.rcParams["font.family"] = "DejaVu Sans"
     plt.rcParams["axes.unicode_minus"] = False
 
 
@@ -39,8 +77,8 @@ def style(ax: plt.Axes) -> None:
     ax.grid(True, color="#E5E7EB", linewidth=0.7)
 
 
-def main() -> None:
-    setup()
+def main(language: str) -> None:
+    setup(language)
     FIGURES.mkdir(parents=True, exist_ok=True)
     fixed = pd.read_csv(RESULTS / "fixed_focal_source_sweep.csv")
     headline = pd.read_csv(RESULTS / "headline_results.csv")
@@ -48,7 +86,12 @@ def main() -> None:
     defocus = pd.read_csv(RESULTS / "defocus_pupil_sweep.csv")
     config = json.loads((EXPERIMENT / "config" / "experiment.json").read_text(encoding="utf-8"))
     eyes = load_eyes(config)
-    labels = {"chick_30_45d": "30–45日龄小鸡", "child_6y": "6岁儿童", "adult_18y": "18岁成人"}
+    labels = {
+        "chick_30_45d": tr("30–45日龄小鸡", language),
+        "child_6y": tr("6岁儿童", language),
+        "adult_18y": tr("18岁成人", language),
+    }
+    suffix = "en" if language == "en" else "cn"
     colors = [BLUE, ORANGE, PINK]
 
     fig, axes = plt.subplots(1, 3, figsize=(13.8, 4.5))
@@ -58,13 +101,13 @@ def main() -> None:
             subset = subset_eye[np.isclose(subset_eye.fixed_focal_length_mm, focal)]
             ax.plot(subset.source_demand_D, subset.conservative_source_diameter_mm, marker="o", linewidth=2, color=color, label=f"f={focal:g} mm")
         ax.set_title(labels[eye.eye_id])
-        ax.set_xlabel("物方需求（D）")
-        ax.set_ylabel("保守光源直径（mm）")
+        ax.set_xlabel(tr("物方需求（D）", language))
+        ax.set_ylabel(tr("保守光源直径（mm）", language))
         ax.legend(frameon=False, fontsize=8)
         style(ax)
-    fig.suptitle("三个固定焦距下的保守光源直径（各模型最大瞳孔）")
+    fig.suptitle(tr("三个固定焦距下的保守光源直径（各模型最大瞳孔）", language))
     fig.tight_layout()
-    fig.savefig(FIGURES / "source_diameter_cn.png", dpi=220)
+    fig.savefig(FIGURES / f"source_diameter_{suffix}.png", dpi=220)
     plt.close(fig)
 
     adult = next(eye for eye in eyes if eye.eye_id == "adult_18y")
@@ -74,14 +117,14 @@ def main() -> None:
         for focal, color in zip(adult.fixed_effective_focal_lengths_mm, colors):
             subset = adult_fixed[(adult_fixed.source_demand_D == demand) & np.isclose(adult_fixed.fixed_focal_length_mm, focal)]
             ax.plot(subset.pupil_diameter_mm, subset.conservative_source_diameter_mm, marker="o", linewidth=2, color=color, label=f"f={focal:g} mm")
-        ax.set_title(f"成人眼，{demand} D")
-        ax.set_xlabel("瞳孔直径（mm）")
-        ax.set_ylabel("保守光源直径（mm）")
+        ax.set_title(tr("成人眼，{demand} D", language, demand=demand))
+        ax.set_xlabel(tr("瞳孔直径（mm）", language))
+        ax.set_ylabel(tr("保守光源直径（mm）", language))
         style(ax)
     axes[0].legend(frameon=False, fontsize=8)
-    fig.suptitle("固定焦距与瞳孔共同决定光源尺寸")
+    fig.suptitle(tr("固定焦距与瞳孔共同决定光源尺寸", language))
     fig.tight_layout()
-    fig.savefig(FIGURES / "fixed_focal_pupil_cn.png", dpi=220)
+    fig.savefig(FIGURES / f"fixed_focal_pupil_{suffix}.png", dpi=220)
     plt.close(fig)
 
     fig, axes = plt.subplots(1, 3, figsize=(13.3, 4.2))
@@ -91,13 +134,13 @@ def main() -> None:
             ax.plot(subset.defocus_D, subset.blur_diameter_mm, marker="o", color=color, label=f"{pupil:g} mm")
         ax.axhline(eye.posterior_pole_diameter_mm, color=INK, linestyle="--", linewidth=1.2)
         ax.set_title(labels[eye.eye_id])
-        ax.set_xlabel("等效离焦（D）")
-        ax.set_ylabel("模糊斑直径（mm）")
+        ax.set_xlabel(tr("等效离焦（D）", language))
+        ax.set_ylabel(tr("模糊斑直径（mm）", language))
         style(ax)
     axes[0].legend(frameon=False, fontsize=8)
-    fig.suptitle("瞳孔直径控制固定像面上的离焦 footprint")
+    fig.suptitle(tr("瞳孔直径控制固定像面上的离焦 footprint", language))
     fig.tight_layout()
-    fig.savefig(FIGURES / "defocus_blur_cn.png", dpi=220)
+    fig.savefig(FIGURES / f"defocus_blur_{suffix}.png", dpi=220)
     plt.close(fig)
 
     solution = fixed_focal_source_solution(adult, 1.0 / 60.0, 16.7, 5.0)
@@ -107,31 +150,35 @@ def main() -> None:
         x, y = sample_retina(solution[key] / 2000.0, 5.0 / 2000.0, ms, mp, 600_000, config["random_seed"] + index)
         maps.append(detector_metrics(x, y, adult.target_radius_m))
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.7))
-    for ax, metrics, title in zip(axes, maps, ["几何最小尺寸", "保守全重叠尺寸"]):
+    for ax, metrics, title in zip(
+        axes,
+        maps,
+        [tr("几何最小尺寸", language), tr("保守全重叠尺寸", language)],
+    ):
         hist = metrics["histogram"].T
         vmax = np.percentile(hist[hist > 0], 99) if np.any(hist > 0) else 1
         im = ax.imshow(hist, origin="lower", extent=[-3, 3, -3, 3], cmap="magma", vmin=0, vmax=vmax)
         ax.add_patch(plt.Circle((0, 0), 3, fill=False, color="white", linewidth=1.0))
         ax.set_title(title)
-        ax.set_xlabel("视网膜 x（mm）")
-        ax.set_ylabel("视网膜 y（mm）")
+        ax.set_xlabel(tr("视网膜 x（mm）", language))
+        ax.set_ylabel(tr("视网膜 y（mm）", language))
         ax.set_aspect("equal")
-        fig.colorbar(im, ax=ax, fraction=0.046, label="相对光线计数")
+        fig.colorbar(im, ax=ax, fraction=0.046, label=tr("相对光线计数", language))
     fig.tight_layout()
-    fig.savefig(FIGURES / "monte_carlo_cn.png", dpi=220)
+    fig.savefig(FIGURES / f"monte_carlo_{suffix}.png", dpi=220)
     plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8.3, 4.8))
     x = np.arange(len(zos))
-    ax.scatter(x - 0.08, zos.expected_max_y_mm, s=65, color=BLUE, label="解析上界")
-    ax.scatter(x + 0.08, zos.observed_max_y_mm, s=50, marker="x", color=ORANGE, label="OpticStudio 上界")
+    ax.scatter(x - 0.08, zos.expected_max_y_mm, s=65, color=BLUE, label=tr("解析上界", language))
+    ax.scatter(x + 0.08, zos.observed_max_y_mm, s=50, marker="x", color=ORANGE, label=tr("OpticStudio 上界", language))
     ax.set_xticks(x, zos.case_id, rotation=28, ha="right")
-    ax.set_ylabel("视网膜光线高度上界（mm）")
-    ax.set_title("固定焦距解析 footprint 与 OpticStudio 一致")
+    ax.set_ylabel(tr("视网膜光线高度上界（mm）", language))
+    ax.set_title(tr("固定焦距解析 footprint 与 OpticStudio 一致", language))
     ax.legend(frameon=False)
     style(ax)
     fig.tight_layout()
-    fig.savefig(FIGURES / "zos_validation_cn.png", dpi=220)
+    fig.savefig(FIGURES / f"zos_validation_{suffix}.png", dpi=220)
     plt.close(fig)
 
     # Model-domain diagnostic: this is intentionally a screening figure, not a
@@ -165,12 +212,12 @@ def main() -> None:
         ecolor=BLUE,
         capsize=5,
         linewidth=2,
-        label="最小—中位—最大",
+        label=tr("最小—中位—最大", language),
     )
-    axes[0].axvline(10.0, color=ORANGE, linestyle="--", linewidth=1.6, label="项目筛查线 10°")
+    axes[0].axvline(10.0, color=ORANGE, linestyle="--", linewidth=1.6, label=tr("项目筛查线 10°", language))
     axes[0].set_yticks(y, [labels[item] for item in order])
-    axes[0].set_xlabel("保守源边缘—瞳孔边缘最大角（°）")
-    axes[0].set_title("全部 252 工况超过 10°")
+    axes[0].set_xlabel(tr("保守源边缘—瞳孔边缘最大角（°）", language))
+    axes[0].set_title(tr("全部 252 工况超过 10°", language))
     axes[0].legend(frameon=False, fontsize=8)
     style(axes[0])
 
@@ -184,15 +231,16 @@ def main() -> None:
         label="F/# ≥ 4",
     )
     axes[1].set_yticks(y, [labels[item] for item in order])
-    axes[1].set_xlabel("工况数（每个模型 84）")
-    axes[1].set_title("工作 F 数筛查")
+    axes[1].set_xlabel(tr("工况数（每个模型 84）", language))
+    axes[1].set_title(tr("工作 F 数筛查", language))
     axes[1].legend(frameon=False, fontsize=8)
     style(axes[1])
-    fig.suptitle("近轴模型适用性诊断（筛查不等于实验放行）")
+    fig.suptitle(tr("近轴模型适用性诊断（筛查不等于实验放行）", language))
     fig.tight_layout()
-    fig.savefig(FIGURES / "model_applicability_cn.png", dpi=220)
+    fig.savefig(FIGURES / f"model_applicability_{suffix}.png", dpi=220)
     plt.close(fig)
 
 
 if __name__ == "__main__":
-    main()
+    for report_language in ("cn", "en"):
+        main(report_language)
