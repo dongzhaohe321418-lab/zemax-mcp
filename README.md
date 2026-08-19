@@ -14,7 +14,7 @@
 - Windows 10 或 11（64 位）
 - Python 3.11 或更高版本（64 位）
 - Git 和 [Git LFS](https://git-lfs.com/)
-- 有权访问本私有 GitHub 仓库
+- 可访问 GitHub 的网络连接（仓库为公开仓库，克隆无需登录）
 
 交互计算不需要 OpticStudio。只有执行 Zemax 验证时才需要已安装并授权的 OpticStudio。
 
@@ -37,7 +37,7 @@ git lfs pull
 3. 检查 Python 与 NumPy；
 4. 启动本地服务器并打开浏览器。
 
-如果私有仓库克隆失败，请先执行 `gh auth login`，或在 Windows Git Credential Manager 中登录有权限的 GitHub 账号。
+本仓库为公开仓库，克隆和 `git lfs pull` 无需 GitHub 登录。如果克隆失败，请先检查能否访问 `https://github.com`，并确认 Git LFS 已正确安装。
 
 ### 以后启动
 
@@ -130,7 +130,7 @@ experiments\eye_illumination\launch_web_gui.cmd
 
 | 现象 | 处理方法 |
 |---|---|
-| 私有仓库无法克隆 | 运行 `gh auth login`，确认账号有仓库访问权限，再重新克隆。 |
+| 公开仓库无法克隆 | 检查 GitHub 网络连接，运行 `git lfs install`，再重新克隆；只读使用无需 `gh auth login`。 |
 | 提示找不到 Python | 安装 64 位 Python 3.11+，或在仓库根目录执行 `powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\setup_local.ps1 -PythonPath "C:\path\to\python.exe"`。 |
 | 浏览器没有自动打开 | 保持启动窗口开启，手动访问 `http://127.0.0.1:8765/`。 |
 | 8765 端口已占用 | 在仓库根目录执行 `powershell -ExecutionPolicy Bypass -File experiments\eye_illumination\app\launch_app.ps1 -Port 8766`，然后访问对应端口。 |
