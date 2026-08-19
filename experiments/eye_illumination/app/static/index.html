@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="小鸡与人眼固定焦距后极照明仿真实验程序">
+  <meta id="meta-description" name="description" content="小鸡与人眼固定焦距后极照明仿真实验程序">
   <title>后极照明参数实验台</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
@@ -14,19 +14,24 @@
       <span class="brand-mark" aria-hidden="true"><span></span></span>
       <span><strong>OpticBench</strong><small>眼部后极照明参数实验台</small></span>
     </a>
-    <div class="server-state"><span class="pulse"></span><span id="server-label">模型连接中</span></div>
+    <div class="topbar-actions">
+      <div class="language-switch" role="group" aria-label="界面语言">
+        <button id="lang-zh" type="button" data-language="zh-CN" aria-pressed="true">中文</button>
+        <button id="lang-en" type="button" data-language="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="server-state"><span class="pulse"></span><span id="server-label">模型连接中</span></div>
+    </div>
   </header>
 
   <main>
     <section class="hero">
       <div>
         <p class="eyebrow">650 nm · FIXED-FOCAL POSTERIOR-POLE LAB</p>
-        <h1>让物距改变光源，<br><em>不让眼球连续调焦。</em></h1>
         <p class="hero-copy">这是为本实验独立制作的本地程序。固定基准模式复现三个离散焦距；PPT 范围模式允许手动独立改变焦距、眼轴、瞳孔与物方需求，但绝不为了强制调焦而自动改变焦距。</p>
       </div>
       <div class="hero-actions">
         <a class="button primary" href="#zemax-console">打开 Zemax 验证向导</a>
-        <a class="button secondary" href="/report.pdf" target="_blank">打开完整 PDF 报告</a>
+        <a id="report-pdf-link" class="button secondary" href="/report.pdf" target="_blank">打开完整 PDF 报告</a>
         <a class="text-link" href="/report.html" target="_blank">真实实验适用性报告 <span>↗</span></a>
         <a class="text-link" href="/zemax-guide.md" target="_blank">Zemax 接入与审计指南 <span>↗</span></a>
         <a class="text-link" href="/validation.json" target="_blank">查看验证记录 <span>↗</span></a>
@@ -314,6 +319,7 @@
 
   <footer><span>OpticBench · Independent-parameter experiment application</span><span>无需云服务 · 数据不离开本机</span></footer>
   <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+  <script src="/i18n.js" defer></script>
   <script src="/app.js" defer></script>
 </body>
 </html>

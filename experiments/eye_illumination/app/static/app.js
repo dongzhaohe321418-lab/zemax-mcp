@@ -1,6 +1,12 @@
 "use strict";
 
+const i18n = window.OpticBenchI18n;
+const savedLanguage = (() => {
+  try { return window.localStorage.getItem("opticbench-language"); } catch (_) { return null; }
+})();
+
 const state = {
+  language: savedLanguage === "en" ? "en" : "zh-CN",
   config: null,
   current: null,
   rows: [],
@@ -12,9 +18,75 @@ const state = {
   zemaxConnectionPassed: false,
   zemaxRunning: false,
   zemaxJobId: null,
+  zemaxPreflight: null,
+  zemaxJob: null,
+  matrixSummary: null,
+  batchStatus: null,
+  serverStatus: "connecting",
 };
 const palette = ["#0f6d70", "#e56b3f", "#d7a22a"];
 const $ = (id) => document.getElementById(id);
+const staticTextNodes = [];
+const staticAttributes = [];
+
+function msg(key, values = {}) {
+  return i18n.message(state.language, key, values);
+}
+
+function localizedEyeLabel(eye) {
+  return i18n.eyeLabel(state.language, eye);
+}
+
+function localizedBackendMessage(value) {
+  return i18n.backendMessage(state.language, value);
+}
+
+function captureStaticTranslations() {
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    const trimmed = node.nodeValue.trim();
+    if (trimmed && i18n.staticEnglish[trimmed]) staticTextNodes.push({ node, original: node.nodeValue, trimmed });
+    node = walker.nextNode();
+  }
+  document.querySelectorAll("[aria-label], [placeholder]").forEach((element) => {
+    ["aria-label", "placeholder"].forEach((name) => {
+      const value = element.getAttribute(name);
+      if (value && i18n.staticEnglish[value]) staticAttributes.push({ element, name, value });
+    });
+  });
+}
+
+function applyStaticTranslations() {
+  const english = state.language === "en";
+  staticTextNodes.forEach(({ node, original, trimmed }) => {
+    if (!english) {
+      node.nodeValue = original;
+      return;
+    }
+    const leading = original.match(/^\s*/)[0];
+    const trailing = original.match(/\s*$/)[0];
+    node.nodeValue = `${leading}${i18n.staticEnglish[trimmed]}${trailing}`;
+  });
+  staticAttributes.forEach(({ element, name, value }) => {
+    element.setAttribute(name, english ? i18n.staticEnglish[value] : value);
+  });
+  document.documentElement.lang = english ? "en" : "zh-CN";
+  document.title = english ? "Posterior-Pole Illumination Parameter Lab" : "后极照明参数实验台";
+  $("meta-description").content = english
+    ? "Fixed-focal posterior-pole illumination simulation for chick and human eyes"
+    : "小鸡与人眼固定焦距后极照明仿真实验程序";
+  $("report-pdf-link").href = english ? "/report-en.pdf" : "/report.pdf";
+  $("lang-zh").setAttribute("aria-pressed", String(!english));
+  $("lang-en").setAttribute("aria-pressed", String(english));
+}
+
+function renderServerStatus() {
+  const label = state.serverStatus === "connected" ? msg("serverConnected")
+    : state.serverStatus === "failed" ? msg("serverFailed")
+      : (state.language === "en" ? "Connecting to local model" : "模型连接中");
+  $("server-label").textContent = label;
+}
 
 async function api(path, options = {}) {
   const response = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
@@ -62,7 +134,7 @@ function setRangeControl(id, specification, unit) {
   input.step = specification.step;
   input.value = specification.default;
   $(`range-${id}-value`).textContent = `${fixed(specification.default, id === "demand" ? 0 : 2)} ${unit}`;
-  $(`range-${id}-limits`).textContent = `${specification.minimum}–${specification.maximum} ${unit} · ${specification.provenance}`;
+  $(`range-${id}-limits`).textContent = `${specification.minimum}–${specification.maximum} ${unit} · ${localizedBackendMessage(specification.provenance)}`;
 }
 
 function updateRangeOutput(id, unit, digits = 2) {
@@ -71,7 +143,14 @@ function updateRangeOutput(id, unit, digits = 2) {
 }
 
 function componentLabel(parameter) {
-  const labels = {
+  const labels = state.language === "en" ? {
+    corneal_curvature_radius_mm: "Corneal curvature radius",
+    corneal_equivalent_power_D: "Corneal equivalent power",
+    crystalline_lens_thickness_mm: "Crystalline-lens thickness",
+    crystalline_lens_equivalent_power_D: "Crystalline-lens equivalent power",
+    corneal_equivalent_focal_length_mm: "Corneal equivalent focal length",
+    crystalline_lens_equivalent_focal_length_mm: "Crystalline-lens equivalent focal length",
+  } : {
     corneal_curvature_radius_mm: "角膜曲率半径",
     corneal_equivalent_power_D: "角膜等效屈光力",
     crystalline_lens_thickness_mm: "晶状体厚度",
@@ -81,7 +160,7 @@ function componentLabel(parameter) {
   };
   const value = parameter.value !== undefined ? parameter.value : `${parameter.minimum}–${parameter.maximum}`;
   const unit = parameter.name.endsWith("_D") ? "D" : "mm";
-  return `${labels[parameter.name] || parameter.name}: ${value} ${unit}（参考，不独立追迹）`;
+  return `${labels[parameter.name] || parameter.name}: ${value} ${unit} (${msg("referenceOnly")})`;
 }
 
 function renderRangeProvenance(eye) {
@@ -90,7 +169,7 @@ function renderRangeProvenance(eye) {
     parameters.effective_focal_length_mm.provenance,
     parameters.axial_length_mm.provenance,
     parameters.pupil_diameter_mm.provenance,
-  ].join("；");
+  ].map(localizedBackendMessage).join(state.language === "en" ? "; " : "；");
   const list = $("component-reference-list");
   list.replaceChildren(...parameters.reference_component_parameters.map((parameter) => {
     const item = document.createElement("li");
@@ -106,7 +185,7 @@ function configureRangeControls(eye) {
   setRangeControl("pupil", ranges.pupil_diameter_mm, "mm");
   setRangeControl("demand", state.config.range_explorer.source_demand_D, "D");
   const lensValues = state.config.range_explorer.external_lens_powers_D.values;
-  fillSelect($("external-lens-select"), lensValues, (value) => value === 0 ? "0（无外镜）" : `${value}`);
+  fillSelect($("external-lens-select"), lensValues, (value) => value === 0 ? msg("noExternalLens") : `${value}`);
   renderRangeProvenance(eye);
 }
 
@@ -129,17 +208,17 @@ function updateModeCopy() {
   $("range-provenance").hidden = !rangeMode;
   $("sensitivity-select").hidden = !rangeMode;
   $("sensitivity-label").hidden = !rangeMode;
-  $("analysis-title").textContent = rangeMode ? "参数范围灵敏度" : "固定焦距对比";
+  $("analysis-title").textContent = rangeMode ? msg("sensitivityTitle") : msg("baselineTitle");
   $("parameter-summary-title").innerHTML = rangeMode
-    ? '<span aria-hidden="true">◆</span> 当前后极参数 · 眼轴可调'
-    : '<span aria-hidden="true">◆</span> 已知后极参数 · 只读';
+    ? `<span aria-hidden="true">◆</span> ${msg("currentPosteriorAdjustable")}`
+    : `<span aria-hidden="true">◆</span> ${msg("knownPosteriorReadOnly")}`;
   $("method-focal").textContent = rangeMode
-    ? "焦距由用户在 PPT 区间内手动选择，不由物距反求或自动拟合。"
-    : "焦距只能取配置中的三个离散固定值。";
+    ? msg("rangeFocalMethod")
+    : msg("baselineFocalMethod");
   $("method-axial").textContent = rangeMode
-    ? "眼轴可在声明区间内独立变化；后极约化距离随之更新。"
-    : "后极平面由报告眼轴和像方折射率固定。";
-  $("full-sweep").textContent = rangeMode ? "生成三水平范围网格" : "生成全部 252 工况";
+    ? msg("rangeAxialMethod")
+    : msg("baselineAxialMethod");
+  $("full-sweep").textContent = rangeMode ? msg("rangeGridButton") : msg("fullSweepButton");
   state.fullMatrix = false;
   if (!rangeMode) $("axial-value").textContent = `${selectedEye().reported_axial_length_mm.toFixed(2)} mm`;
 }
@@ -173,22 +252,22 @@ function renderResult(result) {
   $("blur-value").textContent = fixed(result.pupil_blur_diameter_mm);
   $("edge-angle-value").textContent = `${fixed(result.maximum_source_pupil_ray_angle_deg, 1)}°`;
   $("f-number-value").textContent = `F/${fixed(result.working_f_number, 2)}`;
-  $("readiness-value").textContent = "未就绪 · 需标定";
+  $("readiness-value").textContent = msg("readiness");
   $("diagram-demand").textContent = `${fixed(result.source_demand_D, result.mode === "range" ? 1 : 0)} D`;
   $("source-label").textContent = `${fixed(result.conservative_source_diameter_mm)} mm`;
   $("lens-label").textContent = result.external_lens_power_D
-    ? `${fixed(result.effective_focal_length_mm, 2)} mm · 外镜 ${result.external_lens_power_D} D`
+    ? `${fixed(result.effective_focal_length_mm, 2)} mm · ${msg("externalLens", { power: result.external_lens_power_D })}`
     : `${fixed(result.effective_focal_length_mm, 2)} mm`;
   $("target-label").textContent = `${fixed(result.posterior_pole_diameter_mm, 2)} mm`;
   $("axial-value").textContent = `${fixed(result.axial_length_mm, 2)} mm`;
-  const modeText = result.mode === "range" ? "范围探索值" : "固定网格值";
+  const modeText = result.mode === "range" ? msg("rangeValue") : msg("baselineValue");
   const interpretation = result.pupil_blur_alone_covers_target
-    ? "瞳孔离焦 footprint 已覆盖目标边缘，因此几何最小值为 0。"
-    : `${fixed(result.conservative_source_diameter_mm)} mm 可使目标在近轴模型中位于全重叠平台内。`;
+    ? msg("blurCovers")
+    : msg("fullOverlap", { diameter: fixed(result.conservative_source_diameter_mm) });
   const scopeWarning = result.paraxial_screening_pass
-    ? "该值仍需真实曲面、辐射度和安全标定后才能进入活体实验。"
-    : `最大边缘角 ${fixed(result.maximum_source_pupil_ray_angle_deg, 1)}° 或工作 F 数未通过项目近轴筛查；不得直接作为活体实验设置。`;
-  $("interpretation").querySelector("p").textContent = `${modeText}：${interpretation} ${scopeWarning}`;
+    ? msg("scopePass")
+    : msg("scopeFail", { angle: fixed(result.maximum_source_pupil_ray_angle_deg, 1) });
+  $("interpretation").querySelector("p").textContent = `${modeText}${state.language === "en" ? ": " : "："}${interpretation} ${scopeWarning}`;
   $("download-json").disabled = false;
   renderDiagram(result);
 }
@@ -219,8 +298,8 @@ async function calculateCurrent(event) {
     renderResult(result);
     await loadChartRows();
   } catch (error) {
-    $("interpretation").querySelector("p").textContent = `当前组合不可计算：${error.message}`;
-    showToast(`计算失败：${error.message}`, true);
+    $("interpretation").querySelector("p").textContent = msg("calculationImpossible", { error: localizedBackendMessage(error.message) });
+    showToast(msg("calculationFailed", { error: localizedBackendMessage(error.message) }), true);
   }
 }
 
@@ -233,7 +312,7 @@ async function loadChartRows() {
     state.chartSeriesKey = "series_value";
     state.chartSeriesParameter = payload.vary_by;
     state.fullMatrix = false;
-    $("matrix-description").textContent = `当前参数的三水平灵敏度扫描：${payload.row_count} 个有效工况，跳过 ${payload.skipped_count} 个机械顺序无效工况。`;
+    state.matrixSummary = { type: "rangeSensitivity", rows: payload.row_count, skipped: payload.skipped_count };
   } else {
     const request = { eye_id: $("eye-select").value, pupil_diameter_mm: Number($("pupil-select").value) };
     const payload = await api("/api/sweep", { method: "POST", body: JSON.stringify(request) });
@@ -242,11 +321,27 @@ async function loadChartRows() {
     state.chartSeriesKey = "fixed_focal_length_mm";
     state.chartSeriesParameter = "focal_length_mm";
     state.fullMatrix = false;
-    $("matrix-description").textContent = `当前眼模型、${fixed(request.pupil_diameter_mm, 1)} mm 瞳孔和三个固定焦距的 ${payload.row_count} 个工况。`;
+    state.matrixSummary = { type: "baseline", rows: payload.row_count, pupil: fixed(request.pupil_diameter_mm, 1) };
   }
+  renderMatrixDescription();
   renderChart();
+  state.batchStatus = state.rows.length ? { type: "rows", rows: state.rows.length } : { type: "waiting" };
   renderTable(state.rows);
   $("download-csv").disabled = false;
+}
+
+function renderMatrixDescription() {
+  if (!state.matrixSummary) return;
+  const summary = state.matrixSummary;
+  if (summary.type === "rangeSensitivity") {
+    $("matrix-description").textContent = msg("rangeSensitivitySummary", summary);
+  } else if (summary.type === "rangeGrid") {
+    $("matrix-description").textContent = msg("rangeGridSummary", summary);
+  } else if (summary.type === "baselineFull") {
+    $("matrix-description").textContent = msg("baselineFullSummary", summary);
+  } else {
+    $("matrix-description").textContent = msg("baselineSummary", summary);
+  }
 }
 
 function svgElement(name, attributes = {}, text = "") {
@@ -261,7 +356,11 @@ function seriesUnit(parameter) {
 }
 
 function seriesName(parameter) {
-  return { focal_length_mm: "有效焦距", axial_length_mm: "眼轴", pupil_diameter_mm: "瞳孔" }[parameter] || parameter;
+  return {
+    focal_length_mm: msg("focalName"),
+    axial_length_mm: msg("axialName"),
+    pupil_diameter_mm: msg("pupilName"),
+  }[parameter] || parameter;
 }
 
 function renderChart() {
@@ -281,7 +380,7 @@ function renderChart() {
   const yPos = (y) => top + plotHeight - y / yMax * plotHeight;
   const seriesLabel = `${seriesName(state.chartSeriesParameter)} / ${seriesUnit(state.chartSeriesParameter)}`;
 
-  svg.append(svgElement("text", { x: left, y: 22, class: "chart-title" }, `${selectedEye().label} · ${metricLabel} · ${seriesLabel}`));
+  svg.append(svgElement("text", { x: left, y: 22, class: "chart-title" }, `${localizedEyeLabel(selectedEye())} · ${metricLabel} · ${seriesLabel}`));
   for (let i = 0; i <= 5; i += 1) {
     const yValue = yMax * i / 5;
     const y = yPos(yValue);
@@ -295,8 +394,8 @@ function renderChart() {
   });
   svg.append(svgElement("line", { x1: left, x2: left, y1: top, y2: height-bottom, class: "chart-axis" }));
   svg.append(svgElement("line", { x1: left, x2: width-right, y1: height-bottom, y2: height-bottom, class: "chart-axis" }));
-  svg.append(svgElement("text", { x: left+plotWidth/2, y: height-10, "text-anchor": "middle", class: "chart-text" }, "物方需求 / D"));
-  svg.append(svgElement("text", { x: 16, y: top+plotHeight/2, transform: `rotate(-90 16 ${top+plotHeight/2})`, "text-anchor": "middle", class: "chart-text" }, "直径 / mm"));
+  svg.append(svgElement("text", { x: left+plotWidth/2, y: height-10, "text-anchor": "middle", class: "chart-text" }, msg("demandAxis")));
+  svg.append(svgElement("text", { x: 16, y: top+plotHeight/2, transform: `rotate(-90 16 ${top+plotHeight/2})`, "text-anchor": "middle", class: "chart-text" }, msg("diameterAxis")));
 
   series.forEach((seriesValue, index) => {
     const rows = state.chartRows.filter((row) => row[state.chartSeriesKey] === seriesValue).sort((a,b) => a.source_demand_D-b.source_demand_D);
@@ -320,7 +419,7 @@ function renderTable(rows) {
   rows.forEach((row) => {
     const tr = document.createElement("tr");
     const values = [
-      row.eye_label,
+      state.language === "en" ? localizedEyeLabel(row.eye_id) : row.eye_label,
       fixed(row.effective_focal_length_mm, 2),
       fixed(row.axial_length_mm, 2),
       fixed(row.pupil_diameter_mm, 1),
@@ -336,8 +435,24 @@ function renderTable(rows) {
   });
   body.append(fragment);
   $("download-zemax-batch").disabled = rows.length === 0;
-  $("zemax-batch-status").textContent = rows.length ? `当前将导出 ${rows.length} 个工况。` : "等待结果表。";
+  if (!state.batchStatus || state.batchStatus.type === "rows" || state.batchStatus.type === "waiting") {
+    state.batchStatus = rows.length ? { type: "rows", rows: rows.length } : { type: "waiting" };
+  }
+  renderBatchStatus();
   updateZemaxButtons();
+}
+
+function renderBatchStatus() {
+  const status = state.batchStatus || { type: "waiting" };
+  const values = status.values || status;
+  const key = {
+    rows: "batchRows",
+    waiting: "batchWaiting",
+    validating: "validatingRows",
+    complete: "batchNotRun",
+    failed: "generationFailed",
+  }[status.type] || "batchWaiting";
+  $("zemax-batch-status").textContent = msg(key, values);
 }
 
 function downloadUrl(path) {
@@ -366,8 +481,9 @@ async function downloadZemaxBatch() {
   const button = $("download-zemax-batch");
   try {
     button.disabled = true;
-    button.textContent = "正在封装与计算哈希…";
-    $("zemax-batch-status").textContent = "服务器正在逐行重新验证输入。";
+    button.textContent = msg("packaging");
+    state.batchStatus = { type: "validating" };
+    renderBatchStatus();
     const response = await fetch("/api/zemax-batch", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -387,14 +503,16 @@ async function downloadZemaxBatch() {
     document.body.append(link);
     link.click();
     setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1000);
-    $("zemax-batch-status").textContent = `${batchId} · ZIP SHA-256 ${digest.slice(0, 16)}… · 尚未在 Zemax 运行`;
-    showToast(`已生成 ${state.rows.length} 个工况的 Zemax 审计批次。`);
+    state.batchStatus = { type: "complete", batch: batchId, digest: digest.slice(0, 16) };
+    renderBatchStatus();
+    showToast(msg("batchGenerated", { rows: state.rows.length }));
   } catch (error) {
-    $("zemax-batch-status").textContent = `生成失败：${error.message}`;
-    showToast(`Zemax 批次生成失败：${error.message}`, true);
+    state.batchStatus = { type: "failed", error: localizedBackendMessage(error.message) };
+    renderBatchStatus();
+    showToast(msg("batchGenerationFailed", { error: localizedBackendMessage(error.message) }), true);
   } finally {
     button.disabled = false;
-    button.textContent = "生成 Zemax 审计批次";
+    button.textContent = msg("generateBatch");
   }
 }
 
@@ -413,76 +531,82 @@ function updateZemaxButtons() {
   $("zemax-step-result").classList.toggle("locked", !state.zemaxConnectionPassed && !state.zemaxRunning);
 }
 
+function renderPreflight(result) {
+  checkLabel(
+    $("zemax-runtime-check"),
+    result.platform_supported && result.python_64bit && result.compiler_found && result.powershell_found,
+    msg("runtimeReady", { version: result.python_version }),
+    msg("requirementsMissing"),
+  );
+  checkLabel(
+    $("zemax-api-check"),
+    result.installation_exists && Object.values(result.api_dlls).every(Boolean),
+    msg("dllsFound", { count: 3 }),
+    msg("dllsFound", { count: Object.values(result.api_dlls).filter(Boolean).length }),
+  );
+  $("zemax-license-check").textContent = msg("notTested");
+  $("zemax-license-check").className = "";
+  $("zemax-preflight-message").textContent = localizedBackendMessage(result.next_action);
+  $("zemax-step-detect").classList.toggle("complete", result.ready);
+  $("zemax-verification-label").textContent = msg("waitingConnection");
+  $("zemax-verification-detail").textContent = msg("preflightNoLicense");
+  $("zemax-verification-state").className = "verification-state pending";
+}
+
 async function detectZemax() {
   const button = $("zemax-detect");
   try {
     button.disabled = true;
-    button.textContent = "正在检测…";
+    button.textContent = msg("detecting");
     const path = $("zemax-install-path").value.trim();
     const query = path ? `?${new URLSearchParams({ opticstudio_dir: path })}` : "";
     const result = await api(`/api/zemax/preflight${query}`);
+    state.zemaxPreflight = result;
     state.zemaxReady = result.ready;
     state.zemaxConnectionPassed = false;
     if (!path && result.selected_installation) $("zemax-install-path").value = result.selected_installation;
-    checkLabel(
-      $("zemax-runtime-check"),
-      result.platform_supported && result.python_64bit && result.compiler_found && result.powershell_found,
-      `就绪 · Python ${result.python_version}`,
-      "不满足要求",
-    );
-    checkLabel(
-      $("zemax-api-check"),
-      result.installation_exists && Object.values(result.api_dlls).every(Boolean),
-      "3 / 3 已找到",
-      `${Object.values(result.api_dlls).filter(Boolean).length} / 3 已找到`,
-    );
-    $("zemax-license-check").textContent = "未测试";
-    $("zemax-license-check").className = "";
-    $("zemax-preflight-message").textContent = result.next_action;
-    $("zemax-step-detect").classList.toggle("complete", result.ready);
-    $("zemax-verification-label").textContent = "等待连接测试";
-    $("zemax-verification-detail").textContent = "环境检测不会启动或验证 OpticStudio 许可证。";
-    $("zemax-verification-state").className = "verification-state pending";
+    renderPreflight(result);
     updateZemaxButtons();
-    showToast(result.ready ? "本机环境检测通过，可以运行 1 工况连接测试。" : result.next_action, !result.ready);
+    showToast(result.ready ? msg("preflightPassed") : localizedBackendMessage(result.next_action), !result.ready);
   } catch (error) {
     state.zemaxReady = false;
-    $("zemax-preflight-message").textContent = `检测失败：${error.message}`;
+    $("zemax-preflight-message").textContent = msg("detectionFailed", { error: localizedBackendMessage(error.message) });
     updateZemaxButtons();
-    showToast(`Zemax 检测失败：${error.message}`, true);
+    showToast(msg("zemaxDetectionFailed", { error: localizedBackendMessage(error.message) }), true);
   } finally {
     button.disabled = false;
-    button.textContent = "重新检测 OpticStudio";
+    button.textContent = msg("redetect");
   }
 }
 
-function renderZemaxJob(job) {
+function renderZemaxJob(job, notify = true) {
+  state.zemaxJob = job;
   state.zemaxRunning = ["queued", "running"].includes(job.status);
   const panel = $("zemax-verification-state");
   const verification = job.verification;
   if (state.zemaxRunning) {
     panel.className = "verification-state running";
-    $("zemax-verification-label").textContent = job.stage === "OPTICSTUDIO" ? "Zemax 正在运行" : "正在准备批次";
-    $("zemax-verification-detail").textContent = job.message;
-    $("zemax-job-message").textContent = `${job.batch_id} · ${job.case_count} 个工况，请勿关闭启动窗口。`;
+    $("zemax-verification-label").textContent = job.stage === "OPTICSTUDIO" ? msg("zemaxRunning") : msg("preparingBatch");
+    $("zemax-verification-detail").textContent = localizedBackendMessage(job.message);
+    $("zemax-job-message").textContent = msg("dontClose", { batch: job.batch_id, cases: job.case_count });
   } else if (job.status === "pass") {
     panel.className = "verification-state pass";
-    $("zemax-verification-label").textContent = "PARAXIAL PASS · 一致性通过";
-    $("zemax-verification-detail").textContent = job.message;
-    $("zemax-license-check").textContent = verification.api_license_valid ? "有效 · 已实测" : "未确认";
+    $("zemax-verification-label").textContent = msg("paraxialPass");
+    $("zemax-verification-detail").textContent = localizedBackendMessage(job.message);
+    $("zemax-license-check").textContent = verification.api_license_valid ? msg("licenseMeasured") : msg("notConfirmed");
     $("zemax-license-check").className = verification.api_license_valid ? "pass-text" : "fail-text";
     $("zemax-step-result").classList.add("complete");
     if (job.mode === "connection_test") state.zemaxConnectionPassed = true;
-    $("zemax-job-message").textContent = `${job.batch_id} · ${job.case_count} 个工况已验证，可下载审计证据包。`;
-    showToast(`Zemax ${job.case_count} 工况近轴一致性通过；不代表真实眼或光安全放行。`);
+    $("zemax-job-message").textContent = msg("jobPassed", { batch: job.batch_id, cases: job.case_count });
+    if (notify) showToast(msg("passToast", { cases: job.case_count }));
   } else {
     panel.className = "verification-state fail";
-    $("zemax-verification-label").textContent = "FAIL · 未通过";
-    $("zemax-verification-detail").textContent = job.message;
-    $("zemax-license-check").textContent = verification?.api_license_valid ? "有效 · 结果未通过" : "未确认";
+    $("zemax-verification-label").textContent = msg("fail");
+    $("zemax-verification-detail").textContent = localizedBackendMessage(job.message);
+    $("zemax-license-check").textContent = verification?.api_license_valid ? msg("licenseFailed") : msg("notConfirmed");
     $("zemax-license-check").className = "fail-text";
-    $("zemax-job-message").textContent = `${job.batch_id} · 未通过；如有证据包，请下载后查看详细报告。`;
-    showToast("Zemax 验证未通过；本次结果不会标记为已验证。", true);
+    $("zemax-job-message").textContent = msg("jobFailed", { batch: job.batch_id });
+    if (notify) showToast(msg("failToast"), true);
   }
   if (verification) {
     $("zemax-passed-count").textContent = `${verification.passed_case_count} / ${verification.expected_case_count}`;
@@ -509,8 +633,8 @@ async function pollZemaxJob(jobId) {
   } catch (error) {
     state.zemaxRunning = false;
     $("zemax-verification-state").className = "verification-state fail";
-    $("zemax-verification-label").textContent = "状态读取失败";
-    $("zemax-verification-detail").textContent = error.message;
+    $("zemax-verification-label").textContent = msg("statusReadFailed");
+    $("zemax-verification-detail").textContent = localizedBackendMessage(error.message);
     updateZemaxButtons();
   }
 }
@@ -538,37 +662,41 @@ async function startZemaxJob(mode) {
   } catch (error) {
     state.zemaxRunning = false;
     $("zemax-verification-state").className = "verification-state fail";
-    $("zemax-verification-label").textContent = "无法启动";
-    $("zemax-verification-detail").textContent = error.message;
+    $("zemax-verification-label").textContent = msg("cannotStart");
+    $("zemax-verification-detail").textContent = localizedBackendMessage(error.message);
     updateZemaxButtons();
-    showToast(`无法启动 Zemax：${error.message}`, true);
+    showToast(msg("cannotStartZemax", { error: localizedBackendMessage(error.message) }), true);
   }
 }
 
 async function fullSweep() {
   try {
     $("full-sweep").disabled = true;
-    $("full-sweep").textContent = "正在生成…";
+    $("full-sweep").textContent = msg("generating");
     if (currentMode() === "range") {
       const payload = await api("/api/range-grid", { method: "POST", body: JSON.stringify(requestFromControls()) });
       state.rows = payload.rows;
       state.fullMatrix = true;
+      state.batchStatus = { type: "rows", rows: state.rows.length };
       renderTable(state.rows);
-      $("matrix-description").textContent = `范围三水平网格：请求 ${payload.requested_count} 个组合，完成 ${payload.row_count} 个，跳过 ${payload.skipped_count} 个机械顺序无效组合。`;
-      showToast(`已生成 ${payload.row_count} 个范围探索工况。`);
+      state.matrixSummary = { type: "rangeGrid", requested: payload.requested_count, rows: payload.row_count, skipped: payload.skipped_count };
+      renderMatrixDescription();
+      showToast(msg("rangeGridGenerated", { rows: payload.row_count }));
     } else {
       const payload = await api("/api/sweep", { method: "POST", body: "{}" });
       state.rows = payload.rows;
       state.fullMatrix = true;
+      state.batchStatus = { type: "rows", rows: state.rows.length };
       renderTable(state.rows);
-      $("matrix-description").textContent = `固定基准完整矩阵，共 ${payload.row_count} 个工况。`;
-      showToast(`已生成 ${payload.row_count} 个基准工况。`);
+      state.matrixSummary = { type: "baselineFull", rows: payload.row_count };
+      renderMatrixDescription();
+      showToast(msg("baselineGenerated", { rows: payload.row_count }));
     }
   } catch (error) {
-    showToast(`扫描失败：${error.message}`, true);
+    showToast(msg("sweepFailed", { error: localizedBackendMessage(error.message) }), true);
   } finally {
     $("full-sweep").disabled = false;
-    $("full-sweep").textContent = currentMode() === "range" ? "生成三水平范围网格" : "生成全部 252 工况";
+    $("full-sweep").textContent = currentMode() === "range" ? msg("rangeGridButton") : msg("fullSweepButton");
   }
 }
 
@@ -577,21 +705,52 @@ async function modeChanged() {
   await calculateCurrent();
 }
 
+function setLanguage(language, persist = true) {
+  state.language = language === "en" ? "en" : "zh-CN";
+  if (persist) {
+    try { window.localStorage.setItem("opticbench-language", state.language); } catch (_) { /* local preference only */ }
+  }
+  applyStaticTranslations();
+  renderServerStatus();
+  if (!state.config) return;
+
+  [...$("eye-select").options].forEach((item, index) => {
+    item.textContent = localizedEyeLabel(state.config.eyes[index]);
+  });
+  const lensValues = state.config.range_explorer.external_lens_powers_D.values;
+  [...$("external-lens-select").options].forEach((item, index) => {
+    const value = lensValues[index];
+    item.textContent = value === 0 ? msg("noExternalLens") : `${value}`;
+  });
+  renderRangeProvenance(selectedEye());
+  updateModeCopy();
+  if (state.current) renderResult(state.current);
+  renderMatrixDescription();
+  if (state.chartRows.length) renderChart();
+  if (state.rows.length) renderTable(state.rows);
+  if (state.zemaxPreflight) renderPreflight(state.zemaxPreflight);
+  if (state.zemaxJob) renderZemaxJob(state.zemaxJob, false);
+  renderBatchStatus();
+  updateZemaxButtons();
+}
+
 async function initialize() {
   try {
     state.config = await api("/api/config");
     $("experiment-id").textContent = state.config.experiment_id;
     $("case-count").textContent = state.config.case_count;
     $("wavelength-value").textContent = `${fixed(state.config.wavelength_nm, 0)} nm`;
-    fillSelect($("eye-select"), state.config.eyes, (eye) => eye.label);
+    fillSelect($("eye-select"), state.config.eyes, (eye) => localizedEyeLabel(eye));
     [...$("eye-select").options].forEach((item, index) => { item.value = state.config.eyes[index].id; });
     fillSelect($("demand-select"), state.config.source_demands_D, (value) => fixed(value, 0));
-    $("server-label").textContent = "本地模型已连接";
+    state.serverStatus = "connected";
+    renderServerStatus();
     $("server-label").parentElement.classList.add("ready");
     refreshEyeControls();
   } catch (error) {
-    $("server-label").textContent = "模型连接失败";
-    showToast(`程序初始化失败：${error.message}`, true);
+    state.serverStatus = "failed";
+    renderServerStatus();
+    showToast(msg("initializationFailed", { error: localizedBackendMessage(error.message) }), true);
   }
 }
 
@@ -611,9 +770,11 @@ $("zemax-confirm").addEventListener("change", updateZemaxButtons);
 $("zemax-install-path").addEventListener("input", () => {
   state.zemaxReady = false;
   state.zemaxConnectionPassed = false;
-  $("zemax-preflight-message").textContent = "路径已更改，请重新检测。";
+  $("zemax-preflight-message").textContent = msg("pathChanged");
   updateZemaxButtons();
 });
+$("lang-zh").addEventListener("click", () => setLanguage("zh-CN"));
+$("lang-en").addEventListener("click", () => setLanguage("en"));
 $("zemax-test").addEventListener("click", () => startZemaxJob("connection_test"));
 $("zemax-run-table").addEventListener("click", () => startZemaxJob("table"));
 
@@ -636,4 +797,6 @@ $("download-csv").addEventListener("click", () => {
   downloadUrl(`/api/sweep.csv${query}`);
 });
 
+captureStaticTranslations();
+setLanguage(state.language, false);
 void initialize();
